@@ -1,57 +1,28 @@
 package main
 
 import (
-	"net/http"
 	"bytes"
 	"fmt"
-	"runtime"
-	"time"
 	"log"
+	"net/http"
+	"runtime"
 	"sync"
+	"time"
 )
-const(
-	url = "http://127.0.0.1:8080"
-	pollInterval = 2
+
+const (
+	url            = "http://127.0.0.1:8080"
+	pollInterval   = 2
 	reportInterval = 10
 )
-var mutex sync.RWMutex
+
+var mutex *sync.RWMutex
 
 type Guage float64
 type Couter int64
 type MonitorMap map[string]Guage
-// type Monitor struct{
-// 	Alloc Guage
-// 	BuckHashSys Guage
-// 	Frees Guage
-// 	GCCPUFraction Guage
-// 	GCSys Guage
-// 	HeapAlloc Guage
-// 	HeapIdle Guage
-// 	HeapInuse Guage
-// 	HeapObjects Guage
-// 	HeapReleased Guage
-// 	HeapSys Guage
-// 	LastGC Guage
-// 	Lookups Guage
-// 	MCacheInuse Guage
-// 	MCacheSys Guage
-// 	MSpanInuse Guage
-// 	MSpanSys Guage
-// 	Mallocs Guage
-// 	NextGC Guage 
-// 	NumForcedGC Guage
-// 	NumGC Guage
-// 	OtherSys Guage
-// 	PauseTotalNs Guage
-// 	StackInuse Guage
-// 	StackSys Guage
-// 	Sys Guage
-// 	TotalAlloc Guage
-// 	PollCount Couter
-// 	RandomValue Guage
-// }
 
-func NewMonitor(m *MonitorMap, rtm *runtime.MemStats, mutex sync.RWMutex) {
+func NewMonitor(m *MonitorMap, rtm *runtime.MemStats, mutex *sync.RWMutex) {
 	runtime.ReadMemStats(rtm)
 	mutex.Lock()
 	(*m)["Alloc"] = Guage(rtm.Alloc)
@@ -85,25 +56,28 @@ func NewMonitor(m *MonitorMap, rtm *runtime.MemStats, mutex sync.RWMutex) {
 func main() {
 	var rtm *runtime.MemStats
 	var m = make(MonitorMap)
-	go func (m *MonitorMap, rtm *runtime.MemStats) {
+	go func(m *MonitorMap, rtm *runtime.MemStats, mutex *sync.RWMutex) {
 		var interval = time.Duration(pollInterval) * time.Second
 		for {
 			<-time.After(interval)
 			NewMonitor(m, rtm, mutex)
 		}
-	}(&m, rtm)
-	go func() {
+	}(&m, rtm, mutex)
+	go func(mutex *sync.RWMutex) {
 		var interval = time.Duration(reportInterval) * time.Second
 		for {
 			<-time.After(interval)
 			for key, val := range m {
 				client := &http.Client{}
-				_, err := client.Post(fmt.Sprintf("%s/update/Guage/%s/%v", url, key, val), "text/plain", bytes.NewBufferString(""))
+				mutex.RLock()
+				strUrl := fmt.Sprintf("%s/update/Guage/%s/%v", url, key, val)
+				mutex.Unlock()
+				_, err := client.Post(strUrl, "text/plain", bytes.NewBufferString(""))
 				if err != nil {
 					log.Fatalf("Failed sent request: %s", err)
-				} 
+				}
 
 			}
 		}
-	}()
+	}(mutex)
 }
