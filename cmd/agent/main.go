@@ -17,6 +17,7 @@ const (
 )
 
 var mutex *sync.RWMutex
+var wg sync.WaitGroup 
 
 type Guage float64
 type Couter int64
@@ -54,9 +55,11 @@ func NewMonitor(m *MonitorMap, rtm *runtime.MemStats, mutex *sync.RWMutex) {
 }
 
 func main() {
+	wg.Add(2)
 	var rtm *runtime.MemStats
 	var m = make(MonitorMap)
 	go func(m *MonitorMap, rtm *runtime.MemStats, mutex *sync.RWMutex) {
+		defer wg.Done()
 		var interval = time.Duration(pollInterval) * time.Second
 		for {
 			<-time.After(interval)
@@ -64,6 +67,7 @@ func main() {
 		}
 	}(&m, rtm, mutex)
 	go func(mutex *sync.RWMutex) {
+		defer wg.Done()
 		var interval = time.Duration(reportInterval) * time.Second
 		for {
 			<-time.After(interval)
@@ -80,4 +84,5 @@ func main() {
 			}
 		}
 	}(mutex)
+	wg.Wait()
 }
