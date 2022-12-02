@@ -21,9 +21,9 @@ func main() {
 
 func Handler(w http.ResponseWriter, r *http.Request) {
 	urlPath := r.URL.Path
-	sliceUrlPath := strings.Split(urlPath, "/")
-	if n, err := strconv.ParseFloat(sliceUrlPath[4], 64); err == nil {
-        guageMap[sliceUrlPath[3]] = n
+	sliceURLPath := strings.Split(urlPath, "/")
+	if n, err := strconv.ParseFloat(sliceURLPath[4], 64); err == nil {
+        guageMap[sliceURLPath[3]] = n
         }
 	// fmt.Fprintf(w, "Hello, %v, %T", guageMap, guageMap)
 	w.WriteHeader(http.StatusOK)
