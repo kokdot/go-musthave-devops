@@ -57,12 +57,15 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 			counterMap[sliceURLPath[3]] = append(counterMap[sliceURLPath[3]], n)
 			w.WriteHeader(http.StatusOK)
 			fmt.Fprintf(w, "n, err := strconv.Atoi(sliceURLPath[4]) err == nil; http.StatusBadRequest: %v; sliceURLPath: %v; method: %v",http.StatusBadRequest, sliceURLPath, r.Method)
-			fmt.Fprint(w, "http.StatusOK")
+			// fmt.Fprint(w, "http.StatusOK")
 		}
+	case sliceURLPath[2] != "counter" && sliceURLPath[2] != "gauge":
+		w.WriteHeader(http.StatusNotImplemented)
+		fmt.Fprint(w, "http.StatusNotImplemented")
 	default:
 		w.WriteHeader(http.StatusNotFound)
 		fmt.Fprintf(w, "default: ;sliceURLPath[2] = %v; http.StatusNotFound: %v; sliceURLPath: %v; method: %v",sliceURLPath[2] ,http.StatusNotFound, sliceURLPath, r.Method)
-		fmt.Fprint(w, "http.StatusNotFound")
+		// fmt.Fprint(w, "http.StatusNotFound")
 	}
 }
 
