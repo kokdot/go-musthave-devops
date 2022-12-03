@@ -8,6 +8,7 @@ import (
 	"runtime"
 	"sync"
 	"time"
+	"io"
 )
 
 const (
@@ -22,6 +23,8 @@ var wg sync.WaitGroup
 type Guage float64
 type Couter int64
 type MonitorMap map[string]Guage
+var PollCount int
+
 
 func NewMonitor(m *MonitorMap, rtm runtime.MemStats) {//}, mutex *sync.RWMutex) {
 	runtime.ReadMemStats(&rtm)
@@ -56,7 +59,7 @@ func NewMonitor(m *MonitorMap, rtm runtime.MemStats) {//}, mutex *sync.RWMutex) 
 }
 
 func main() {
-	wg.Add(1)
+	wg.Add(2)
 	var rtm runtime.MemStats
 	var m = make(MonitorMap)
 	// NewMonitor(&m, rtm)
@@ -74,16 +77,39 @@ func main() {
 		var interval = time.Duration(reportInterval) * time.Second
 		for {
 			<-time.After(interval)
+
+			client := &http.Client{}
+			strUrl := fmt.Sprintf("%s/update/counter/%s/%v", url, "PollCount", PollCount)
+			fmt.Println("strUrl:  --  ", strUrl)
+			response, err := client.Post(strUrl, "text/plain", bytes.NewBufferString(""))
+			if err != nil {
+				log.Fatalf("Failed sent request: %s", err)
+			}
+			bodyBytes, err := io.ReadAll(response.Body)
+			if err != nil {
+				log.Fatal(err)
+			}
+			response.Body.Close()
+			bodyString := string(bodyBytes)
+			fmt.Println("response.Body: ", bodyString)
+
 			for key, val := range m {
 				client := &http.Client{}
 				// mutex.RLock()
-				strUrl := fmt.Sprintf("%s/update/Guage/%s/%v", url, key, val)
+				strUrl := fmt.Sprintf("%s/update/guage/%s/%v", url, key, val)
 				// mutex.Unlock()
 				fmt.Println("strUrl:  --  ", strUrl)
-				_, err := client.Post(strUrl, "text/plain", bytes.NewBufferString(""))
+				response, err := client.Post(strUrl, "text/plain", bytes.NewBufferString(""))
 				if err != nil {
 					log.Fatalf("Failed sent request: %s", err)
 				}
+				bodyBytes, err := io.ReadAll(response.Body)
+				if err != nil {
+					log.Fatal(err)
+				}
+				response.Body.Close()
+				bodyString := string(bodyBytes)
+				fmt.Println("response.Body: ", bodyString)
 
 			}
 		}

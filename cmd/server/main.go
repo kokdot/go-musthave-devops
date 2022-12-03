@@ -15,6 +15,7 @@ type CounterMap map[string][]int
 
 var guageMap = GaugeMap{}
 var counterMap = CounterMap{}
+
 func main() {
 
 	http.HandleFunc("/update/", Handler)
@@ -40,14 +41,15 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 		} else {
 			guageMap[sliceURLPath[3]] = n
 			w.WriteHeader(http.StatusOK)
-			fmt.Fprint(w, "http.StatusOK")
-		}
+			// fmt.Fprint(w, "http.StatusOK")
+			fmt.Fprintf(w, "http.StatusOK: %v; sliceURLPath: %v; method: %v",http.StatusOK, sliceURLPath, r.Method)
 
+		}
 	case sliceURLPath[2] == "counter":
 		n, err := strconv.Atoi(sliceURLPath[4])
 		if err != nil {
 			w.WriteHeader(http.StatusBadRequest)
-			fmt.Fprint(w, "http.StatusBadRequest")
+			fmt.Fprintf(w, "http.StatusBadRequest: %v; sliceURLPath: %v; method: %v",http.StatusBadRequest, sliceURLPath, r.Method)
 		} else {
 			counterMap[sliceURLPath[3]] = append(counterMap[sliceURLPath[3]], n)
 			w.WriteHeader(http.StatusOK)
@@ -57,18 +59,5 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusNotFound)
 		fmt.Fprint(w, "http.StatusNotFound")
 	}
-	// if sliceURLPath[2] == "Guage" {
-		
-	// 	if n, err := strconv.ParseFloat(sliceURLPath[4], 64); err == nil {
-	// 		guageMap[sliceURLPath[3]] = n
-    //     }
-	// }
-	// if sliceURLPath[2] == "Counter" {
-	// 	if n, err := strconv.Atoi(sliceURLPath[4]); err == nil {
-	// 		counterMap[sliceURLPath[3]] = append(counterMap[sliceURLPath[3]], n)
-	// 	}
-	// }
-	// fmt.Fprintf(w, "Hello, %v, %T", guageMap, guageMap)
-	// w.WriteHeader(http.StatusOK)
 }
 
