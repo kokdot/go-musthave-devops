@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
+	"io"
 )
 
 func TestHandler(t *testing.T) {
@@ -77,6 +78,9 @@ func TestHandler(t *testing.T) {
 			// запускаем сервер
 			h.ServeHTTP(w, request)
 			result := w.Result()
+			defer result.Body.Close()
+			_, err := io.ReadAll(result.Body) 
+			assert.NoError(t, err)
 			assert.Equal(t, tt.want.StatusCode, result.StatusCode)
 			// fmt.Println("result.Header.Get(\"Content-Type\"): ", result.Header.Get("Content-Type"))
 			assert.Equal(t, tt.want.contentType, result.Header.Get("Content-Type"))
