@@ -20,9 +20,9 @@ const (
 // var mutex *sync.RWMutex
 var wg sync.WaitGroup 
 
-type Guage float64
+type Gauge float64
 type Couter int64
-type MonitorMap map[string]Guage
+type MonitorMap map[string]Gauge
 var PollCount int
 
 
@@ -30,31 +30,31 @@ func NewMonitor(m *MonitorMap, rtm runtime.MemStats) {//}, mutex *sync.RWMutex) 
 	runtime.ReadMemStats(&rtm)
 	fmt.Println(rtm)
 	// mutex.Lock()
-	(*m)["Alloc"] = Guage(rtm.Alloc)
-	(*m)["BuckHashSys"] = Guage(rtm.BuckHashSys)
-	(*m)["TotalAlloc"] = Guage(rtm.TotalAlloc)
-	(*m)["Sys"] = Guage(rtm.Sys)
-	(*m)["Mallocs"] = Guage(rtm.Mallocs)
-	(*m)["Frees"] = Guage(rtm.Frees)
-	(*m)["PauseTotalNs"] = Guage(rtm.PauseTotalNs)
-	(*m)["NumGC"] = Guage(rtm.NumGC)
-	(*m)["GCCPUFraction"] = Guage(rtm.GCCPUFraction)
-	(*m)["GCSys"] = Guage(rtm.GCSys)
-	(*m)["HeapInuse"] = Guage(rtm.HeapInuse)
-	(*m)["HeapObjects"] = Guage(rtm.HeapObjects)
-	(*m)["HeapReleased"] = Guage(rtm.HeapReleased)
-	(*m)["HeapSys"] = Guage(rtm.HeapSys)
-	(*m)["LastGC"] = Guage(rtm.LastGC)
-	(*m)["MSpanInuse"] = Guage(rtm.MSpanInuse)
-	(*m)["MCacheSys"] = Guage(rtm.MCacheSys)
-	(*m)["MCacheInuse"] = Guage(rtm.MCacheInuse)
-	(*m)["MSpanSys"] = Guage(rtm.MSpanSys)
-	(*m)["NextGC"] = Guage(rtm.NextGC)
-	(*m)["NumForcedGC"] = Guage(rtm.NumForcedGC)
-	(*m)["OtherSys"] = Guage(rtm.OtherSys)
-	(*m)["StackSys"] = Guage(rtm.StackSys)
-	(*m)["StackInuse"] = Guage(rtm.StackInuse)
-	(*m)["TotalAlloc"] = Guage(rtm.TotalAlloc)
+	(*m)["Alloc"] = Gauge(rtm.Alloc)
+	(*m)["BuckHashSys"] = Gauge(rtm.BuckHashSys)
+	(*m)["TotalAlloc"] = Gauge(rtm.TotalAlloc)
+	(*m)["Sys"] = Gauge(rtm.Sys)
+	(*m)["Mallocs"] = Gauge(rtm.Mallocs)
+	(*m)["Frees"] = Gauge(rtm.Frees)
+	(*m)["PauseTotalNs"] = Gauge(rtm.PauseTotalNs)
+	(*m)["NumGC"] = Gauge(rtm.NumGC)
+	(*m)["GCCPUFraction"] = Gauge(rtm.GCCPUFraction)
+	(*m)["GCSys"] = Gauge(rtm.GCSys)
+	(*m)["HeapInuse"] = Gauge(rtm.HeapInuse)
+	(*m)["HeapObjects"] = Gauge(rtm.HeapObjects)
+	(*m)["HeapReleased"] = Gauge(rtm.HeapReleased)
+	(*m)["HeapSys"] = Gauge(rtm.HeapSys)
+	(*m)["LastGC"] = Gauge(rtm.LastGC)
+	(*m)["MSpanInuse"] = Gauge(rtm.MSpanInuse)
+	(*m)["MCacheSys"] = Gauge(rtm.MCacheSys)
+	(*m)["MCacheInuse"] = Gauge(rtm.MCacheInuse)
+	(*m)["MSpanSys"] = Gauge(rtm.MSpanSys)
+	(*m)["NextGC"] = Gauge(rtm.NextGC)
+	(*m)["NumForcedGC"] = Gauge(rtm.NumForcedGC)
+	(*m)["OtherSys"] = Gauge(rtm.OtherSys)
+	(*m)["StackSys"] = Gauge(rtm.StackSys)
+	(*m)["StackInuse"] = Gauge(rtm.StackInuse)
+	(*m)["TotalAlloc"] = Gauge(rtm.TotalAlloc)
 	// mutex.Unlock()
 }
 
@@ -96,7 +96,7 @@ func main() {
 			for key, val := range m {
 				client := &http.Client{}
 				// mutex.RLock()
-				strUrl := fmt.Sprintf("%s/update/guage/%s/%v", url, key, val)
+				strUrl := fmt.Sprintf("%s/update/Gauge/%s/%v", url, key, val)
 				// mutex.Unlock()
 				fmt.Println("strUrl:  --  ", strUrl)
 				response, err := client.Post(strUrl, "text/plain", bytes.NewBufferString(""))
