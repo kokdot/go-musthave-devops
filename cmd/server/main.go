@@ -37,20 +37,22 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 		if  err != nil {
 			w.WriteHeader(http.StatusBadRequest)
 			fmt.Fprint(w, "")
+		} else {
+			guageMap[sliceURLPath[3]] = n
+			w.WriteHeader(http.StatusOK)
+			fmt.Fprint(w, "")
 		}
-		guageMap[sliceURLPath[3]] = n
-		w.WriteHeader(http.StatusOK)
-		fmt.Fprint(w, "")
 
 	case sliceURLPath[2] == "Counter":
 		n, err := strconv.Atoi(sliceURLPath[4])
 		if err != nil {
 			w.WriteHeader(http.StatusBadRequest)
 			fmt.Fprint(w, "")
+		} else {
+			counterMap[sliceURLPath[3]] = append(counterMap[sliceURLPath[3]], n)
+			w.WriteHeader(http.StatusOK)
+			fmt.Fprint(w, "")
 		}
-		counterMap[sliceURLPath[3]] = append(counterMap[sliceURLPath[3]], n)
-		w.WriteHeader(http.StatusOK)
-		fmt.Fprint(w, "")
 	}
 	// if sliceURLPath[2] == "Guage" {
 		
