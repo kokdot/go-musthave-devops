@@ -24,17 +24,43 @@ func main() {
 func Handler(w http.ResponseWriter, r *http.Request) {
 	urlPath := r.URL.Path
 	sliceURLPath := strings.Split(urlPath, "/")
-	if sliceURLPath[2] == "Guage" {
-		
-		if n, err := strconv.ParseFloat(sliceURLPath[4], 64); err == nil {
-			guageMap[sliceURLPath[3]] = n
-        }
-	}
-	if sliceURLPath[2] == "Counter" {
-		if n, err := strconv.Atoi(sliceURLPath[4]); err == nil {
-			counterMap[sliceURLPath[3]] = append(counterMap[sliceURLPath[3]], n)
+
+	switch  {
+	case len(sliceURLPath) != 5:
+		w.WriteHeader(http.StatusNotFound)
+		fmt.Fprint(w, "")
+
+	case sliceURLPath[2] == "Guage":
+		n, err := strconv.ParseFloat(sliceURLPath[4], 64)
+		if  err != nil {
+			w.WriteHeader(http.StatusBadRequest)
+			fmt.Fprint(w, "")
 		}
+		guageMap[sliceURLPath[3]] = n
+		w.WriteHeader(http.StatusOK)
+		fmt.Fprint(w, "")
+
+	case sliceURLPath[2] == "Counter":
+		n, err := strconv.Atoi(sliceURLPath[4])
+		if err != nil {
+			w.WriteHeader(http.StatusBadRequest)
+			fmt.Fprint(w, "")
+		}
+		counterMap[sliceURLPath[3]] = append(counterMap[sliceURLPath[3]], n)
+		w.WriteHeader(http.StatusOK)
+		fmt.Fprint(w, "")
 	}
+	// if sliceURLPath[2] == "Guage" {
+		
+	// 	if n, err := strconv.ParseFloat(sliceURLPath[4], 64); err == nil {
+	// 		guageMap[sliceURLPath[3]] = n
+    //     }
+	// }
+	// if sliceURLPath[2] == "Counter" {
+	// 	if n, err := strconv.Atoi(sliceURLPath[4]); err == nil {
+	// 		counterMap[sliceURLPath[3]] = append(counterMap[sliceURLPath[3]], n)
+	// 	}
+	// }
 	// fmt.Fprintf(w, "Hello, %v, %T", guageMap, guageMap)
 	w.WriteHeader(http.StatusOK)
 }
