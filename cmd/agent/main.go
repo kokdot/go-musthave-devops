@@ -3,12 +3,12 @@ package main
 import (
 	"bytes"
 	"fmt"
+	"io"
 	"log"
 	"net/http"
 	"runtime"
 	"sync"
 	"time"
-	"io"
 )
 
 const (
@@ -18,15 +18,15 @@ const (
 )
 
 // var mutex *sync.RWMutex
-var wg sync.WaitGroup 
+var wg sync.WaitGroup
 
 type Gauge float64
 type Couter int64
 type MonitorMap map[string]Gauge
+
 var PollCount int
 
-
-func NewMonitor(m *MonitorMap, rtm runtime.MemStats) {//}, mutex *sync.RWMutex) {
+func NewMonitor(m *MonitorMap, rtm runtime.MemStats) { //}, mutex *sync.RWMutex) {
 	runtime.ReadMemStats(&rtm)
 	fmt.Println(rtm)
 	// mutex.Lock()
@@ -63,16 +63,16 @@ func main() {
 	var rtm runtime.MemStats
 	var m = make(MonitorMap)
 	// NewMonitor(&m, rtm)
-	go func(m *MonitorMap, rtm runtime.MemStats) {//}, mutex *sync.RWMutex) {
+	go func(m *MonitorMap, rtm runtime.MemStats) { //}, mutex *sync.RWMutex) {
 		defer wg.Done()
 		var interval = time.Duration(pollInterval) * time.Second
 		for {
 			<-time.After(interval)
-			NewMonitor(m, rtm)//, mutex)
+			NewMonitor(m, rtm) //, mutex)
 			fmt.Println(m)
 		}
-	}(&m, rtm)//, mutex)
-	go func() {//mutex *sync.RWMutex) {
+	}(&m, rtm) //, mutex)
+	go func() { //mutex *sync.RWMutex) {
 		defer wg.Done()
 		var interval = time.Duration(reportInterval) * time.Second
 		for {
@@ -113,6 +113,6 @@ func main() {
 
 			}
 		}
-	}()//mutex)
+	}() //mutex)
 	wg.Wait()
 }
