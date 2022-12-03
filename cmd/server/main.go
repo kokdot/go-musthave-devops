@@ -1,12 +1,14 @@
 package main
 
 import (
-    "fmt"
-    "net/http"
+	"fmt"
 	"log"
-	"strings"
+	"net/http"
 	"strconv"
+	"strings"
+
 )
+
 // http://<АДРЕС_СЕРВЕРА>/update/<ТИП_МЕТРИКИ>/<ИМЯ_МЕТРИКИ>/<ЗНАЧЕНИЕ_МЕТРИКИ>
 type GaugeMap map[string]float64
 type CounterMap map[string][]int
@@ -62,6 +64,6 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 	// 	}
 	// }
 	// fmt.Fprintf(w, "Hello, %v, %T", guageMap, guageMap)
-	w.WriteHeader(http.StatusOK)
+	// w.WriteHeader(http.StatusOK)
 }
 
