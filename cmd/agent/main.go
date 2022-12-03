@@ -79,9 +79,9 @@ func main() {
 			<-time.After(interval)
 
 			client := &http.Client{}
-			strUrl := fmt.Sprintf("%s/update/counter/%s/%v", url, "PollCount", PollCount)
-			fmt.Println("strUrl:  --  ", strUrl)
-			response, err := client.Post(strUrl, "text/plain", bytes.NewBufferString(""))
+			strURL := fmt.Sprintf("%s/update/counter/%s/%v", url, "PollCount", PollCount)
+			fmt.Println("strURL:  --  ", strURL)
+			response, err := client.Post(strURL, "text/plain", bytes.NewBufferString(""))
 			if err != nil {
 				log.Fatalf("Failed sent request: %s", err)
 			}
@@ -96,10 +96,10 @@ func main() {
 			for key, val := range m {
 				client := &http.Client{}
 				// mutex.RLock()
-				strUrl := fmt.Sprintf("%s/update/Gauge/%s/%v", url, key, val)
+				strURL := fmt.Sprintf("%s/update/Gauge/%s/%v", url, key, val)
 				// mutex.Unlock()
-				fmt.Println("strUrl:  --  ", strUrl)
-				response, err := client.Post(strUrl, "text/plain", bytes.NewBufferString(""))
+				fmt.Println("strURL:  --  ", strURL)
+				response, err := client.Post(strURL, "text/plain", bytes.NewBufferString(""))
 				if err != nil {
 					log.Fatalf("Failed sent request: %s", err)
 				}
