@@ -30,29 +30,32 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 	switch  {
 	case len(sliceURLPath) != 5:
 		w.WriteHeader(http.StatusNotFound)
-		fmt.Fprint(w, "")
+		fmt.Fprint(w, "http.StatusNotFound")
 
-	case sliceURLPath[2] == "Guage":
+	case sliceURLPath[2] == "guage":
 		n, err := strconv.ParseFloat(sliceURLPath[4], 64)
 		if  err != nil {
 			w.WriteHeader(http.StatusBadRequest)
-			fmt.Fprint(w, "")
+			fmt.Fprint(w, "http.StatusBadRequest")
 		} else {
 			guageMap[sliceURLPath[3]] = n
 			w.WriteHeader(http.StatusOK)
-			fmt.Fprint(w, "")
+			fmt.Fprint(w, "http.StatusOK")
 		}
 
-	case sliceURLPath[2] == "Counter":
+	case sliceURLPath[2] == "counter":
 		n, err := strconv.Atoi(sliceURLPath[4])
 		if err != nil {
 			w.WriteHeader(http.StatusBadRequest)
-			fmt.Fprint(w, "")
+			fmt.Fprint(w, "http.StatusBadRequest")
 		} else {
 			counterMap[sliceURLPath[3]] = append(counterMap[sliceURLPath[3]], n)
 			w.WriteHeader(http.StatusOK)
-			fmt.Fprint(w, "")
+			fmt.Fprint(w, "http.StatusOK")
 		}
+	default:
+		w.WriteHeader(http.StatusNotFound)
+		fmt.Fprint(w, "http.StatusNotFound")
 	}
 	// if sliceURLPath[2] == "Guage" {
 		
