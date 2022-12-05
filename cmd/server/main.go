@@ -60,7 +60,7 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 			counterMap[sliceURLPath[3]] = append(counterMap[sliceURLPath[3]], n)
 			w.Header().Set("content-type", "text/plain; charset=utf-8")
 			w.WriteHeader(http.StatusOK)
-			fmt.Fprintf(w, "n, err := strconv.Atoi(sliceURLPath[4]) err == nil; http.StatusBadRequest: %v; sliceURLPath: %v; method: %v", http.StatusBadRequest, sliceURLPath, r.Method)
+			fmt.Fprintf(w, "n, err := strconv.Atoi(sliceURLPath[4]) err == nil; http.StatusOK: %v; sliceURLPath: %v; method: %v", http.StatusOK, sliceURLPath, r.Method)
 			// fmt.Fprint(w, "http.StatusOK")
 		}
 	case sliceURLPath[2] != "counter" && sliceURLPath[2] != "gauge":
