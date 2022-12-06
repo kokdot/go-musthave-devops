@@ -13,10 +13,12 @@ import (
 )
 type GaugeMap map[string]float64
 type CounterSlice []int
+type MapCounterSlice map[string]CounterSlice
 
 var errNotFound  = errors.New("not found")
 var gaugeMap = GaugeMap{}
 var counterSlice = CounterSlice{}
+var mapCounterSlice = MapCounterSlice{}
 
 func Handler(w http.ResponseWriter, r *http.Request) {
 	urlPath := r.URL.Path
@@ -55,7 +57,7 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 			w.WriteHeader(http.StatusBadRequest)
 			fmt.Fprintf(w, "n, err := strconv.Atoi(sliceURLPath[4]) err != nil; http.StatusBadRequest: %v; sliceURLPath: %v; method: %v", http.StatusBadRequest, sliceURLPath, r.Method)
 		} else {
-			counterSlice = append(counterSlice, n)
+			mapCounterSlice[sliceURLPath[3]] = append(mapCounterSlice[sliceURLPath[3]], n)
 			w.Header().Set("content-type", "text/plain; charset=utf-8")
 			w.WriteHeader(http.StatusOK)
 			fmt.Fprintf(w, "n, err := strconv.Atoi(sliceURLPath[4]) err == nil; http.StatusOK: %v; sliceURLPath: %v; method: %v", http.StatusOK, sliceURLPath, r.Method)
@@ -81,10 +83,17 @@ func getCount(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusNotFound)
         fmt.Fprintf(w, "%v", "")
     } else {
-        n := counterSlice[len(counterSlice) - 1]
-        w.Header().Set("content-type", "text/plain; charset=utf-8")
-        w.WriteHeader(http.StatusOK)
-        fmt.Fprintf(w, "%v", n)
+        n, err := getCountValue(sliceURLPath[3])
+        
+        if err != nil {
+            w.Header().Set("content-type", "text/plain; charset=utf-8")
+            w.WriteHeader(http.StatusNotFound)
+        } else {
+            w.Header().Set("content-type", "text/plain; charset=utf-8")
+            w.WriteHeader(http.StatusOK)
+            fmt.Fprintf(w, "%v", n)
+    
+        }
     }
 }
 func getGauge(w http.ResponseWriter, r *http.Request) {
@@ -114,6 +123,13 @@ func getGaugeValue(name string) (float64, error) {
         return 0, errNotFound
     }
     return n, nil
+}
+func getCountValue(name string) (int, error) {
+    slice, ok := mapCounterSlice[name]
+    if !ok {
+        return 0, errNotFound
+    }
+    return slice[len(slice) - 1], nil
 }
 func GetAll(w http.ResponseWriter, r *http.Request){
     w.Header().Set("content-type", "text/plain; charset=utf-8")
