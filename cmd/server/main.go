@@ -1,31 +1,29 @@
 package main
 
 import (
-	"fmt"
-	"log"
-	"net/http"
-	"strconv"
-	"strings"
+    "github.com/go-chi/chi/v5"
+    "github.com/go-chi/chi/v5/middleware"
+    // "io"
+    "log"
+    "net/http"
+    "fmt"
+    "strings"
+    "strconv"
+    "errors"
 )
-
-// http://<АДРЕС_СЕРВЕРА>/update/<ТИП_МЕТРИКИ>/<ИМЯ_МЕТРИКИ>/<ЗНАЧЕНИЕ_МЕТРИКИ>
 type GaugeMap map[string]float64
-type CounterMap map[string][]int
+type CounterSlice []int
 
+var errNotFound  = errors.New("not found")
 var gaugeMap = GaugeMap{}
-var counterMap = CounterMap{}
-
-func main() {
-
-	http.HandleFunc("/update/", Handler)
-	fmt.Println("Server started at port 8080")
-
-	log.Fatal(http.ListenAndServe("127.0.0.1:8080", nil))
-}
+var counterSlice = CounterSlice{}
 
 func Handler(w http.ResponseWriter, r *http.Request) {
 	urlPath := r.URL.Path
 	sliceURLPath := strings.Split(urlPath, "/")
+    // w.Header().Set("content-type", "text/plain; charset=utf-8")
+	// w.WriteHeader(http.StatusNotFound)
+	// fmt.Fprintf(w, "len(sliceURLPath) != 5; http.StatusNotFound: %v; sliceURLPath: %v; method: %v", http.StatusNotFound, sliceURLPath, r.Method)
 
 	switch {
 	case len(sliceURLPath) != 5:
@@ -57,7 +55,7 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 			w.WriteHeader(http.StatusBadRequest)
 			fmt.Fprintf(w, "n, err := strconv.Atoi(sliceURLPath[4]) err != nil; http.StatusBadRequest: %v; sliceURLPath: %v; method: %v", http.StatusBadRequest, sliceURLPath, r.Method)
 		} else {
-			counterMap[sliceURLPath[3]] = append(counterMap[sliceURLPath[3]], n)
+			counterSlice = append(counterSlice, n)
 			w.Header().Set("content-type", "text/plain; charset=utf-8")
 			w.WriteHeader(http.StatusOK)
 			fmt.Fprintf(w, "n, err := strconv.Atoi(sliceURLPath[4]) err == nil; http.StatusOK: %v; sliceURLPath: %v; method: %v", http.StatusOK, sliceURLPath, r.Method)
@@ -73,4 +71,81 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprintf(w, "default: ;sliceURLPath[2] = %v; http.StatusNotFound: %v; sliceURLPath: %v; method: %v", sliceURLPath[2], http.StatusNotFound, sliceURLPath, r.Method)
 		// fmt.Fprint(w, "http.StatusNotFound")
 	}
+
+}
+func getCount(w http.ResponseWriter, r *http.Request) {
+    urlPath := r.URL.Path
+    sliceURLPath := strings.Split(urlPath, "/")
+    if len(sliceURLPath) != 4 {
+        w.Header().Set("content-type", "text/plain; charset=utf-8")
+		w.WriteHeader(http.StatusNotFound)
+        fmt.Fprintf(w, "%v", "")
+    } else {
+        n := counterSlice[len(counterSlice) - 1]
+        w.Header().Set("content-type", "text/plain; charset=utf-8")
+        w.WriteHeader(http.StatusOK)
+        fmt.Fprintf(w, "%v", n)
+    }
+}
+func getGauge(w http.ResponseWriter, r *http.Request) {
+    urlPath := r.URL.Path
+    sliceURLPath := strings.Split(urlPath, "/")
+	if len(sliceURLPath) != 4{
+		w.Header().Set("content-type", "text/plain; charset=utf-8")
+		w.WriteHeader(http.StatusNotFound)
+        fmt.Fprintf(w, "%v", "")
+    } else {
+        n, err := getGaugeValue(sliceURLPath[3])
+        
+        if err != nil {
+            w.Header().Set("content-type", "text/plain; charset=utf-8")
+            w.WriteHeader(http.StatusNotFound)
+        } else {
+            w.Header().Set("content-type", "text/plain; charset=utf-8")
+            w.WriteHeader(http.StatusOK)
+            fmt.Fprintf(w, "%v", n)
+    
+        }
+    }
+}
+func getGaugeValue(name string) (float64, error) {
+    n, ok := gaugeMap[name]
+    if !ok {
+        return 0, errNotFound
+    }
+    return n, nil
+}
+func GetAll(w http.ResponseWriter, r *http.Request){
+    w.Header().Set("content-type", "text/plain; charset=utf-8")
+    w.WriteHeader(http.StatusOK)
+    for key, val := range gaugeMap {
+        fmt.Fprintf(w, "%v: %v\n", key, val)
+    }
+    fmt.Fprintf(w, "CountPool: %v", counterSlice[len(counterSlice) - 1])
+}
+
+func main() {
+    gaugeMap["Alloc"] = 1234.6
+    // определяем роутер chi
+    r := chi.NewRouter()
+    // зададим встроенные middleware, чтобы улучшить стабильность приложения
+    r.Use(middleware.RequestID)
+    r.Use(middleware.RealIP)
+    r.Use(middleware.Logger)
+    r.Use(middleware.Recoverer)
+    r.Get("/", GetAll)
+    r.Route("/update", func(r chi.Router) {
+            r.Post("/*", Handler)})
+
+    r.Route("/value", func(r chi.Router) {
+		r.Route("/count", func(r chi.Router){
+            r.Get("/*", getCount)
+		})
+        r.Route("/gauge", func(r chi.Router){
+            r.Get("/*", getGauge)				
+        })
+			
+	})
+
+    log.Fatal(http.ListenAndServe(":8080", r))
 }
