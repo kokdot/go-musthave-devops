@@ -159,7 +159,7 @@ func main() {
             r.Post("/*", Handler)})
 
     r.Route("/value", func(r chi.Router) {
-		r.Route("/count", func(r chi.Router){
+		r.Route("/counter", func(r chi.Router){
             r.Get("/*", getCount)
 		})
         r.Route("/gauge", func(r chi.Router){
