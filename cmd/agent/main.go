@@ -86,6 +86,19 @@ func main() {
 				log.Fatalf("Failed sent request: %s", err)
 			}
 			fmt.Println(response) 
+
+			// response, err = client.R().Post("http://localhost:8080/update/counter/testSetGet33/187")
+			// if err != nil {
+			// 	log.Fatalf("Failed sent request: %s", err)
+			// }
+			// fmt.Println(response)
+
+			// response, err = client.R().Get("http://localhost:8080/value/counter/testSetGet33")
+			// if err != nil {
+			// 	log.Fatalf("Failed sent request: %s", err)
+			// }
+			// fmt.Println(response)
+
 			// n := 0
 			for key, val := range m {
 				// n++
