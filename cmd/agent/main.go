@@ -89,7 +89,7 @@ func main() {
 			// n := 0
 			for key, val := range m {
 				// n++
-				// if n > 3 {
+				// if n > 1 {
 				// 	break
 				// }
 				strURL := fmt.Sprintf("%s/update/gauge/%s/%v", url, key, val)

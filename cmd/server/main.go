@@ -60,7 +60,7 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 			mapCounterSlice[sliceURLPath[3]] = append(mapCounterSlice[sliceURLPath[3]], n)
 			w.Header().Set("content-type", "text/plain; charset=utf-8")
 			w.WriteHeader(http.StatusOK)
-			fmt.Fprintf(w, "n, err := strconv.Atoi(sliceURLPath[4]) err == nil; http.StatusOK: %v; sliceURLPath: %v; method: %v", http.StatusOK, sliceURLPath, r.Method)
+			fmt.Fprintf(w, "line 63; mapCounterSlice: %v;  http.StatusOK: %v; sliceURLPath: %v; method: %v", mapCounterSlice, http.StatusOK, sliceURLPath, r.Method)
 			// fmt.Fprint(w, "http.StatusOK")
 		}
 	case sliceURLPath[2] != "counter" && sliceURLPath[2] != "gauge":
@@ -88,6 +88,8 @@ func getCount(w http.ResponseWriter, r *http.Request) {
         if err != nil {
             w.Header().Set("content-type", "text/plain; charset=utf-8")
             w.WriteHeader(http.StatusNotFound)
+            fmt.Fprintf(w, "line: 92;mapCounterSlice: %v; %v",sliceURLPath[3], n)
+
         } else {
             w.Header().Set("content-type", "text/plain; charset=utf-8")
             w.WriteHeader(http.StatusOK)
@@ -137,7 +139,9 @@ func GetAll(w http.ResponseWriter, r *http.Request){
     for key, val := range gaugeMap {
         fmt.Fprintf(w, "%v: %v\n", key, val)
     }
-    fmt.Fprintf(w, "CountPool: %v", counterSlice[len(counterSlice) - 1])
+	 for key := range mapCounterSlice {
+        fmt.Fprintf(w, "%v: %v\n", key, mapCounterSlice[key][len(mapCounterSlice[key]) - 1])
+    }
 }
 
 func main() {
