@@ -80,7 +80,7 @@ func getCount(w http.ResponseWriter, r *http.Request) {
     sliceURLPath := strings.Split(urlPath, "/")
     if len(sliceURLPath) != 4 {
         w.Header().Set("content-type", "text/plain; charset=utf-8")
-		w.WriteHeader(http.StatusNotFound)
+		w.WriteHeader(http.StatusBadRequest)
         fmt.Fprintf(w, "%v", "")
     } else {
         n, err := getCountValue(sliceURLPath[3])
