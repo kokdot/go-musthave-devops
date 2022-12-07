@@ -17,7 +17,7 @@ type MapCounterSlice map[string]CounterSlice
 
 var errNotFound  = errors.New("not found")
 var gaugeMap = GaugeMap{}
-var counterSlice = CounterSlice{}
+// var counterSlice = CounterSlice{}
 var mapCounterSlice = MapCounterSlice{}
 
 func Handler(w http.ResponseWriter, r *http.Request) {
@@ -87,7 +87,7 @@ func getCount(w http.ResponseWriter, r *http.Request) {
         
         if err != nil {
             w.Header().Set("content-type", "text/plain; charset=utf-8")
-            w.WriteHeader(http.StatusBadRequest)
+            w.WriteHeader(http.StatusNotFound)
             fmt.Fprintf(w, "line: 92;mapCounterSlice: %v; %v",sliceURLPath[3], n)
 
         } else {
@@ -142,6 +142,7 @@ func GetAll(w http.ResponseWriter, r *http.Request){
 	 for key := range mapCounterSlice {
         fmt.Fprintf(w, "%v: %v\n", key, mapCounterSlice[key][len(mapCounterSlice[key]) - 1])
     }
+    // fmt.Fprintf(w, "Poll: %v", counterSlice[len(counterSlice) - 1])
 }
 
 func main() {

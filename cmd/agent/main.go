@@ -76,7 +76,6 @@ func main() {
 	go func() {
 		defer wg.Done()
 		var interval = time.Duration(reportInterval) * time.Second
-		// PollCount35 := 35
 		for {
 
 			<-time.After(interval) 
@@ -87,14 +86,6 @@ func main() {
 				log.Fatalf("Failed sent request: %s", err)
 			}
 			fmt.Println(response) 
-			// strURL = fmt.Sprintf("%s/update/counter/%s/%v", url, "PollCount35", PollCount35)
-			// client = resty.New()
-			// response, err = client.R().Post(strURL)
-			// if err != nil {
-			// 	log.Fatalf("Failed sent request: %s", err)
-			// }
-			// PollCount35++
-			// fmt.Println(response) 
 			// n := 0
 			for key, val := range m {
 				// n++
