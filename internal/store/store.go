@@ -20,10 +20,10 @@ type Repo interface {
 	saveGauge(name string, gauge Gauge)
 	getCounter(name string) (Counter, error)
 	getGauge(name string) (Gauge, error)
-	getAll() string
+	GetAllValues() string
 }
 
-func (m *MemStorage) saveCounter(name string, counter Counter) {
+func (m MemStorage) saveCounter(name string, counter Counter) {
 	n, ok := m.counterMap[name]
 	if !ok {
 		m.counterMap[name] = counter
@@ -32,11 +32,11 @@ func (m *MemStorage) saveCounter(name string, counter Counter) {
 	m.counterMap[name] = n + counter
 }
 
-func (m *MemStorage) saveGauge(name string, gauge Gauge) {
+func (m MemStorage) saveGauge(name string, gauge Gauge) {
 	m.gaugeMap[name] = gauge
 }
 
-func (m *MemStorage) getCounter(name string) (Counter, error) {
+func (m MemStorage) getCounter(name string) (Counter, error) {
 	n, ok := m.counterMap[name]
 	if !ok {
 		return 0, errors.New("this counter don't find")
@@ -44,7 +44,7 @@ func (m *MemStorage) getCounter(name string) (Counter, error) {
 	return n, nil
 }
 
-func (m *MemStorage) getGauge(name string) (Gauge, error) {
+func (m MemStorage) getGauge(name string) (Gauge, error) {
 	n, ok := m.gaugeMap[name]
 	if !ok {
 		return 0, errors.New("this gauge don't find")
@@ -52,7 +52,7 @@ func (m *MemStorage) getGauge(name string) (Gauge, error) {
 	return n, nil
 }
 
-func (m *MemStorage) getAll() string {
+func (m MemStorage) GetAllValues() string {
 	mapAll := make(map[string]string)
 	for key, val := range m.counterMap {
 		mapAll[key] = fmt.Sprintf("%v", val)

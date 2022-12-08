@@ -5,24 +5,98 @@ import (
 	"strings"
 	"fmt"
 	"strconv"
-	"github.com/kokdot/go-musthave-devops/internal/store"
+	"errors"
+	// "github.com/kokdot/go-musthave-devops/internal/store"
 )
 // var m = new(store.MemStorage)
-var m store.Repo = new(store.MemStorage)
+// var m store.Repo
+// var m Repo
+// var ms store.MemStorage
+// m = ms
+// m.getAll()
 
-func HandlerPostUpdate(w http.ResponseWriter, r *http.Request) {
+// func Test()
+
+
+
+
+type Counter int
+type Gauge float64
+type GaugeMap map[string]Gauge
+type CounterMap map[string]Counter
+
+type MemStorage struct {
+	gaugeMap   GaugeMap
+	counterMap CounterMap
+}
+
+type Repo interface {
+	SaveCounterValue(name string, counter Counter)
+	SaveGaugeValue(name string, gauge Gauge)
+	GetCounterValue(name string) (Counter, error)
+	GetGaugeValue(name string) (Gauge, error)
+	GetAllValues() string
+	PostUpdateHandler(w http.ResponseWriter, r *http.Request)
+	GetCountHandler(w http.ResponseWriter, r *http.Request)
+	GetGaugeHandler(w http.ResponseWriter, r *http.Request)
+	GetAllHandler(w http.ResponseWriter, r *http.Request)
+}
+
+func (m *MemStorage) SaveCounterValue(name string, counter Counter) {
+	n, ok := m.counterMap[name]
+	if !ok {
+		m.counterMap[name] = counter
+		return
+	}
+	m.counterMap[name] = n + counter
+}
+
+func (m *MemStorage) SaveGaugeValue(name string, gauge Gauge) {
+	m.gaugeMap[name] = gauge
+}
+
+func (m *MemStorage) GetCounterValue(name string) (Counter, error) {
+	n, ok := m.counterMap[name]
+	if !ok {
+		return 0, errors.New("this counter don't find")
+	}
+	return n, nil
+}
+
+func (m *MemStorage) GetGaugeValue(name string) (Gauge, error) {
+	n, ok := m.gaugeMap[name]
+	if !ok {
+		return 0, errors.New("this gauge don't find")
+	}
+	return n, nil
+}
+
+func (m *MemStorage) GetAllValues() string {
+	mapAll := make(map[string]string)
+	for key, val := range m.counterMap {
+		mapAll[key] = fmt.Sprintf("%v", val)
+	}
+	for key, val := range m.gaugeMap {
+		mapAll[key] = fmt.Sprintf("%v", val)
+	}
+	var str string
+	for key, val := range mapAll{
+		str += fmt.Sprintf("%s: %s\n", key, val)
+	}
+	return str
+}
+
+
+
+func  (m *MemStorage) PostUpdateHandler(w http.ResponseWriter, r *http.Request) {
 	urlPath := r.URL.Path
 	sliceURLPath := strings.Split(urlPath, "/")
-    // w.Header().Set("content-type", "text/plain; charset=utf-8")
-	// w.WriteHeader(http.StatusNotFound)
-	// fmt.Fprintf(w, "len(sliceURLPath) != 5; http.StatusNotFound: %v; sliceURLPath: %v; method: %v", http.StatusNotFound, sliceURLPath, r.Method)
 
 	switch {
 	case len(sliceURLPath) != 5:
 		w.Header().Set("content-type", "text/plain; charset=utf-8")
 		w.WriteHeader(http.StatusNotFound)
 		fmt.Fprintf(w, "len(sliceURLPath) != 5; http.StatusNotFound: %v; sliceURLPath: %v; method: %v", http.StatusNotFound, sliceURLPath, r.Method)
-		// fmt.Fprint(w, "http.StatusNotFound")
 
 	case sliceURLPath[2] == "gauge":
 		// fmt.Println("case sliceURLPath[2] == \"gauge\":")
@@ -30,13 +104,11 @@ func HandlerPostUpdate(w http.ResponseWriter, r *http.Request) {
 		if err != nil {
 			w.Header().Set("content-type", "text/plain; charset=utf-8")
 			w.WriteHeader(http.StatusBadRequest)
-			// fmt.Fprint(w, "http.StatusBadRequest")
 			fmt.Fprintf(w, "n, err := strconv.ParseFloat(sliceURLPath[4], 64) err != nil; http.StatusBadRequest: %v; sliceURLPath: %v; method: %v", http.StatusBadRequest, sliceURLPath, r.Method)
 		} else {
-			m.saveGauge(sliceURLPath[3], store.Gauge(n))
+			m.SaveGaugeValue(sliceURLPath[3], Gauge(n))
 			w.Header().Set("content-type", "text/plain; charset=utf-8")
 			w.WriteHeader(http.StatusOK)
-			// fmt.Fprint(w, "http.StatusOK")
 			fmt.Fprintf(w, "n, err := strconv.ParseFloat(sliceURLPath[4], 64) err == nil; http.StatusOK: %v; sliceURLPath: %v; method: %v", http.StatusOK, sliceURLPath, r.Method)
 
 		}
@@ -47,12 +119,10 @@ func HandlerPostUpdate(w http.ResponseWriter, r *http.Request) {
 			w.WriteHeader(http.StatusBadRequest)
 			fmt.Fprintf(w, "n, err := strconv.Atoi(sliceURLPath[4]) err != nil; http.StatusBadRequest: %v; sliceURLPath: %v; method: %v", http.StatusBadRequest, sliceURLPath, r.Method)
 		} else {
-			m.saveCounter(sliceURLPath[3], store.Counter(n))
-			// mapCounterSlice[sliceURLPath[3]] = append(mapCounterSlice[sliceURLPath[3]], n)
+			m.SaveCounterValue()(sliceURLPath[3], Counter(n))
 			w.Header().Set("content-type", "text/plain; charset=utf-8")
 			w.WriteHeader(http.StatusOK)
 			fmt.Fprintf(w, "line 63; mapCounterSlice: ;  http.StatusOK: %v; sliceURLPath: %v; method: %v", http.StatusOK, sliceURLPath, r.Method)
-			// fmt.Fprint(w, "http.StatusOK")
 		}
 	case sliceURLPath[2] != "counter" && sliceURLPath[2] != "gauge":
 		w.Header().Set("content-type", "text/plain; charset=utf-8")
@@ -62,12 +132,10 @@ func HandlerPostUpdate(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("content-type", "text/plain; charset=utf-8")
 		w.WriteHeader(http.StatusNotFound)
 		fmt.Fprintf(w, "default: ;sliceURLPath[2] = %v; http.StatusNotFound: %v; sliceURLPath: %v; method: %v", sliceURLPath[2], http.StatusNotFound, sliceURLPath, r.Method)
-		// fmt.Fprint(w, "http.StatusNotFound")
 	}
-
 }
 
-func getCount(w http.ResponseWriter, r *http.Request) {
+func  (m *MemStorage) GetCountHandler(w http.ResponseWriter, r *http.Request) {
     urlPath := r.URL.Path
     sliceURLPath := strings.Split(urlPath, "/")
     if len(sliceURLPath) != 4 {
@@ -75,22 +143,19 @@ func getCount(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusNotFound)
         fmt.Fprintf(w, "%v", "")
     } else {
-        n, err := getCountValue(sliceURLPath[3])
-        
+        n, err := m.GetCounterValue(sliceURLPath[3])
         if err != nil {
             w.Header().Set("content-type", "text/plain; charset=utf-8")
             w.WriteHeader(http.StatusNotFound)
-            fmt.Fprintf(w, "line: 92;mapCounterSlice: %v; %v",sliceURLPath[3], n)
-
+            fmt.Fprintf(w, "line: 147; name: %v; %v",sliceURLPath[3], n)
         } else {
             w.Header().Set("content-type", "text/plain; charset=utf-8")
             w.WriteHeader(http.StatusOK)
             fmt.Fprintf(w, "%v", n)
-    
         }
     }
 }
-func getGauge(w http.ResponseWriter, r *http.Request) {
+func (m *MemStorage) GetGaugeHandler(w http.ResponseWriter, r *http.Request) {
     urlPath := r.URL.Path
     sliceURLPath := strings.Split(urlPath, "/")
 	if len(sliceURLPath) != 4{
@@ -98,8 +163,7 @@ func getGauge(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusNotFound)
         fmt.Fprintf(w, "%v", "")
     } else {
-        n, err := getGaugeValue(sliceURLPath[3])
-        
+        n, err := m.GetGaugeValue(sliceURLPath[3])
         if err != nil {
             w.Header().Set("content-type", "text/plain; charset=utf-8")
             w.WriteHeader(http.StatusNotFound)
@@ -107,27 +171,26 @@ func getGauge(w http.ResponseWriter, r *http.Request) {
             w.Header().Set("content-type", "text/plain; charset=utf-8")
             w.WriteHeader(http.StatusOK)
             fmt.Fprintf(w, "%v", n)
-    
         }
     }
 }
-func getGaugeValue(name string) (store.Gauge, error) {
-    n, err := m.getGauge(name)
-    if err != nil {
-        return 0, err
-    }
-    return n, nil
-}
-func getCountValue(name string) (store.Counter, error) {
-    n, err := m.getCounter(name)
-    if err != nil {
-        return 0, err
-    }
-    return n, nil
-}
-func GetAllValues(w http.ResponseWriter, r *http.Request){
+// func (m MemStorage) getGauge(name string) (Gauge, error) {
+//     n, err := m.getGauge(name)
+//     if err != nil {
+//         return 0, err
+//     }
+//     return n, nil
+// }
+// func (m MemStorage) getCount(name string) (Counter, error) {
+//     n, err := m.getCounter(name)
+//     if err != nil {
+//         return 0, err
+//     }
+//     return n, nil
+// }
+func (m *MemStorage) GetAllHandler(w http.ResponseWriter, r *http.Request){
     w.Header().Set("content-type", "text/plain; charset=utf-8")
     w.WriteHeader(http.StatusOK)
-	w.Write(m.GetAll)
+	w.Write([]byte(m.GetAllValues()))
 	// fmt.Fprintf(w, "Poll: %v", counterSlice[len(counterSlice) - 1])
 }
