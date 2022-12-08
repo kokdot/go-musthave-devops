@@ -26,8 +26,8 @@ type GaugeMap map[string]Gauge
 type CounterMap map[string]Counter
 
 type MemStorage struct {
-	gaugeMap   GaugeMap
-	counterMap CounterMap
+	GaugeMap   GaugeMap
+	CounterMap CounterMap
 }
 
 type Repo interface {
@@ -43,20 +43,20 @@ type Repo interface {
 }
 
 func (m *MemStorage) SaveCounterValue(name string, counter Counter) {
-	n, ok := m.counterMap[name]
+	n, ok := m.CounterMap[name]
 	if !ok {
-		m.counterMap[name] = counter
+		m.CounterMap[name] = counter
 		return
 	}
-	m.counterMap[name] = n + counter
+	m.CounterMap[name] = n + counter
 }
 
 func (m *MemStorage) SaveGaugeValue(name string, gauge Gauge) {
-	m.gaugeMap[name] = gauge
+	m.GaugeMap[name] = gauge
 }
 
 func (m *MemStorage) GetCounterValue(name string) (Counter, error) {
-	n, ok := m.counterMap[name]
+	n, ok := m.CounterMap[name]
 	if !ok {
 		return 0, errors.New("this counter don't find")
 	}
@@ -64,7 +64,7 @@ func (m *MemStorage) GetCounterValue(name string) (Counter, error) {
 }
 
 func (m *MemStorage) GetGaugeValue(name string) (Gauge, error) {
-	n, ok := m.gaugeMap[name]
+	n, ok := m.GaugeMap[name]
 	if !ok {
 		return 0, errors.New("this gauge don't find")
 	}
@@ -73,10 +73,10 @@ func (m *MemStorage) GetGaugeValue(name string) (Gauge, error) {
 
 func (m *MemStorage) GetAllValues() string {
 	mapAll := make(map[string]string)
-	for key, val := range m.counterMap {
+	for key, val := range m.CounterMap {
 		mapAll[key] = fmt.Sprintf("%v", val)
 	}
-	for key, val := range m.gaugeMap {
+	for key, val := range m.GaugeMap {
 		mapAll[key] = fmt.Sprintf("%v", val)
 	}
 	var str string

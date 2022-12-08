@@ -26,8 +26,10 @@ import (
 
 
 func main() {
-	var m handler.Repo = new(handler.MemStorage)
-	// var ms = new(handler.MemStorage)
+	var ms = new(handler.MemStorage)
+	ms.GaugeMap = make(handler.GaugeMap)
+	ms.CounterMap = make(handler.CounterMap)
+	var m handler.Repo = ms
 	// m = ms
     // gaugeMap["Alloc"] = 1234.6
     // определяем роутер chi
