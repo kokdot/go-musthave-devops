@@ -119,7 +119,7 @@ func  (m *MemStorage) PostUpdateHandler(w http.ResponseWriter, r *http.Request) 
 			w.WriteHeader(http.StatusBadRequest)
 			fmt.Fprintf(w, "n, err := strconv.Atoi(sliceURLPath[4]) err != nil; http.StatusBadRequest: %v; sliceURLPath: %v; method: %v", http.StatusBadRequest, sliceURLPath, r.Method)
 		} else {
-			m.SaveCounterValue()(sliceURLPath[3], Counter(n))
+			m.SaveCounterValue(sliceURLPath[3], Counter(n))
 			w.Header().Set("content-type", "text/plain; charset=utf-8")
 			w.WriteHeader(http.StatusOK)
 			fmt.Fprintf(w, "line 63; mapCounterSlice: ;  http.StatusOK: %v; sliceURLPath: %v; method: %v", http.StatusOK, sliceURLPath, r.Method)
