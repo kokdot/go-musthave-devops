@@ -7,7 +7,9 @@ import (
 	"strconv"
 	"github.com/kokdot/go-musthave-devops/internal/store"
 )
-var m = new(stroe.MemStorage)
+// var m = new(store.MemStorage)
+var m store.Repo = new(store.MemStorage)
+
 func HandlerPostUpdate(w http.ResponseWriter, r *http.Request) {
 	urlPath := r.URL.Path
 	sliceURLPath := strings.Split(urlPath, "/")
@@ -31,7 +33,7 @@ func HandlerPostUpdate(w http.ResponseWriter, r *http.Request) {
 			// fmt.Fprint(w, "http.StatusBadRequest")
 			fmt.Fprintf(w, "n, err := strconv.ParseFloat(sliceURLPath[4], 64) err != nil; http.StatusBadRequest: %v; sliceURLPath: %v; method: %v", http.StatusBadRequest, sliceURLPath, r.Method)
 		} else {
-			gaugeMap[sliceURLPath[3]] = n
+			m.saveGauge(sliceURLPath[3], store.Gauge(n))
 			w.Header().Set("content-type", "text/plain; charset=utf-8")
 			w.WriteHeader(http.StatusOK)
 			// fmt.Fprint(w, "http.StatusOK")
@@ -45,10 +47,11 @@ func HandlerPostUpdate(w http.ResponseWriter, r *http.Request) {
 			w.WriteHeader(http.StatusBadRequest)
 			fmt.Fprintf(w, "n, err := strconv.Atoi(sliceURLPath[4]) err != nil; http.StatusBadRequest: %v; sliceURLPath: %v; method: %v", http.StatusBadRequest, sliceURLPath, r.Method)
 		} else {
-			mapCounterSlice[sliceURLPath[3]] = append(mapCounterSlice[sliceURLPath[3]], n)
+			m.saveCounter(sliceURLPath[3], store.Counter(n))
+			// mapCounterSlice[sliceURLPath[3]] = append(mapCounterSlice[sliceURLPath[3]], n)
 			w.Header().Set("content-type", "text/plain; charset=utf-8")
 			w.WriteHeader(http.StatusOK)
-			fmt.Fprintf(w, "line 63; mapCounterSlice: %v;  http.StatusOK: %v; sliceURLPath: %v; method: %v", mapCounterSlice, http.StatusOK, sliceURLPath, r.Method)
+			fmt.Fprintf(w, "line 63; mapCounterSlice: ;  http.StatusOK: %v; sliceURLPath: %v; method: %v", http.StatusOK, sliceURLPath, r.Method)
 			// fmt.Fprint(w, "http.StatusOK")
 		}
 	case sliceURLPath[2] != "counter" && sliceURLPath[2] != "gauge":
