@@ -7,9 +7,14 @@ import (
 	"net/http/httptest"
 	"testing"
 	"io"
+	"github.com/kokdot/go-musthave-devops/internal/handler"
 )
 
 func TestHandler(t *testing.T) {
+	var ms = new(handler.MemStorage)
+	ms.GaugeMap = make(handler.GaugeMap)
+	ms.CounterMap = make(handler.CounterMap)
+	var m handler.Repo = ms
 	type want struct {
 		StatusCode  int
 		contentType string
@@ -74,7 +79,7 @@ func TestHandler(t *testing.T) {
 			// создаём новый Recorder
 			w := httptest.NewRecorder()
 			// определяем хендлер
-			h := http.HandlerFunc(Handler)
+			h := http.HandlerFunc(m.PostUpdateHandler)
 			// запускаем сервер
 			h.ServeHTTP(w, request)
 			result := w.Result()
