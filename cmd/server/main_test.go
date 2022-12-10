@@ -7,13 +7,13 @@ import (
 	"net/http/httptest"
 	"testing"
 	"io"
-	"github.com/kokdot/go-musthave-devops/internal/handler"
+	"github.com/kokdot/go-musthave-devops/internal/store"
 )
 
 func TestHandler(t *testing.T) {
-	var ms = new(handler.MemStorage)
-	ms.GaugeMap = make(handler.GaugeMap)
-	ms.CounterMap = make(handler.CounterMap)
+	var ms = new(store.MemStorage)
+	ms.GaugeMap = make(store.GaugeMap)
+	ms.CounterMap = make(store.CounterMap)
 	var m handler.Repo = ms
 	type want struct {
 		StatusCode  int
