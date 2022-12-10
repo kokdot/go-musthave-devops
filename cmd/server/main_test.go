@@ -7,14 +7,14 @@ import (
 	"net/http/httptest"
 	"testing"
 	"io"
-	"github.com/kokdot/go-musthave-devops/internal/store"
+	// "github.com/kokdot/go-musthave-devops/internal/store"
 )
 
-func TestHandler(t *testing.T) {
-	var ms = new(store.MemStorage)
-	ms.GaugeMap = make(store.GaugeMap)
-	ms.CounterMap = make(store.CounterMap)
-	var m handler.Repo = ms
+func TesPostUpdateCounter(t *testing.T) {
+	// var ms = new(store.MemStorage)
+	// ms.GaugeMap = make(store.GaugeMap)
+	// ms.CounterMap = make(store.CounterMap)
+	// var m store.Repo = ms
 	type want struct {
 		StatusCode  int
 		contentType string
@@ -79,7 +79,7 @@ func TestHandler(t *testing.T) {
 			// создаём новый Recorder
 			w := httptest.NewRecorder()
 			// определяем хендлер
-			h := http.HandlerFunc(m.PostUpdateHandler)
+			h := http.HandlerFunc(PostUpdateGauge)
 			// запускаем сервер
 			h.ServeHTTP(w, request)
 			result := w.Result()

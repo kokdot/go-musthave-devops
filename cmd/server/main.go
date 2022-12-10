@@ -14,15 +14,15 @@ import (
 	"github.com/kokdot/go-musthave-devops/internal/store"
 )
 
-var m handler.Repo
+var m store.Repo
 
 
 
 
 func main() {
-	var ms = new(handler.MemStorage)
-	ms.GaugeMap = make(handler.GaugeMap)
-	ms.CounterMap = make(handler.CounterMap)
+	var ms = new(store.MemStorage)
+	ms.GaugeMap = make(store.GaugeMap)
+	ms.CounterMap = make(store.CounterMap)
 	m = ms
     // определяем роутер chi
     r := chi.NewRouter()
@@ -39,11 +39,18 @@ func main() {
                 r.Post("/", PostUpdateCounter)
             })
         })
-         r.Route("/gauge", func(r chi.Router) {
+        r.Route("/gauge", func(r chi.Router) {
             r.Route("/{nameData}/{valueData}", func(r chi.Router) {
                 r.Use(PostGaugeCtx)
                 r.Post("/", PostUpdateGauge)
             })
+        })
+        r.Route("/",func(r chi.Router) {
+            r.Post("/*", func(w http.ResponseWriter, r *http.Request) {
+		        w.Header().Set("content-type", "text/plain; charset=utf-8")
+                w.WriteHeader(http.StatusNotImplemented)
+                fmt.Fprint(w, "line: 52; http.StatusNotImplemented")
+	        })
         })
     })
 
@@ -64,6 +71,7 @@ func main() {
 
     log.Fatal(http.ListenAndServe(":8080", r))
 }
+
 func PostCounterCtx(next http.Handler) http.Handler {
     return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
         var nameData string
@@ -140,7 +148,7 @@ func PostGaugeCtx(next http.Handler) http.Handler {
 func PostUpdateCounter(w http.ResponseWriter, r *http.Request) {
 	valueData := r.Context().Value("valueData").(int)
 	nameData := r.Context().Value("nameData").(string)
-    m.SaveCounterValue(nameData, handler.Counter(valueData))
+    m.SaveCounterValue(nameData, store.Counter(valueData))
 	w.Header().Set("content-type", "text/plain; charset=utf-8")
 	w.WriteHeader(http.StatusOK)
     fmt.Fprint(w, "http.StatusOK")
@@ -148,7 +156,7 @@ func PostUpdateCounter(w http.ResponseWriter, r *http.Request) {
 func PostUpdateGauge(w http.ResponseWriter, r *http.Request) {
 	valueData := r.Context().Value("valueData").(float64)
 	nameData := r.Context().Value("nameData").(string)
-    m.SaveGaugeValue(nameData, handler.Gauge(valueData))
+    m.SaveGaugeValue(nameData, store.Gauge(valueData))
 	w.Header().Set("content-type", "text/plain; charset=utf-8")
 	w.WriteHeader(http.StatusOK)
     fmt.Fprint(w, "http.StatusOK")
