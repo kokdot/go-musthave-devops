@@ -8,6 +8,7 @@ import (
 	"runtime"
 	"sync"
 	"time"
+	"math/rand"
 	// "io"
 	"github.com/go-resty/resty/v2"
 )
@@ -25,6 +26,7 @@ type Guage float64
 type Couter int64
 type MonitorMap map[string]Guage
 var PollCount int
+var RandomValue Guage
 func NewMonitor(m *MonitorMap, rtm runtime.MemStats) {//}, mutex *sync.RWMutex) {
 	runtime.ReadMemStats(&rtm)
 	// fmt.Println(rtm)
@@ -68,6 +70,7 @@ func main() {
 			<-time.After(interval)
 			NewMonitor(m, rtm)//, mutex)
 			PollCount++
+			RandomValue = Guage(rand.Float64())
 			// fmt.Println(m)
 		}
 	}(&m, rtm)
@@ -86,7 +89,13 @@ func main() {
 				log.Fatalf("Failed sent request: %s", err)
 			}
 			fmt.Println(response) 
-
+			strURL = fmt.Sprintf("%s/update/gauge/%s/%v", url, "RandomValue", RandomValue)
+			client = resty.New()
+			response, err = client.R().Post(strURL)
+			if err != nil {
+				log.Fatalf("Failed sent request: %s", err)
+			}
+			fmt.Println(response) 
 			// response, err = client.R().Post("http://localhost:8080/update/counter/testSetGet33/187")
 			// if err != nil {
 			// 	log.Fatalf("Failed sent request: %s", err)
