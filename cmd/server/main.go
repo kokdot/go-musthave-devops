@@ -13,7 +13,12 @@ import (
 	"fmt"
 	"github.com/kokdot/go-musthave-devops/internal/store"
 )
+type key int
 
+const (
+    nameDataKey key = iota
+    valueDataKey
+)
 var m store.Repo
 
 func main() {
@@ -92,8 +97,8 @@ func PostCounterCtx(next http.Handler) http.Handler {
             return
         }
 
-		ctx := context.WithValue(r.Context(), "nameData", nameData)
-		ctx = context.WithValue(ctx, "valueData", valueData)
+		ctx := context.WithValue(r.Context(), nameDataKey, nameData)
+		ctx = context.WithValue(ctx, valueDataKey, valueData)
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})
 }
@@ -109,7 +114,7 @@ func GetCtx(next http.Handler) http.Handler {
         }
         nameData = nameDataStr
 
-		ctx := context.WithValue(r.Context(), "nameData", nameData)
+		ctx := context.WithValue(r.Context(), nameDataKey, nameData)
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})
 }
@@ -137,29 +142,29 @@ func PostGaugeCtx(next http.Handler) http.Handler {
             return
         }
 
-		ctx := context.WithValue(r.Context(), "nameData", nameData)
-		ctx = context.WithValue(ctx, "valueData", valueData)
+		ctx := context.WithValue(r.Context(), nameDataKey, nameData)
+		ctx = context.WithValue(ctx, valueDataKey, valueData)
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})
 }
 func PostUpdateCounter(w http.ResponseWriter, r *http.Request) {
-	valueData := r.Context().Value("valueData").(int)
-	nameData := r.Context().Value("nameData").(string)
+	valueData := r.Context().Value(valueDataKey).(int)
+	nameData := r.Context().Value(nameDataKey).(string)
     m.SaveCounterValue(nameData, store.Counter(valueData))
 	w.Header().Set("content-type", "text/plain; charset=utf-8")
 	w.WriteHeader(http.StatusOK)
     fmt.Fprint(w, "http.StatusOK")
 }
 func PostUpdateGauge(w http.ResponseWriter, r *http.Request) {
-	valueData := r.Context().Value("valueData").(float64)
-	nameData := r.Context().Value("nameData").(string)
+	valueData := r.Context().Value(valueDataKey).(float64)
+	nameData := r.Context().Value(nameDataKey).(string)
     m.SaveGaugeValue(nameData, store.Gauge(valueData))
 	w.Header().Set("content-type", "text/plain; charset=utf-8")
 	w.WriteHeader(http.StatusOK)
     fmt.Fprint(w, "http.StatusOK")
 }
 func GetCounter(w http.ResponseWriter, r *http.Request) {
-    nameData := r.Context().Value("nameData").(string)
+    nameData := r.Context().Value(nameDataKey).(string)
     n, err := m.GetCounterValue(nameData)
     if err != nil {
         w.Header().Set("content-type", "text/plain; charset=utf-8")
@@ -172,7 +177,7 @@ func GetCounter(w http.ResponseWriter, r *http.Request) {
     }
 }
 func GetGauge(w http.ResponseWriter, r *http.Request) {
-    nameData := r.Context().Value("nameData").(string)
+    nameData := r.Context().Value(nameDataKey).(string)
     n, err := m.GetGaugeValue(nameData)
     if err != nil {
         w.Header().Set("content-type", "text/plain; charset=utf-8")
