@@ -10,32 +10,28 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
-	"github.com/kokdot/go-musthave-devops/internal/store"
+	"github.com/kokdot/go-musthave-devops/internal/handler"
+
 )
 
 func TestHandler(t *testing.T) {
 	r := chi.NewRouter()
-	var ms = new(store.MemStorage)
-	ms.GaugeMap = make(store.GaugeMap)
-	ms.CounterMap = make(store.CounterMap)
-	m = ms
-	// зададим встроенные middleware, чтобы улучшить стабильность приложения
 	r.Use(middleware.RequestID)
 	r.Use(middleware.RealIP)
 	r.Use(middleware.Logger)
 	r.Use(middleware.Recoverer)
-	r.Get("/", GetAll)
+	r.Get("/", handler.GetAll)
 	r.Route("/update", func(r chi.Router) {
 		r.Route("/counter", func(r chi.Router) {
 			r.Route("/{nameData}/{valueData}", func(r chi.Router) {
-				r.Use(PostCounterCtx)
-				r.Post("/", PostUpdateCounter)
+				r.Use(handler.PostCounterCtx)
+				r.Post("/", handler.PostUpdateCounter)
 			})
 		})
 		r.Route("/gauge", func(r chi.Router) {
 			r.Route("/{nameData}/{valueData}", func(r chi.Router) {
-				r.Use(PostGaugeCtx)
-				r.Post("/", PostUpdateGauge)
+				r.Use(handler.PostGaugeCtx)
+				r.Post("/", handler.PostUpdateGauge)
 			})
 		})
 		r.Route("/", func(r chi.Router) {
@@ -50,14 +46,14 @@ func TestHandler(t *testing.T) {
 	r.Route("/value", func(r chi.Router) {
 		r.Route("/counter", func(r chi.Router) {
 			r.Route("/{nameData}", func(r chi.Router) {
-				r.Use(GetCtx)
-				r.Get("/", GetCounter)
+				r.Use(handler.GetCtx)
+				r.Get("/", handler.GetCounter)
 			})
 		})
 		r.Route("/gauge", func(r chi.Router) {
 			r.Route("/{nameData}", func(r chi.Router) {
-				r.Use(GetCtx)
-				r.Get("/", GetGauge)
+				r.Use(handler.GetCtx)
+				r.Get("/", handler.GetGauge)
 			})
 		})
 	})
