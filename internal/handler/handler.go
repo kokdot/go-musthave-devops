@@ -2,68 +2,136 @@ package handler
 
 import (
 	"fmt"
-	"errors"
+	// "errors"
+	"github.com/go-chi/chi/v5"
+	"net/http"
+	"context"
+	"github.com/kokdot/go-musthave-devops/internal/store"
+	"strconv"
 )
 
+const (
+    nameDataKey key = iota
+    valueDataKey
+)
 
-type Counter int
-type Gauge float64
-type GaugeMap map[string]Gauge
-type CounterMap map[string]Counter
+func PostCounterCtx(next http.Handler) http.Handler {
+    return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+        var nameData string
+        var valueData int
 
-type MemStorage struct {
-	GaugeMap   GaugeMap
-	CounterMap CounterMap
+		nameDataStr := chi.URLParam(r, "nameData")
+		valueDataStr := chi.URLParam(r, "valueData")
+
+        if nameDataStr == "" || valueDataStr == "" {
+            w.Header().Set("content-type", "text/plain; charset=utf-8")
+		    w.WriteHeader(http.StatusNotFound)
+            fmt.Fprint(w, "http.StatusNotFound")
+            return
+        }
+        nameData = nameDataStr
+        valueData, err := strconv.Atoi(valueDataStr)
+        if err != nil {
+            w.Header().Set("content-type", "text/plain; charset=utf-8")
+			w.WriteHeader(http.StatusBadRequest)
+            fmt.Fprint(w, "http.StatusBadRequest")
+            return
+        }
+
+		ctx := context.WithValue(r.Context(), nameDataKey, nameData)
+		ctx = context.WithValue(ctx, valueDataKey, valueData)
+		next.ServeHTTP(w, r.WithContext(ctx))
+	})
+}
+func GetCtx(next http.Handler) http.Handler {
+    return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+        var nameData string
+		nameDataStr := chi.URLParam(r, "nameData")
+        if nameDataStr == "" {
+            w.Header().Set("content-type", "text/plain; charset=utf-8")
+		    w.WriteHeader(http.StatusNotFound)
+            fmt.Fprint(w, "line: 115; http.StatusNotFound")
+            return
+        }
+        nameData = nameDataStr
+
+		ctx := context.WithValue(r.Context(), nameDataKey, nameData)
+		next.ServeHTTP(w, r.WithContext(ctx))
+	})
 }
 
-type Repo interface {
-	SaveCounterValue(name string, counter Counter)
-	SaveGaugeValue(name string, gauge Gauge)
-	GetCounterValue(name string) (Counter, error)
-	GetGaugeValue(name string) (Gauge, error)
-	GetAllValues() string
-}
+func PostGaugeCtx(next http.Handler) http.Handler {
+    return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+        var nameData string
+        var valueData float64
 
-func (m *MemStorage) SaveCounterValue(name string, counter Counter) {
-	n, ok := m.CounterMap[name]
-	if !ok {
-		m.CounterMap[name] = counter
-		return
-	}
-	m.CounterMap[name] = n + counter
-}
+		nameDataStr := chi.URLParam(r, "nameData")
+		valueDataStr := chi.URLParam(r, "valueData")
 
-func (m *MemStorage) SaveGaugeValue(name string, gauge Gauge) {
-	m.GaugeMap[name] = gauge
-}
+        if nameDataStr == "" || valueDataStr == "" {
+            w.Header().Set("content-type", "text/plain; charset=utf-8")
+		    w.WriteHeader(http.StatusNotFound)
+            fmt.Fprint(w, "http.StatusNotFound")
+            return
+        }
+        nameData = nameDataStr
+        valueData, err := strconv.ParseFloat(valueDataStr, 64)
+        if err != nil {
+            w.Header().Set("content-type", "text/plain; charset=utf-8")
+			w.WriteHeader(http.StatusBadRequest)
+            fmt.Fprint(w, "http.StatusBadRequest")
+            return
+        }
 
-func (m *MemStorage) GetCounterValue(name string) (Counter, error) {
-	n, ok := m.CounterMap[name]
-	if !ok {
-		return 0, errors.New("this counter don't find")
-	}
-	return n, nil
+		ctx := context.WithValue(r.Context(), nameDataKey, nameData)
+		ctx = context.WithValue(ctx, valueDataKey, valueData)
+		next.ServeHTTP(w, r.WithContext(ctx))
+	})
 }
-
-func (m *MemStorage) GetGaugeValue(name string) (Gauge, error) {
-	n, ok := m.GaugeMap[name]
-	if !ok {
-		return 0, errors.New("this gauge don't find")
-	}
-	return n, nil
+func PostUpdateCounter(w http.ResponseWriter, r *http.Request) {
+	valueData := r.Context().Value(valueDataKey).(int)
+	nameData := r.Context().Value(nameDataKey).(string)
+    m.SaveCounterValue(nameData, store.Counter(valueData))
+	w.Header().Set("content-type", "text/plain; charset=utf-8")
+	w.WriteHeader(http.StatusOK)
+    fmt.Fprint(w, "http.StatusOK")
 }
-
-func (m *MemStorage) GetAllValues() string {
-	mapAll := make(map[string]string)
-	for key, val := range m.CounterMap {
-		mapAll[key] = fmt.Sprintf("%v", val)
-	}
-	for key, val := range m.GaugeMap {
-		mapAll[key] = fmt.Sprintf("%v", val)
-	}
-	var str string
-	for key, val := range mapAll{
-		str += fmt.Sprintf("%s: %s\n", key, val)
-	}
-	return str
+func PostUpdateGauge(w http.ResponseWriter, r *http.Request) {
+	valueData := r.Context().Value(valueDataKey).(float64)
+	nameData := r.Context().Value(nameDataKey).(string)
+    m.SaveGaugeValue(nameData, store.Gauge(valueData))
+	w.Header().Set("content-type", "text/plain; charset=utf-8")
+	w.WriteHeader(http.StatusOK)
+    fmt.Fprint(w, "http.StatusOK")
+}
+func GetCounter(w http.ResponseWriter, r *http.Request) {
+    nameData := r.Context().Value(nameDataKey).(string)
+    n, err := m.GetCounterValue(nameData)
+    if err != nil {
+        w.Header().Set("content-type", "text/plain; charset=utf-8")
+        w.WriteHeader(http.StatusNotFound)
+        fmt.Fprint(w, "line: 175; http.StatusNotFound")
+    } else {
+        w.Header().Set("content-type", "text/plain; charset=utf-8")
+        w.WriteHeader(http.StatusOK)
+        fmt.Fprintf(w, "%v", n)
+    }
+}
+func GetGauge(w http.ResponseWriter, r *http.Request) {
+    nameData := r.Context().Value(nameDataKey).(string)
+    n, err := m.GetGaugeValue(nameData)
+    if err != nil {
+        w.Header().Set("content-type", "text/plain; charset=utf-8")
+        w.WriteHeader(http.StatusNotFound)
+        fmt.Fprint(w, "line: 188; http.StatusNotFound")
+    } else {
+        w.Header().Set("content-type", "text/plain; charset=utf-8")
+        w.WriteHeader(http.StatusOK)
+        fmt.Fprintf(w, "%v", n)
+    }    
+}
+func GetAll(w http.ResponseWriter, r *http.Request) {
+    w.Header().Set("content-type", "text/plain; charset=utf-8")
+    w.WriteHeader(http.StatusOK)
+    fmt.Fprintf(w, "%v", m.GetAllValues()) 
 }
