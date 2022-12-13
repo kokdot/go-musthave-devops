@@ -10,19 +10,10 @@ import (
 	"net/http"
 
 	"fmt"
-	"github.com/kokdot/go-musthave-devops/internal/store"
 	"github.com/kokdot/go-musthave-devops/internal/handler"
 )
-type key int
-
-
-var m store.Repo
 
 func main() {
-	var ms = new(store.MemStorage)
-	ms.GaugeMap = make(store.GaugeMap)
-	ms.CounterMap = make(store.CounterMap)
-	m = ms
     // определяем роутер chi
     r := chi.NewRouter()
     // зададим встроенные middleware, чтобы улучшить стабильность приложения

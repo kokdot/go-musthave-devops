@@ -2,7 +2,6 @@ package handler
 
 import (
 	"fmt"
-	// "errors"
 	"github.com/go-chi/chi/v5"
 	"net/http"
 	"context"
@@ -10,10 +9,20 @@ import (
 	"strconv"
 )
 
+type key int
+
 const (
     nameDataKey key = iota
     valueDataKey
 )
+var m store.Repo
+var ms = new(store.MemStorage)
+
+func init() {
+	ms.GaugeMap = make(store.GaugeMap)
+	ms.CounterMap = make(store.CounterMap)
+	m = ms
+}
 
 func PostCounterCtx(next http.Handler) http.Handler {
     return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -91,6 +100,7 @@ func PostGaugeCtx(next http.Handler) http.Handler {
 func PostUpdateCounter(w http.ResponseWriter, r *http.Request) {
 	valueData := r.Context().Value(valueDataKey).(int)
 	nameData := r.Context().Value(nameDataKey).(string)
+	// fmt.Println("__________________________________", m)
     m.SaveCounterValue(nameData, store.Counter(valueData))
 	w.Header().Set("content-type", "text/plain; charset=utf-8")
 	w.WriteHeader(http.StatusOK)
