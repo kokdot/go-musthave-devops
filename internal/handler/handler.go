@@ -2,6 +2,8 @@ package handler
 
 import (
 	"fmt"
+	"encoding/json"
+    "io"
 	"github.com/go-chi/chi/v5"
 	"net/http"
 	"context"
@@ -15,6 +17,12 @@ const (
     nameDataKey key = iota
     valueDataKey
 )
+type Metrics struct {
+	ID    string   `json:"id"`              // имя метрики
+	MType string   `json:"type"`            // параметр, принимающий значение gauge или counter
+	Delta *int64   `json:"delta,omitempty"` // значение метрики в случае передачи counter
+	Value *float64 `json:"value,omitempty"` // значение метрики в случае передачи gauge
+}
 var m store.Repo
 var ms = new(store.MemStorage)
 
@@ -22,6 +30,89 @@ func init() {
 	ms.GaugeMap = make(store.GaugeMap)
 	ms.CounterMap = make(store.CounterMap)
 	m = ms
+}
+func PostUpdate(w http.ResponseWriter, r *http.Request) {
+        // fmt.Println(string(r, "-----------------------------------------------------------")
+
+    bodyBytes, err := io.ReadAll(r.Body)
+    if err != nil {
+        http.Error(w, err.Error(), 500)
+        return
+    }
+    var metrics Metrics
+    err = json.Unmarshal(bodyBytes, &metrics)
+    if err != nil {
+        http.Error(w, err.Error(), 500)
+        return
+    }
+    switch metrics.MType  {
+    case "Gauge":
+        m.SaveGaugeValue(metrics.ID, store.Gauge(*metrics.Value))
+        w.Header().Set("content-type", "application/json; charset=UTF-8")
+        w.WriteHeader(http.StatusOK)
+        fmt.Fprintf(w, "%v", bodyBytes) 
+    case "Counter":
+        m.SaveCounterValue(metrics.ID, store.Counter(*metrics.Delta))
+        delta, _ := m.GetCounterValue(metrics.ID)
+        *metrics.Delta = int64(delta)
+        bodyBytes, err := json.Marshal(metrics)
+        if err != nil {
+            http.Error(w, err.Error(), 500)
+            return
+        }
+        fmt.Println(string(bodyBytes), "-----------------------------------------------------------")
+        fmt.Println(bodyBytes, "-----------------------------------------------------------")
+        w.Header().Set("content-type", "application/json; charset=UTF-8")
+        w.WriteHeader(http.StatusOK)
+        fmt.Fprintf(w, "%v", bodyBytes) 
+    default:
+        http.Error(w, err.Error(), 500)
+        return
+    }
+}
+func GetValue(w http.ResponseWriter, r *http.Request) {
+    bodyBytes, err := io.ReadAll(r.Body)
+    if err != nil {
+        http.Error(w, err.Error(), 500)
+        return
+    }
+    var metrics Metrics
+    err = json.Unmarshal(bodyBytes, &metrics)
+    if err != nil {
+        http.Error(w, err.Error(), 500)
+        return
+    }
+    switch metrics.MType  {
+    case "Gauge":
+        gaugeValue, err := m.GetGaugeValue(metrics.ID)
+        if err != nil {
+            http.Error(w, err.Error(), 500)
+            return
+        }
+        *metrics.Value = float64(gaugeValue)
+        bodyBytes, err := json.Marshal(metrics)
+        if err != nil {
+            http.Error(w, err.Error(), 500)
+            return
+        }
+        w.Header().Set("content-type", "application/json")
+        w.WriteHeader(http.StatusOK)
+        fmt.Fprintf(w, "%v", bodyBytes) 
+    case "Counter":
+        delta, _ := m.GetCounterValue(metrics.ID)
+        *metrics.Delta = int64(delta)
+        bodyBytes, err := json.Marshal(metrics)
+        if err != nil {
+            http.Error(w, err.Error(), 500)
+            return
+        }
+        w.Header().Set("content-type", "application/json")
+        w.WriteHeader(http.StatusOK)
+        fmt.Fprintf(w, "%v", bodyBytes) 
+    default:
+        http.Error(w, err.Error(), 500)
+        return
+    }
 }
 
 func PostCounterCtx(next http.Handler) http.Handler {

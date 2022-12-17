@@ -22,6 +22,7 @@ type Repo interface {
 	GetCounterValue(name string) (Counter, error)
 	GetGaugeValue(name string) (Gauge, error)
 	GetAllValues() string
+	GetAllValuesJson() (GaugeMap, CounterMap)
 }
 
 
@@ -68,4 +69,9 @@ func (m *MemStorage) GetAllValues() string {
 		str += fmt.Sprintf("%s: %s\n", key, val)
 	}
 	return str
+}
+func (m *MemStorage) GetAllValuesJson() (GaugeMap, CounterMap) {
+	gaugeMap := m.GaugeMap
+	counterMap := m.CounterMap
+	return gaugeMap, counterMap 
 }

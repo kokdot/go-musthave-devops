@@ -23,6 +23,7 @@ func main() {
     r.Use(middleware.Recoverer)
     r.Get("/", handler.GetAll)
     r.Route("/update", func(r chi.Router) {
+        r.Post("/", handler.PostUpdate)
         r.Route("/counter", func(r chi.Router) {
             r.Route("/{nameData}/{valueData}", func(r chi.Router) {
                 r.Use(handler.PostCounterCtx)
@@ -45,6 +46,7 @@ func main() {
     })
 
     r.Route("/value", func(r chi.Router) {
+        r.Get("/", handler.GetValue)
 		r.Route("/counter", func(r chi.Router){
             r.Route("/{nameData}", func(r chi.Router) {
                 r.Use(handler.GetCtx)
