@@ -46,7 +46,7 @@ func main() {
     })
 
     r.Route("/value", func(r chi.Router) {
-        r.Get("/", handler.GetValue)
+        r.Post("/", handler.GetValue)
 		r.Route("/counter", func(r chi.Router){
             r.Route("/{nameData}", func(r chi.Router) {
                 r.Use(handler.GetCtx)

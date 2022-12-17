@@ -103,10 +103,10 @@ func main() {
 			if err != nil {
 				log.Fatalf("Failed marshal json: %s", err)
 			}
-			var metricsStruct Metrics
+			// var metricsStruct Metrics
 			client := resty.New()
 			_, err = client.R().
-			SetResult(&metricsStruct).
+			// SetResult(&varMetrics).
 			SetBody(bodyBytes).
 			Post(strURL)
 			 if err != nil {
@@ -127,7 +127,7 @@ func main() {
 			}
 			// var varMetrics1 Metrics
 			_, err = client.R().
-			SetResult(&metricsStruct).
+			// SetResult(&metricsStruct).
 			SetBody(bodyBytes).
 			Post(strURL)
 			if err != nil {
@@ -153,7 +153,7 @@ func main() {
 					log.Fatalf("Failed marshal json: %s", err)
 				}
 				_, err = client.R().
-				SetResult(&metricsStruct).
+				// SetResult(&metricsStruct).
 				ForceContentType("application/json").
 				SetBody(bodyBytes).
 				Post(strURL)
@@ -181,11 +181,11 @@ func main() {
 			// }
 			// fmt.Println(response)
 
-			// response, err = client.R().Get("http://localhost:8080/value/counter/testSetGet33")
-			// if err != nil {
-			// 	log.Fatalf("Failed sent request: %s", err)
-			// }
-			// fmt.Println(response)
+			response, err = client.R().Get("http://localhost:8080/value/counter/testSetGet33")
+			if err != nil {
+				log.Fatalf("Failed sent request: %s", err)
+			}
+			fmt.Println(response)
 
 			// // n := 0
 			// for key, val := range m {

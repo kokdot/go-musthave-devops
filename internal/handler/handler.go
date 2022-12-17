@@ -31,6 +31,37 @@ func init() {
 	ms.CounterMap = make(store.CounterMap)
 	m = ms
 }
+
+func GetAllJson(w http.ResponseWriter, r *http.Request) {
+    metricSlise := make([]Metrics, 0)
+    gaugeMap, counterMap := m.GetAllValuesJson()
+    for key, val := range gaugeMap {
+        val1 := float64(val)
+        metricSlise = append(metricSlise, Metrics{
+            ID: key,
+            MType: "Gauge",
+            Value: &val1,
+        })
+    }
+     for key, val := range counterMap {
+        delta1 := int64(val)
+        metricSlise = append(metricSlise, Metrics{
+            ID: key,
+            MType: "Counter",
+            Delta: &delta1,
+        })
+    }
+     bodyBytes, err := json.Marshal(metricSlise)
+    if err != nil {
+        http.Error(w, err.Error(), 500)
+        return
+    }
+    fmt.Println(string(bodyBytes))
+    w.Header().Set("content-type", "application/json")
+    w.WriteHeader(http.StatusOK)
+    fmt.Fprintf(w, "%v", bodyBytes) 
+}
+
 func PostUpdate(w http.ResponseWriter, r *http.Request) {
         // fmt.Println(string(r, "-----------------------------------------------------------")
 
@@ -51,7 +82,7 @@ func PostUpdate(w http.ResponseWriter, r *http.Request) {
     }
     switch metrics.MType  {
     case "Gauge":
-        m.SaveGaugeValue(metrics.ID, store.Gauge(*metrics.Value))0
+        m.SaveGaugeValue(metrics.ID, store.Gauge(*metrics.Value))
          
         w.Header().Set("content-type", "application/json")
         w.WriteHeader(http.StatusOK)
