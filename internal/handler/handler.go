@@ -38,7 +38,7 @@ func PostUpdate(w http.ResponseWriter, r *http.Request) {
     if err != nil {
         w.Header().Set("content-type", "application/json")
         w.WriteHeader(http.StatusBadRequest)
-        fmt.Fprint(w, "http.StatusBadRequest")
+        // fmt.Fprint(w, "http.StatusBadRequest")
         return
     }
     var metrics Metrics
@@ -46,7 +46,7 @@ func PostUpdate(w http.ResponseWriter, r *http.Request) {
     if err != nil {
         w.Header().Set("content-type", "application/json")
         w.WriteHeader(http.StatusBadRequest)
-        fmt.Fprint(w, "http.StatusBadRequest")
+        // fmt.Fprint(w, "http.StatusBadRequest")
         return
     }
     switch metrics.MType  {
@@ -64,7 +64,7 @@ func PostUpdate(w http.ResponseWriter, r *http.Request) {
         if err != nil {
             w.Header().Set("content-type", "application/json")
             w.WriteHeader(http.StatusBadRequest)
-            fmt.Fprint(w, "http.StatusBadRequest")
+            // fmt.Fprint(w, "http.StatusBadRequest")
             return
         }
         fmt.Println(string(bodyBytes), "-----------------------------------------------------------")
@@ -75,7 +75,7 @@ func PostUpdate(w http.ResponseWriter, r *http.Request) {
     default:
         w.Header().Set("content-type", "application/json")
         w.WriteHeader(http.StatusBadRequest)
-        fmt.Fprint(w, "http.StatusBadRequest")
+        // fmt.Fprint(w, "http.StatusBadRequest")
         return
     }
 }
@@ -84,7 +84,7 @@ func GetValue(w http.ResponseWriter, r *http.Request) {
     if err != nil {
         w.Header().Set("content-type", "application/json")
         w.WriteHeader(http.StatusBadRequest)
-        fmt.Fprint(w, "http.StatusBadRequest")
+        // fmt.Fprint(w, "http.StatusBadRequest")
         return
     }
     var metrics Metrics
@@ -92,7 +92,7 @@ func GetValue(w http.ResponseWriter, r *http.Request) {
     if err != nil {
         w.Header().Set("content-type", "application/json")
         w.WriteHeader(http.StatusBadRequest)
-        fmt.Fprint(w, "http.StatusBadRequest")
+        // fmt.Fprint(w, "http.StatusBadRequest")
         return
     }
     switch metrics.MType  {
@@ -101,7 +101,7 @@ func GetValue(w http.ResponseWriter, r *http.Request) {
         if err != nil {
             w.Header().Set("content-type", "application/json")
             w.WriteHeader(http.StatusBadRequest)
-            fmt.Fprint(w, "http.StatusBadRequest")
+            // fmt.Fprint(w, "http.StatusBadRequest")
             return
         }
         *metrics.Value = float64(gaugeValue)
@@ -109,7 +109,7 @@ func GetValue(w http.ResponseWriter, r *http.Request) {
          if err != nil {
             w.Header().Set("content-type", "application/json")
             w.WriteHeader(http.StatusBadRequest)
-            fmt.Fprint(w, "http.StatusBadRequest")
+            // fmt.Fprint(w, "http.StatusBadRequest")
             return
         }
         w.Header().Set("content-type", "application/json")
@@ -122,7 +122,7 @@ func GetValue(w http.ResponseWriter, r *http.Request) {
         if err != nil {
             w.Header().Set("content-type", "application/json")
             w.WriteHeader(http.StatusBadRequest)
-            fmt.Fprint(w, "http.StatusBadRequest")
+            // fmt.Fprint(w, "http.StatusBadRequest")
             return
         }
         w.Header().Set("content-type", "application/json")
@@ -131,7 +131,7 @@ func GetValue(w http.ResponseWriter, r *http.Request) {
     default:
         w.Header().Set("content-type", "application/json")
         w.WriteHeader(http.StatusBadRequest)
-        fmt.Fprint(w, "http.StatusBadRequest")
+        // fmt.Fprint(w, "http.StatusBadRequest")
         return
     }
 }
