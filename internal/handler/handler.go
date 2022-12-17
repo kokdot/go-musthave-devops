@@ -89,8 +89,7 @@ func PostUpdate(w http.ResponseWriter, r *http.Request) {
         // fmt.Fprintf(w, "%v", bodyBytes) 
         w.Write(bodyBytes)
     case "Counter":
-        m.SaveCounterValue(metrics.ID, store.Counter(*metrics.Delta))
-        delta, _ := m.GetCounterValue(metrics.ID)
+        delta := m.SaveCounterValue(metrics.ID, store.Counter(*metrics.Delta))
         *metrics.Delta = int64(delta)
         bodyBytes, err := json.Marshal(metrics)
         if err != nil {

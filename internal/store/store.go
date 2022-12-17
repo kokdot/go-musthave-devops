@@ -17,7 +17,7 @@ type MemStorage struct {
 }
 
 type Repo interface {
-	SaveCounterValue(name string, counter Counter)
+	SaveCounterValue(name string, counter Counter) Counter
 	SaveGaugeValue(name string, gauge Gauge)
 	GetCounterValue(name string) (Counter, error)
 	GetGaugeValue(name string) (Gauge, error)
@@ -27,13 +27,15 @@ type Repo interface {
 
 
 
-func (m *MemStorage) SaveCounterValue(name string, counter Counter) {
+func (m *MemStorage) SaveCounterValue(name string, counter Counter) Counter {
 	n, ok := m.CounterMap[name]
 	if !ok {
 		m.CounterMap[name] = counter
-		return
+		return counter
 	}
-	m.CounterMap[name] = n + counter
+	n += counter
+	m.CounterMap[name] = n
+	return n
 }
 
 func (m *MemStorage) SaveGaugeValue(name string, gauge Gauge) {
