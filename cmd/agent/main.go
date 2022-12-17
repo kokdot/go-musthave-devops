@@ -154,6 +154,7 @@ func main() {
 				}
 				_, err = client.R().
 				SetResult(&metricsStruct).
+				ForceContentType("application/json").
 				SetBody(bodyBytes).
 				Post(strURL)
 				if err != nil {
