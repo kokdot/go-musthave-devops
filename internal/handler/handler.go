@@ -48,7 +48,7 @@ func PostUpdate(w http.ResponseWriter, r *http.Request) {
     switch metrics.MType  {
     case "Gauge":
         m.SaveGaugeValue(metrics.ID, store.Gauge(*metrics.Value))
-        w.Header().Set("content-type", "application/json; charset=UTF-8")
+        w.Header().Set("content-type", "application/json")
         w.WriteHeader(http.StatusOK)
         fmt.Fprintf(w, "%v", bodyBytes) 
     case "Counter":
@@ -62,7 +62,7 @@ func PostUpdate(w http.ResponseWriter, r *http.Request) {
         }
         fmt.Println(string(bodyBytes), "-----------------------------------------------------------")
         fmt.Println(bodyBytes, "-----------------------------------------------------------")
-        w.Header().Set("content-type", "application/json; charset=UTF-8")
+        w.Header().Set("content-type", "application/json")
         w.WriteHeader(http.StatusOK)
         fmt.Fprintf(w, "%v", bodyBytes) 
     default:
