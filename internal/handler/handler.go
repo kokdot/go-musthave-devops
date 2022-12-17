@@ -36,18 +36,23 @@ func PostUpdate(w http.ResponseWriter, r *http.Request) {
 
     bodyBytes, err := io.ReadAll(r.Body)
     if err != nil {
-        http.Error(w, err.Error(), 500)
+        w.Header().Set("content-type", "application/json")
+        w.WriteHeader(http.StatusBadRequest)
+        fmt.Fprint(w, "http.StatusBadRequest")
         return
     }
     var metrics Metrics
     err = json.Unmarshal(bodyBytes, &metrics)
     if err != nil {
-        http.Error(w, err.Error(), 500)
+        w.Header().Set("content-type", "application/json")
+        w.WriteHeader(http.StatusBadRequest)
+        fmt.Fprint(w, "http.StatusBadRequest")
         return
     }
     switch metrics.MType  {
     case "Gauge":
-        m.SaveGaugeValue(metrics.ID, store.Gauge(*metrics.Value))
+        m.SaveGaugeValue(metrics.ID, store.Gauge(*metrics.Value))0
+         
         w.Header().Set("content-type", "application/json")
         w.WriteHeader(http.StatusOK)
         fmt.Fprintf(w, "%v", bodyBytes) 
@@ -57,7 +62,9 @@ func PostUpdate(w http.ResponseWriter, r *http.Request) {
         *metrics.Delta = int64(delta)
         bodyBytes, err := json.Marshal(metrics)
         if err != nil {
-            http.Error(w, err.Error(), 500)
+            w.Header().Set("content-type", "application/json")
+            w.WriteHeader(http.StatusBadRequest)
+            fmt.Fprint(w, "http.StatusBadRequest")
             return
         }
         fmt.Println(string(bodyBytes), "-----------------------------------------------------------")
@@ -66,33 +73,43 @@ func PostUpdate(w http.ResponseWriter, r *http.Request) {
         w.WriteHeader(http.StatusOK)
         fmt.Fprintf(w, "%v", bodyBytes) 
     default:
-        http.Error(w, err.Error(), 404)
+        w.Header().Set("content-type", "application/json")
+        w.WriteHeader(http.StatusBadRequest)
+        fmt.Fprint(w, "http.StatusBadRequest")
         return
     }
 }
 func GetValue(w http.ResponseWriter, r *http.Request) {
     bodyBytes, err := io.ReadAll(r.Body)
     if err != nil {
-        http.Error(w, err.Error(), 500)
+        w.Header().Set("content-type", "application/json")
+        w.WriteHeader(http.StatusBadRequest)
+        fmt.Fprint(w, "http.StatusBadRequest")
         return
     }
     var metrics Metrics
     err = json.Unmarshal(bodyBytes, &metrics)
     if err != nil {
-        http.Error(w, err.Error(), 500)
+        w.Header().Set("content-type", "application/json")
+        w.WriteHeader(http.StatusBadRequest)
+        fmt.Fprint(w, "http.StatusBadRequest")
         return
     }
     switch metrics.MType  {
     case "Gauge":
         gaugeValue, err := m.GetGaugeValue(metrics.ID)
         if err != nil {
-            http.Error(w, err.Error(), 500)
+            w.Header().Set("content-type", "application/json")
+            w.WriteHeader(http.StatusBadRequest)
+            fmt.Fprint(w, "http.StatusBadRequest")
             return
         }
         *metrics.Value = float64(gaugeValue)
         bodyBytes, err := json.Marshal(metrics)
-        if err != nil {
-            http.Error(w, err.Error(), 500)
+         if err != nil {
+            w.Header().Set("content-type", "application/json")
+            w.WriteHeader(http.StatusBadRequest)
+            fmt.Fprint(w, "http.StatusBadRequest")
             return
         }
         w.Header().Set("content-type", "application/json")
@@ -103,14 +120,18 @@ func GetValue(w http.ResponseWriter, r *http.Request) {
         *metrics.Delta = int64(delta)
         bodyBytes, err := json.Marshal(metrics)
         if err != nil {
-            http.Error(w, err.Error(), 500)
+            w.Header().Set("content-type", "application/json")
+            w.WriteHeader(http.StatusBadRequest)
+            fmt.Fprint(w, "http.StatusBadRequest")
             return
         }
         w.Header().Set("content-type", "application/json")
         w.WriteHeader(http.StatusOK)
         fmt.Fprintf(w, "%v", bodyBytes) 
     default:
-        http.Error(w, err.Error(), 500)
+        w.Header().Set("content-type", "application/json")
+        w.WriteHeader(http.StatusBadRequest)
+        fmt.Fprint(w, "http.StatusBadRequest")
         return
     }
 }
