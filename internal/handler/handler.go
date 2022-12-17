@@ -86,7 +86,8 @@ func PostUpdate(w http.ResponseWriter, r *http.Request) {
          
         w.Header().Set("content-type", "application/json")
         w.WriteHeader(http.StatusOK)
-        fmt.Fprintf(w, "%v", bodyBytes) 
+        // fmt.Fprintf(w, "%v", bodyBytes) 
+        w.Write(bodyBytes)
     case "Counter":
         m.SaveCounterValue(metrics.ID, store.Counter(*metrics.Delta))
         delta, _ := m.GetCounterValue(metrics.ID)
@@ -98,11 +99,12 @@ func PostUpdate(w http.ResponseWriter, r *http.Request) {
             // fmt.Fprint(w, "http.StatusBadRequest")
             return
         }
-        fmt.Println(string(bodyBytes), "-----------------------------------------------------------")
-        fmt.Println(bodyBytes, "-----------------------------------------------------------")
+        // fmt.Println(string(bodyBytes), "-----------------------------------------------------------")
+        // fmt.Println(bodyBytes, "-----------------------------------------------------------")
         w.Header().Set("content-type", "application/json")
         w.WriteHeader(http.StatusOK)
-        fmt.Fprintf(w, "%v", bodyBytes) 
+        // fmt.Fprintf(w, "%v", bodyBytes) 
+        w.Write(bodyBytes)
     default:
         w.Header().Set("content-type", "application/json")
         w.WriteHeader(http.StatusBadRequest)
@@ -135,8 +137,15 @@ func GetValue(w http.ResponseWriter, r *http.Request) {
             // fmt.Fprint(w, "http.StatusBadRequest")
             return
         }
-        *metrics.Value = float64(gaugeValue)
-        bodyBytes, err := json.Marshal(metrics)
+        fmt.Println("gaugeValue: ", gaugeValue, "   ;float64(gaugeValue): ", float64(gaugeValue), "    ;metrics: ", metrics)
+        gaugeValue1 := float64(gaugeValue)
+        metrics1 := Metrics{
+				ID: metrics.ID,
+				MType: metrics.MType,
+				Value: &gaugeValue1,
+			}
+        // *metrics.Value = gaugeValue1
+        bodyBytes, err := json.Marshal(metrics1)
          if err != nil {
             w.Header().Set("content-type", "application/json")
             w.WriteHeader(http.StatusBadRequest)
@@ -145,12 +154,26 @@ func GetValue(w http.ResponseWriter, r *http.Request) {
         }
         w.Header().Set("content-type", "application/json")
         w.WriteHeader(http.StatusOK)
-        fmt.Fprintf(w, "%v", bodyBytes) 
+        w.Write(bodyBytes)
+        // fmt.Fprintf(w, "%v", bodyBytes) 
     case "Counter":
-        delta, _ := m.GetCounterValue(metrics.ID)
-        *metrics.Delta = int64(delta)
-        bodyBytes, err := json.Marshal(metrics)
-        if err != nil {
+        delta, err := m.GetCounterValue(metrics.ID)
+         if err != nil {
+            w.Header().Set("content-type", "application/json")
+            w.WriteHeader(http.StatusBadRequest)
+            // fmt.Fprint(w, "http.StatusBadRequest")
+            return
+        }
+        // fmt.Println("gaugeValue: ", gaugeValue, "   ;float64(gaugeValue): ", float64(gaugeValue), "    ;metrics: ", metrics)
+        counterValue1 := int64(delta)
+        metrics1 := Metrics{
+				ID: metrics.ID,
+				MType: metrics.MType,
+				Delta: &counterValue1,
+			}
+        // *metrics.Value = gaugeValue1
+        bodyBytes, err := json.Marshal(metrics1)
+         if err != nil {
             w.Header().Set("content-type", "application/json")
             w.WriteHeader(http.StatusBadRequest)
             // fmt.Fprint(w, "http.StatusBadRequest")
@@ -158,7 +181,7 @@ func GetValue(w http.ResponseWriter, r *http.Request) {
         }
         w.Header().Set("content-type", "application/json")
         w.WriteHeader(http.StatusOK)
-        fmt.Fprintf(w, "%v", bodyBytes) 
+        w.Write(bodyBytes) 
     default:
         w.Header().Set("content-type", "application/json")
         w.WriteHeader(http.StatusBadRequest)
