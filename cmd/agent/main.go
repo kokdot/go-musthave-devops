@@ -92,36 +92,36 @@ func main() {
 			<-time.After(interval) 
 			//PollCount----------------------------------------------------------
 			strURL := fmt.Sprintf("%s/update/", url)
-			// // strURL := fmt.Sprintf("%s/update/counter/%s/%v", url, "PollCount", PollCount)
-			// pollCount := int64(PollCount)
-			// var varMetrics Metrics = Metrics{
-			// 	ID: "PollCount",
-			// 	MType: "Counter",
-			// 	Delta: &pollCount,
-			// }
-			// bodyBytes, err := json.Marshal(varMetrics)
-			// if err != nil {
-			// 	log.Fatalf("Failed marshal json: %s", err)
-			// }
-			// // var metricsStruct Metrics
-			// client := resty.New()
-			// _, err = client.R().
-			// // SetResult(&varMetrics).
-			// SetBody(bodyBytes).
-			// Post(strURL)
-			//  if err != nil {
-			// 	log.Fatalf("Failed unmarshal response: %s", err)
-			// }
-			// fmt.Println(varMetrics) 
-			//RandomValue----------------------------------------------------------
+			// strURL := fmt.Sprintf("%s/update/counter/%s/%v", url, "PollCount", PollCount)
+			pollCount := int64(PollCount)
+			var varMetrics Metrics = Metrics{
+				ID: "PollCount",
+				MType: "Counter",
+				Delta: &pollCount,
+			}
+			bodyBytes, err := json.Marshal(varMetrics)
+			if err != nil {
+				log.Fatalf("Failed marshal json: %s", err)
+			}
+			// var metricsStruct Metrics
 			client := resty.New()
+			_, err = client.R().
+			SetResult(&varMetrics).
+			SetBody(bodyBytes).
+			Post(strURL)
+			 if err != nil {
+				log.Fatalf("Failed unmarshal response: %s", err)
+			}
+			fmt.Println(varMetrics) 
+			//RandomValue----------------------------------------------------------
+			client = resty.New()
 			randomValue := float64(RandomValue)
-			varMetrics := Metrics{
+			varMetrics = Metrics{
 				ID: "RandomValue",
 				MType: "Gauge",
 				Value: &randomValue,
 			}
-			bodyBytes, err := json.Marshal(varMetrics)
+			bodyBytes, err = json.Marshal(varMetrics)
 			if err != nil {
 				log.Fatalf("Failed marshal json: %s", err)
 			}

@@ -63,6 +63,7 @@ func GetAllJson(w http.ResponseWriter, r *http.Request) {
 }
 
 func PostUpdate(w http.ResponseWriter, r *http.Request) {
+    var metrics Metrics
         // fmt.Println(string(r, "-----------------------------------------------------------")
 
     bodyBytes, err := io.ReadAll(r.Body)
@@ -72,7 +73,6 @@ func PostUpdate(w http.ResponseWriter, r *http.Request) {
         // fmt.Fprint(w, "http.StatusBadRequest")
         return
     }
-    var metrics Metrics
     err = json.Unmarshal(bodyBytes, &metrics)
     if err != nil {
         w.Header().Set("content-type", "application/json")
