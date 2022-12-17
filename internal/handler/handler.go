@@ -68,7 +68,7 @@ func PostUpdate(w http.ResponseWriter, r *http.Request) {
     bodyBytes, err := io.ReadAll(r.Body)
     if err != nil {
         w.Header().Set("content-type", "application/json")
-        w.WriteHeader(http.StatusBadRequest)
+        w.WriteHeader(http.StatusNotFound)
         // fmt.Fprint(w, "http.StatusBadRequest")
         return
     }
@@ -76,7 +76,7 @@ func PostUpdate(w http.ResponseWriter, r *http.Request) {
     err = json.Unmarshal(bodyBytes, &metrics)
     if err != nil {
         w.Header().Set("content-type", "application/json")
-        w.WriteHeader(http.StatusBadRequest)
+        w.WriteHeader(http.StatusNotFound)
         // fmt.Fprint(w, "http.StatusBadRequest")
         return
     }
@@ -95,7 +95,7 @@ func PostUpdate(w http.ResponseWriter, r *http.Request) {
         bodyBytes, err := json.Marshal(metrics)
         if err != nil {
             w.Header().Set("content-type", "application/json")
-            w.WriteHeader(http.StatusBadRequest)
+            w.WriteHeader(http.StatusNotFound)
             // fmt.Fprint(w, "http.StatusBadRequest")
             return
         }
@@ -107,7 +107,7 @@ func PostUpdate(w http.ResponseWriter, r *http.Request) {
         w.Write(bodyBytes)
     default:
         w.Header().Set("content-type", "application/json")
-        w.WriteHeader(http.StatusBadRequest)
+        w.WriteHeader(http.StatusNotFound)
         // fmt.Fprint(w, "http.StatusBadRequest")
         return
     }
