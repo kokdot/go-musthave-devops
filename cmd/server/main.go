@@ -5,15 +5,30 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
-
+	"github.com/caarlos0/env/v6"
 	"log"
 	"net/http"
 
 	"fmt"
 	"github.com/kokdot/go-musthave-devops/internal/handler"
 )
+const (
+    url = "127.0.0.1:8080"
+)
+type Config struct {
+    Address  string 		`env:"ADDRESS"`
+}
 
 func main() {
+    var cfg Config
+	var urlReal = url
+    err := env.Parse(&cfg)
+    if err != nil {
+        log.Fatal(err)
+    }
+	if cfg.Address != ""{
+		urlReal	= cfg.Address
+	} 
     // определяем роутер chi
     r := chi.NewRouter()
     // зададим встроенные middleware, чтобы улучшить стабильность приложения
@@ -61,5 +76,6 @@ func main() {
         })
 	})
 
-    log.Fatal(http.ListenAndServe(":8080", r))
+    log.Fatal(http.ListenAndServe(urlReal, r))
+    // log.Fatal(http.ListenAndServe(":8080", r))
 }

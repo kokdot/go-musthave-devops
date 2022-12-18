@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"encoding/json"
+	"github.com/caarlos0/env/v6"
 	// "net/http"
 	"runtime"
 	"sync"
@@ -15,10 +16,15 @@ import (
 )
 
 const (
-	url            = "http://127.0.0.1:8080"
+	url            = "127.0.0.1:8080"
 	pollInterval   = 2
-	reportInterval = 4
+	reportInterval = 10
 )
+type Config struct {
+    Address  string 		`env:"ADDRESS"`
+    ReportInterval int	 `env:"REPORT_INTERVAL"`
+    PollInterval int	 `env:"POLL_INTERVAL"`
+}
 
 // var mutex *sync.RWMutex
 var wg sync.WaitGroup 
@@ -67,12 +73,33 @@ func NewMonitor(m *MonitorMap, rtm runtime.MemStats) {//}, mutex *sync.RWMutex) 
 }
 func main() {
 	wg.Add(2)
+	var cfg Config
+	var pollIntervalReal = pollInterval
+	var reportIntervalReal = reportInterval
+	var urlReal = "http://" + url
+    err := env.Parse(&cfg)
+    if err != nil {
+        log.Fatal(err)
+    }
+	if cfg.Address != ""{
+		urlReal	= "http://" + cfg.Address
+	} 
+	if cfg.ReportInterval != 0{
+		reportIntervalReal	= cfg.ReportInterval
+	} 
+	if cfg.PollInterval != 0{
+		pollIntervalReal	= cfg.PollInterval
+	} 
+    fmt.Printf("Current address is %s\n", cfg.Address)
+    fmt.Printf("Current report_interval is %d\n", cfg.ReportInterval)
+    fmt.Printf("Current poll_interval is %d\n", cfg.PollInterval)
+
 	var rtm runtime.MemStats
 	var m = make(MonitorMap)
 	go func(m *MonitorMap, rtm runtime.MemStats) {//}, mutex *sync.RWMutex) {
 		defer wg.Done()
 
-		var interval = time.Duration(pollInterval) * time.Second
+		var interval = time.Duration(pollIntervalReal) * time.Second
 		for {
 			<-time.After(interval)
 			runtime.ReadMemStats(&rtm)
@@ -86,12 +113,12 @@ func main() {
 	
 	go func() {
 		defer wg.Done()
-		var interval = time.Duration(reportInterval) * time.Second
+		var interval = time.Duration(reportIntervalReal) * time.Second
 		for {
 
 			<-time.After(interval) 
 			//PollCount----------------------------------------------------------
-			strURL := fmt.Sprintf("%s/update/", url)
+			strURL := fmt.Sprintf("%s/update/", urlReal)
 			// strURL := fmt.Sprintf("%s/update/counter/%s/%v", url, "PollCount", PollCount)
 			pollCount := int64(PollCount)
 			var varMetrics Metrics = Metrics{
@@ -135,7 +162,7 @@ func main() {
 			}
 			fmt.Println("RandomValue: ", metricsStruct) 
 			//RandomValueGet---------------------------------------------------
-			// strURLGet := fmt.Sprintf("%s/value/", url)
+			// strURLGet := fmt.Sprintf("%s/value/", urlReal)
 			// var metricsStructGet Metrics
 			// client = resty.New()
 			// // randomValue := float64(RandomValue)
