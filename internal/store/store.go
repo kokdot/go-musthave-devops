@@ -40,8 +40,8 @@ type Metrics struct {
 	Delta *Counter   `json:"delta,omitempty"` // значение метрики в случае передачи counter
 	Value *Gauge `json:"value,omitempty"` // значение метрики в случае передачи gauge
 }
-var zeroG Gauge
-var zeroC Counter
+var zeroG Gauge = 0
+var zeroC Counter = 0
 func NewMetrics(id string, mType string) Metrics {
 	if mType == "Gauge" {
 		return Metrics{
