@@ -103,12 +103,18 @@ func (m *MemStorage) SaveCounterValue(id string, counter Counter) Counter {
 
 func (m *MemStorage) SaveGaugeValue(id string, gauge Gauge) {
 	mtxOld, ok := m.StoreMap[id]
+	// fmt.Println("OK:  ", ok, "-----------------********************************************-----------------")
+
 	if !ok {
 		mtxNew := NewMetrics(id, "Gauge")
 		mtxNew.Value = &gauge
 		m.StoreMap[id] = mtxNew
+	}else {
+		// fmt.Println("*mtxOld:  ", mtxOld, "----------------------------------")
+		// fmt.Println("*mtxOld.Value:  ", *mtxOld.Value, "----------------------------------")
+		*mtxOld.Value = gauge
+		
 	}
-	*mtxOld.Value = gauge
 }
 
 func (m *MemStorage) GetCounterValue(id string) (Counter, error) {
@@ -120,10 +126,13 @@ func (m *MemStorage) GetCounterValue(id string) (Counter, error) {
 }
 
 func (m *MemStorage) GetGaugeValue(id string) (Gauge, error) {
+	// fmt.Println("id:  ", id, "-----------------------((((((((((((((((((((((((((((((((((((")
 	mtxOld, ok := m.StoreMap[id]
+	// fmt.Println("mtxOld:  ", mtxOld, ";  OK: ", ok, "MemStorage", m)
 	if !ok {
 		return 0, errors.New("this gauge don't find")
 	}
+	// fmt.Println("*mtxOld.Value:  ", *mtxOld.Value, "----------------------------------")
 	return *mtxOld.Value, nil
 }
 

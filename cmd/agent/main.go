@@ -117,6 +117,58 @@ func main() {
 		for {
 
 			<-time.After(interval) 
+			//text----------------------------------------------------------
+
+			//PollCount Update-------------------------------------------------
+			strURL1 := fmt.Sprintf("%s/update/counter/%s/%v", urlReal, "PollCount", PollCount)
+			client := resty.New()
+			response, err := client.R().Post(strURL1)
+			if err != nil {
+				log.Fatalf("Failed sent request: %s", err)
+			}
+			fmt.Println("PollCount response: ", response) 
+
+			
+			// //PollCount get --------------------------------------------------------
+			response, err = client.R().Get("http://localhost:8080/value/counter/PollCount")
+			if err != nil {
+				log.Fatalf("Failed sent request: %s", err)
+			}
+			fmt.Println("PollCount Get response: ", response)
+
+			//RandomValue Update--------------------------------------------------
+			strURL1 = fmt.Sprintf("%s/update/gauge/%s/%v", urlReal, "RandomValue", RandomValue)
+			client = resty.New()
+			response, err = client.R().Post(strURL1)
+			if err != nil {
+				log.Fatalf("Failed sent request: %s", err)
+			}
+			fmt.Println("RandomValue Update response: ", response) 
+
+			
+			//RandomValue get --------------------------------------------------------
+			response, err = client.R().Get("http://localhost:8080/value/gauge/RandomValue")
+			if err != nil {
+				log.Fatalf("Failed sent request: %s", err)
+			}
+			fmt.Println("RandomValue Get response: ", response)
+
+			//testSetGet33 Update ---------------------------------------------------
+			response, err = client.R().Post("http://localhost:8080/update/counter/testSetGet33/187")
+			if err != nil {
+				log.Fatalf("Failed sent request: %s", err)
+			}
+			fmt.Println("testSetGet33 Update response: ", response)
+
+			//testSetGet33 get --------------------------------------------------------
+			response, err = client.R().Get("http://localhost:8080/value/counter/testSetGet33")
+			if err != nil {
+				log.Fatalf("Failed sent request: %s", err)
+			}
+			fmt.Println("testSetGet33 Get response: ", response)
+			//text----------------------------------------------------------
+			
+			
 			//PollCount----------------------------------------------------------
 			strURL := fmt.Sprintf("%s/update/", urlReal)
 			// strURL := fmt.Sprintf("%s/update/counter/%s/%v", url, "PollCount", PollCount)
@@ -131,7 +183,7 @@ func main() {
 				log.Fatalf("Failed marshal json: %s", err)
 			}
 			// var metricsStruct Metrics
-			client := resty.New()
+			client = resty.New()
 			_, err = client.R().
 			SetResult(&varMetrics).
 			SetBody(bodyBytes).
@@ -162,28 +214,28 @@ func main() {
 			}
 			fmt.Println("RandomValue: ", metricsStruct) 
 			//RandomValueGet---------------------------------------------------
-			// strURLGet := fmt.Sprintf("%s/value/", urlReal)
-			// var metricsStructGet Metrics
-			// client = resty.New()
-			// // randomValue := float64(RandomValue)
-			// varMetrics = Metrics{
-			// 	ID: "RandomValue",
-			// 	MType: "Gauge",
-			// }
-			// bodyBytes, err = json.Marshal(varMetrics)
-			// if err != nil {
-			// 	log.Fatalf("Failed marshal json: %s", err)
-			// }
-			// // var varMetrics1 Metrics
-			// _, err = client.R().
-			// SetResult(&metricsStructGet).
-			// SetBody(bodyBytes).
-			// Post(strURLGet)
-			// if err != nil {
-			// 	log.Fatalf("Failed unmarshall response: %s", err)
-			// }
-			// fmt.Println("RandomValueGet:  ", metricsStructGet) 
-			//MemStats----------------------------------------------------------
+			strURLGet := fmt.Sprintf("%s/value/", urlReal)
+			var metricsStructGet Metrics
+			client = resty.New()
+			// randomValue := float64(RandomValue)
+			varMetrics = Metrics{
+				ID: "RandomValue",
+				MType: "Gauge",
+			}
+			bodyBytes, err = json.Marshal(varMetrics)
+			if err != nil {
+				log.Fatalf("Failed marshal json: %s", err)
+			}
+			// var varMetrics1 Metrics
+			_, err = client.R().
+			SetResult(&metricsStructGet).
+			SetBody(bodyBytes).
+			Post(strURLGet)
+			if err != nil {
+				log.Fatalf("Failed unmarshall response: %s", err)
+			}
+			fmt.Println("RandomValueGet:  ", metricsStructGet) 
+			// MemStats----------------------------------------------------------
 			// n := 0
 			for key, val := range m {
 				// n++
