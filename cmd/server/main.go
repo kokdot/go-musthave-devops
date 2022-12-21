@@ -1,32 +1,79 @@
 package main
 
 import (
-	"github.com/go-chi/chi/v5"
-	"github.com/go-chi/chi/v5/middleware"
-	"github.com/caarlos0/env/v6"
 	"log"
 	"net/http"
+	// "strconv"
+    "time"
+
+	"github.com/caarlos0/env/v6"
+	"github.com/go-chi/chi/v5"
+	"github.com/go-chi/chi/v5/middleware"
 
 	"fmt"
+
 	"github.com/kokdot/go-musthave-devops/internal/handler"
 )
 const (
     url = "127.0.0.1:8080"
+    StoreInterval = 300
+    StoreFile = "/tmp/devops-metrics-db.json"
+    Restore = true
 )
 type Config struct {
-    Address  string 		`env:"ADDRESS"`
+    Address  string 		`env:"ADDRESS" envDefault:"127.0.0.1:8080"`
+    StoreInterval  int 		`env:"STORE_INTERVAL" envDefault:"300"`
+    StoreFile  string 		`env:"STORE_FILE" envDefault:"/tmp/devops-metrics-db.json"`
+    Restore  bool 		`env:"RESTORE" envDefault:"true"`
 }
+var (
+    urlReal = url
+	storeInterval = StoreInterval
+	storeFile = StoreFile
+	restore = Restore
+    // syncDownload = false
+    cfg Config
+)
 
-func main() {
-    var cfg Config
-	var urlReal = url
+func onboarding() {
     err := env.Parse(&cfg)
     if err != nil {
         log.Fatal(err)
     }
-	if cfg.Address != ""{
-		urlReal	= cfg.Address
-	} 
+    fmt.Printf("main:  %+v\n", cfg)
+	urlReal	= cfg.Address
+    storeInterval = cfg.StoreInterval
+    storeFile = cfg.StoreFile
+    restore = cfg.Restore
+    
+    if storeFile != "" {
+        if storeInterval > 0 {
+            DownloadToFile(storeFile)
+        } else {
+            // syncDownload = true
+            handler.CheckSyncDownload()
+        }
+    }
+    if restore{
+        handler.UpdateMemStorageFromFile(storeFile)
+    }
+
+}
+func DownloadToFile(file string) {
+    go func() {
+        var interval = time.Duration(storeInterval) * time.Second
+        for {
+            <-time.After(interval) 
+            fmt.Println("main; line: 67; DownloadToFile", ";  file:  ", file)
+            handler.DownloadMemStorageToFile(file)
+        }
+    }()
+}
+
+func main() {
+	onboarding()
+
+
     // определяем роутер chi
     r := chi.NewRouter()
     // зададим встроенные middleware, чтобы улучшить стабильность приложения

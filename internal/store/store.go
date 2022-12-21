@@ -3,27 +3,21 @@ package store
 import (
 	"fmt"
 	"errors"
+	"os"
+	"bufio"
+	"log"
+	"encoding/json"
 )
 
 
 type Counter int64
 type Gauge float64
-// type GaugeMap map[string]Gauge
-// type CounterMap map[string]Counter
 type StoreMap map[string]Metrics
 
 type MemStorage struct {
 	StoreMap   StoreMap
 }
 
-// type Repo interface {
-// 	SaveCounterValue(name string, counter Counter) Counter
-// 	SaveGaugeValue(name string, gauge Gauge)
-// 	GetCounterValue(name string) (Counter, error)
-// 	GetGaugeValue(name string) (Gauge, error)
-// 	GetAllValues() string
-// 	GetAllValuesJson() (GaugeMap, CounterMap)
-// }
 type Repo interface {
 	Save(mtx *Metrics) *Metrics
 	Get(id string) (*Metrics, error)
@@ -33,6 +27,8 @@ type Repo interface {
 	GetCounterValue(name string) (Counter, error)
 	GetGaugeValue(name string) (Gauge, error)
 	GetAllValues() string
+	DownloadMemStorage(file string)
+	UpdateMemStorage(file string) *MemStorage
 }
 type Metrics struct {
 	ID    string   `json:"id"`              // имя метрики
@@ -42,6 +38,120 @@ type Metrics struct {
 }
 var zeroG Gauge = 0
 var zeroC Counter = 0
+
+type Producer interface {
+    WriteMemStorage(memStorage *MemStorage) // для записи события
+    Close() error            // для закрытия ресурса (файла)
+}
+
+type Consumer interface {
+    ReadMemStorage() (*MemStorage, error) // для чтения события
+    Close() error               // для закрытия ресурса (файла)
+}
+type producer struct {
+    file *os.File
+    // добавляем writer в Producer
+    writer *bufio.Writer
+}
+
+func (m MemStorage) UpdateMemStorage(file string) *MemStorage {
+	consumerPtr, err := NewConsumer(file)
+	if err != nil {
+        log.Fatal(err)
+    }
+	ms, err := consumerPtr.ReadMemStorage()
+	if err != nil {
+        log.Fatal(err)
+    }
+	return ms
+}
+
+func (m MemStorage) DownloadMemStorage(file string) {
+	producerPtr, err := NewProducer(file)
+	if err != nil {
+		fmt.Println("store; line: 77; DownloadMemStorage file: ", file, "   ;err: ", err)
+        log.Fatal(err)
+    }
+	err = producerPtr.WriteMemStorage(&m)
+	if err != nil {
+        log.Fatal(err)
+    }
+}
+
+func NewProducer(filename string) (*producer, error) {
+    file, err := os.OpenFile(filename, os.O_WRONLY|os.O_CREATE, 0777)
+	file.Truncate(0)
+    // file, err := os.OpenFile(filename, os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0777)
+    if err != nil {
+        return nil, err
+    }
+
+    return &producer{
+        file: file,
+        // создаём новый Writer
+        writer: bufio.NewWriter(file),
+    }, nil
+}
+
+func (p *producer) WriteMemStorage(memStorage *MemStorage) error {
+    data, err := json.Marshal(&memStorage)
+    if err != nil {
+        return err
+    }
+
+    // записываем событие в буфер
+    if _, err := p.writer.Write(data); err != nil {
+        return err
+    }
+
+    // добавляем перенос строки
+    if err := p.writer.WriteByte('\n'); err != nil {
+        return err
+    }
+
+    // записываем буфер в файл
+    return p.writer.Flush()
+}
+type consumer struct {
+    file *os.File
+    // заменяем reader на scanner
+    scanner *bufio.Scanner
+}
+
+func NewConsumer(filename string) (*consumer, error) {
+    file, err := os.OpenFile(filename, os.O_RDONLY|os.O_CREATE, 0777)
+    // file, err := os.OpenFile(filename, os.O_RDONLY|os.O_CREATE, 0777)
+    if err != nil {
+        return nil, err
+    }
+
+    return &consumer{
+        file: file,
+        // создаём новый scanner
+        scanner: bufio.NewScanner(file),
+    }, nil
+}
+
+func (c *consumer) ReadMemStorage() (*MemStorage, error) {
+    // одиночное сканирование до следующей строки
+    if !c.scanner.Scan() {
+        return nil, c.scanner.Err()
+    }
+    // читаем данные из scanner
+    data := c.scanner.Bytes()
+
+    memStorage := MemStorage{}
+    err := json.Unmarshal(data, &memStorage)
+    if err != nil {
+        return nil, err
+    }
+
+    return &memStorage, nil
+}
+
+func (c *consumer) Close() error {
+    return c.file.Close()
+}
 func NewMetrics(id string, mType string) Metrics {
 	if mType == "Gauge" {
 		return Metrics{
@@ -57,6 +167,7 @@ func NewMetrics(id string, mType string) Metrics {
 		}
 	}
 }
+
 
 
 func (m MemStorage) Save(mtxNew *Metrics) *Metrics {

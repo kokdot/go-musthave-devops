@@ -4,11 +4,14 @@ import (
 	"fmt"
 	"encoding/json"
     "io"
+	"github.com/caarlos0/env/v6"
 	"github.com/go-chi/chi/v5"
 	"net/http"
 	"context"
 	"github.com/kokdot/go-musthave-devops/internal/store"
 	"strconv"
+    "log"
+    // "strconv"
 )
 
 type key int
@@ -17,19 +20,44 @@ const (
     nameDataKey key = iota
     valueDataKey
 )
-// type Metrics struct {
-// 	ID    string   `json:"id"`              // имя метрики
-// 	MType string   `json:"type"`            // параметр, принимающий значение gauge или counter
-// 	Delta *int64   `json:"delta,omitempty"` // значение метрики в случае передачи counter
-// 	Value *float64 `json:"value,omitempty"` // значение метрики в случае передачи gauge
-// }
+type Config struct {
+    StoreInterval  int	`env:"STORE_INTERVAL" envDefault:"300"`
+    StoreFile  string 		`env:"STORE_FILE" envDefault:"/tmp/devops-metrics-db.json"`
+}
+
 var m store.Repo
 var ms = new(store.MemStorage)
+var SyncDownload bool
+var cfg Config
+var StoreFile string  = "/tmp/devops-metrics-db.json"
+var StoreInterval int
 
 func init() {
 	ms.StoreMap = make(store.StoreMap)
-	// ms.CounterMap = make(store.CounterMap)
-	m = ms
+    m = ms
+    err := env.Parse(&cfg)
+    if err != nil {
+        log.Fatal(err)
+    }
+    fmt.Printf("handler init():  %+v\n", cfg)
+
+    if cfg.StoreFile != "" &&  cfg.StoreInterval == 0 {
+        SyncDownload = true
+    }
+}
+
+func CheckSyncDownload() {
+    SyncDownload = true
+    fmt.Println("SyncDownload:  ", SyncDownload, "; StoreFile:  ", StoreFile)
+}
+
+func DownloadMemStorageToFile(file string) {
+    fmt.Println("handler; line: 53; DownloadMemStorageToFile: ", m,"; SyncDownload:  ", SyncDownload, "   ;file: ", file, "; m.GetAllValues:  ", m.GetAllValues())
+    m.DownloadMemStorage(file)
+}
+func UpdateMemStorageFromFile(file string) {
+    fmt.Println("handler; line: 57; UpdateMemStorageFromFile", m, "   ;file: ", file)
+    m = m.UpdateMemStorage(file)
 }
 
 func PostUpdate(w http.ResponseWriter, r *http.Request) {
@@ -48,8 +76,8 @@ func PostUpdate(w http.ResponseWriter, r *http.Request) {
         // fmt.Fprint(w, "http.StatusBadRequest")
         return
     }
-    mtxOLd := m.Save(&mtxNew)
-    bodyBytes, err = json.Marshal(mtxOLd)
+    mtxOld := m.Save(&mtxNew)
+    bodyBytes, err = json.Marshal(mtxOld)
      if err != nil {
         w.Header().Set("content-type", "application/json")
         w.WriteHeader(http.StatusNotFound)
@@ -60,6 +88,9 @@ func PostUpdate(w http.ResponseWriter, r *http.Request) {
     w.WriteHeader(http.StatusOK)
     // fmt.Fprintf(w, "%v", bodyBytes) 
     w.Write(bodyBytes)
+    if SyncDownload {
+        DownloadMemStorageToFile(StoreFile)
+    }
 }
 
 func GetValue(w http.ResponseWriter, r *http.Request) {
