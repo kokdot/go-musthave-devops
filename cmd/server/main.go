@@ -5,6 +5,7 @@ import (
 	"net/http"
 	// "strconv"
     "time"
+    "flag"
 
 	"github.com/caarlos0/env/v6"
 	"github.com/go-chi/chi/v5"
@@ -45,19 +46,42 @@ func onboarding() {
     storeInterval = cfg.StoreInterval
     storeFile = cfg.StoreFile
     restore = cfg.Restore
+
+    urlRealPtr := flag.String("a", "127.0.0.1:8080", "ip adddress of server")
+    restorePtr := flag.Bool("r", true, "restore Metrics(Bool)")
+    storeFilePtr := flag.String("f", "/tmp/devops-metrics-db.json", "file name")
+    storeIntervalPtr := flag.Int("i", 300, "interval of download")
+
+    flag.Parse()
+    if urlReal == url {
+        urlReal = *urlRealPtr
+    }
+    if storeInterval == StoreInterval {
+        storeInterval = *storeIntervalPtr
+    }
+    if storeFile == StoreFile {
+        storeFile = *storeFilePtr
+    }
+    if !Restore {
+        restore = *restorePtr
+    }
     
     if storeFile != "" {
         if storeInterval > 0 {
             DownloadToFile(storeFile)
         } else {
             // syncDownload = true
-            handler.CheckSyncDownload()
+            handler.CheckSyncDownload(storeFile)
         }
     }
     if restore{
         handler.UpdateMemStorageFromFile(storeFile)
     }
-
+   
+    fmt.Println("urlRealPrt:", *urlRealPtr)
+    fmt.Println("restorePtr:", *restorePtr)
+    fmt.Println("storeFilePtr:", *storeFilePtr)
+    fmt.Println("storeIntervalPtr:", *storeIntervalPtr)
 }
 func DownloadToFile(file string) {
     go func() {
@@ -72,6 +96,7 @@ func DownloadToFile(file string) {
 
 func main() {
 	onboarding()
+   
 
 
     // определяем роутер chi

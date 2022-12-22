@@ -8,6 +8,7 @@ import (
 	"github.com/caarlos0/env/v6"
 	// "net/http"
 	"runtime"
+	"flag"
 	"sync"
 	"time"
 	"math/rand"
@@ -16,29 +17,37 @@ import (
 )
 
 const (
-	url            = "127.0.0.1:8080"
-	pollInterval   = 2
-	reportInterval = 10
+	Url            = "127.0.0.1:8080"
+	PollInterval   = 2
+	ReportInterval = 10
 )
 type Config struct {
-    Address  string 		`env:"ADDRESS"`
-    ReportInterval int	 `env:"REPORT_INTERVAL"`
-    PollInterval int	 `env:"POLL_INTERVAL"`
+    Address  string 		`env:"ADDRESS" envDefault:"127.0.0.1:8080"`
+    ReportInterval int	 `env:"REPORT_INTERVAL" envDefault:"10"`
+    PollInterval int	 `env:"POLL_INTERVAL" envDefault:"2"`
 }
 
 // var mutex *sync.RWMutex
 var wg sync.WaitGroup 
 
 type Gauge float64
-type Couter int64
+type Counter int64
 type MonitorMap map[string]Gauge
-var PollCount int
+var PollCount Counter
 var RandomValue Gauge
+
+var( 
+	pollIntervalReal = PollInterval
+	reportIntervalReal = ReportInterval
+	urlReal = Url
+	// urlReal = "http://" + Url
+)
+
 type Metrics struct {
 	ID    string   `json:"id"`              // имя метрики
 	MType string   `json:"type"`            // параметр, принимающий значение gauge или counter
-	Delta *int64   `json:"delta,omitempty"` // значение метрики в случае передачи counter
-	Value *float64 `json:"value,omitempty"` // значение метрики в случае передачи gauge
+	Delta *Counter   `json:"delta,omitempty"` // значение метрики в случае передачи counter
+	Value *Gauge `json:"value,omitempty"` // значение метрики в случае передачи gauge
 }
 func NewMonitor(m *MonitorMap, rtm runtime.MemStats) {//}, mutex *sync.RWMutex) {
 	// runtime.ReadMemStats(&rtm)
@@ -71,28 +80,41 @@ func NewMonitor(m *MonitorMap, rtm runtime.MemStats) {//}, mutex *sync.RWMutex) 
 	(*m)["TotalAlloc"] = Gauge(rtm.TotalAlloc)
 	// mutex.Unlock()
 }
-func main() {
-	wg.Add(2)
+func onboarding() {
 	var cfg Config
-	var pollIntervalReal = pollInterval
-	var reportIntervalReal = reportInterval
-	var urlReal = "http://" + url
+
     err := env.Parse(&cfg)
     if err != nil {
         log.Fatal(err)
     }
-	if cfg.Address != ""{
-		urlReal	= "http://" + cfg.Address
-	} 
-	if cfg.ReportInterval != 0{
-		reportIntervalReal	= cfg.ReportInterval
-	} 
-	if cfg.PollInterval != 0{
-		pollIntervalReal	= cfg.PollInterval
-	} 
-    fmt.Printf("Current address is %s\n", cfg.Address)
-    fmt.Printf("Current report_interval is %d\n", cfg.ReportInterval)
-    fmt.Printf("Current poll_interval is %d\n", cfg.PollInterval)
+	urlReal	= cfg.Address
+	reportIntervalReal	= cfg.ReportInterval
+	pollIntervalReal	= cfg.PollInterval
+
+	urlRealPtr := flag.String("a", "127.0.0.1:8080", "ip adddress of server")
+    reportIntervalRealPtr := flag.Int("r", 10, "interval of perort")
+    pollIntervalRealPtr := flag.Int("p", 2, "interval of poll")
+
+    flag.Parse()
+	if urlReal == Url {
+        urlReal = *urlRealPtr
+	}
+	urlReal = "http://" + urlReal
+	if reportIntervalReal == ReportInterval {
+		reportIntervalReal = *reportIntervalRealPtr
+	}
+	if pollIntervalReal == PollInterval {
+		pollIntervalReal = *pollIntervalRealPtr
+	}
+
+	// fmt.Printf("Current address is %s\n", cfg.Address)
+    // fmt.Printf("Current report_interval is %d\n", cfg.ReportInterval)
+    // fmt.Printf("Current poll_interval is %d\n", cfg.PollInterval)
+
+}
+func main() {
+	wg.Add(2)
+	onboarding()
 
 	var rtm runtime.MemStats
 	var m = make(MonitorMap)
@@ -172,11 +194,10 @@ func main() {
 			//PollCount----------------------------------------------------------
 			strURL := fmt.Sprintf("%s/update/", urlReal)
 			// strURL := fmt.Sprintf("%s/update/counter/%s/%v", url, "PollCount", PollCount)
-			pollCount := int64(PollCount)
 			var varMetrics Metrics = Metrics{
 				ID: "PollCount",
 				MType: "Counter",
-				Delta: &pollCount,
+				Delta: &PollCount,
 			}
 			bodyBytes, err := json.Marshal(varMetrics)
 			if err != nil {
@@ -191,7 +212,7 @@ func main() {
 			if err != nil {
 				log.Fatalf("Failed unmarshall response PollCount: %s", err)
 			}
-			fmt.Println("PollCount: ", int64(*varMetrics.Delta)) 
+			fmt.Println("PollCount: ", *varMetrics.Delta) 
 
 			// //--------------------
 			// client = resty.New()
@@ -211,11 +232,10 @@ func main() {
 			// fmt.Println(int(*varMetrics.Delta)) 
 			//RandomValue----------------------------------------------------------
 			client = resty.New()
-			randomValue := float64(RandomValue)
 			varMetrics = Metrics{
 				ID: "RandomValue",
 				MType: "Gauge",
-				Value: &randomValue,
+				Value: &RandomValue,
 			}
 			bodyBytes, err = json.Marshal(varMetrics)
 			if err != nil {
@@ -229,7 +249,7 @@ func main() {
 			if err != nil {
 				log.Fatalf("Failed unmarshall response RandomValue: %s", err)
 			}
-			fmt.Println("RandomValue: ", float64(*varMetrics.Value)) 
+			fmt.Println("RandomValue: ", *varMetrics.Value) 
 			//RandomValueGet---------------------------------------------------
 			// strURLGet := fmt.Sprintf("%s/value/", urlReal)
 			// var metricsStructGet Metrics
@@ -260,11 +280,10 @@ func main() {
 				// 	break
 				// }
 				client = resty.New()
-				val1 := float64(val)
 				varMetrics = Metrics{
 					ID: key,
 					MType: "Gauge",
-					Value: &val1,
+					Value: &val,
 				}
 				bodyBytes, err = json.Marshal(varMetrics)
 				if err != nil {

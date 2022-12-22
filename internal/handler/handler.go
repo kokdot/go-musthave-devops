@@ -46,8 +46,9 @@ func init() {
     }
 }
 
-func CheckSyncDownload() {
+func CheckSyncDownload(file string) {
     SyncDownload = true
+    StoreFile = file
     fmt.Println("SyncDownload:  ", SyncDownload, "; StoreFile:  ", StoreFile)
 }
 
