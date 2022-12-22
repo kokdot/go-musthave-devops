@@ -253,20 +253,5 @@ func (m *MemStorage) GetAllValues() string {
 		str += fmt.Sprintf("%s: %v %v\n", key, val.Value, val.Delta)
 
 	}
-	// mapAll := make(map[string]string)
-	// for key, val := range m.CounterMap {
-	// 	mapAll[key] = fmt.Sprintf("%v", val)
-	// }
-	// for key, val := range m.GaugeMap {
-	// 	mapAll[key] = fmt.Sprintf("%v", val)
-	// }
-	// for key, val := range mapAll{
-	// 	str += fmt.Sprintf("%s: %s\n", key, val)
-	// }
 	return str
 }
-// func (m *MemStorage) GetAllValuesJson() (GaugeMap, CounterMap) {
-// 	gaugeMap := m.GaugeMap
-// 	counterMap := m.CounterMap
-// 	return gaugeMap, counterMap 
-// }

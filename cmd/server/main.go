@@ -96,8 +96,6 @@ func DownloadToFile(file string) {
 
 func main() {
 	onboarding()
-   
-
 
     // определяем роутер chi
     r := chi.NewRouter()
@@ -106,6 +104,7 @@ func main() {
     r.Use(middleware.RealIP)
     r.Use(middleware.Logger)
     r.Use(middleware.Recoverer)
+    r.Use(middleware.Compress(5, "gzip" ))
     r.Get("/", handler.GetAll)
     r.Route("/update", func(r chi.Router) {
         r.Post("/", handler.PostUpdate)
