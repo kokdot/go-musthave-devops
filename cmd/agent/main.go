@@ -107,6 +107,32 @@ func onboarding() {
 	}
 
 }
+func mtxCounterSet(id string, counterPtr *Counter) ([]byte, error) {
+	var varMetrics Metrics = Metrics{
+			ID: id,
+			MType: "Counter",
+			Delta: counterPtr,
+		}
+	bodyBytes, err := json.Marshal(varMetrics)
+	if err != nil {
+		log.Fatalf("Failed marshal json: %s", err)
+		return nil, err
+	}
+	return bodyBytes, nil
+}
+func mtxGaugeSet(id string, gaugePtr *Gauge) ([]byte, error) {
+	var varMetrics Metrics = Metrics{
+			ID: id,
+			MType: "Gauge",
+			Value: gaugePtr,
+		}
+	bodyBytes, err := json.Marshal(varMetrics)
+	if err != nil {
+		log.Fatalf("Failed marshal json: %s", err)
+		return nil, err
+	}
+	return bodyBytes, nil
+}
 func main() {
 	wg.Add(2)
 	onboarding()
@@ -137,17 +163,13 @@ func main() {
 			
 			//PollCount----------------------------------------------------------
 			strURL := fmt.Sprintf("%s/update/", urlReal)
-			// strURL := fmt.Sprintf("%s/update/counter/%s/%v", url, "PollCount", PollCount)
-			var varMetrics Metrics = Metrics{
-				ID: "PollCount",
-				MType: "Counter",
-				Delta: &PollCount,
-			}
-			bodyBytes, err := json.Marshal(varMetrics)
+			var varMetrics Metrics
+			var bodyBytes []byte
+			var err error
+			bodyBytes, err = mtxCounterSet("PollCount", &PollCount)
 			if err != nil {
-				log.Fatalf("Failed marshal json: %s", err)
+				log.Fatal(err)
 			}
-			// var metricsStruct Metrics
 			client := resty.New()
 			_, err = client.R().
 			SetResult(&varMetrics).
@@ -159,19 +181,13 @@ func main() {
 			fmt.Println("PollCount: ", *varMetrics.Delta) 
 
 			//RandomValue----------------------------------------------------------
-			client = resty.New()
-			varMetrics = Metrics{
-				ID: "RandomValue",
-				MType: "Gauge",
-				Value: &RandomValue,
-			}
-			bodyBytes, err = json.Marshal(varMetrics)
+			bodyBytes, err = mtxGaugeSet("RandomValue", &RandomValue)
 			if err != nil {
-				log.Fatalf("Failed marshal json: %s", err)
+				log.Fatal(err)
 			}
-			var metricsStruct Metrics
+			client = resty.New()
 			_, err = client.R().
-			SetResult(&metricsStruct).
+			SetResult(&varMetrics).
 			SetBody(bodyBytes).
 			Post(strURL)
 			if err != nil {
@@ -186,25 +202,20 @@ func main() {
 				// if n > 1 {
 				// 	break
 				// }
-				client = resty.New()
-				varMetrics = Metrics{
-					ID: key,
-					MType: "Gauge",
-					Value: &val,
-				}
-				bodyBytes, err = json.Marshal(varMetrics)
+
+				bodyBytes, err = mtxGaugeSet(key, &val)
 				if err != nil {
-					log.Fatalf("Failed marshal json: %s", err)
+					log.Fatal(err)
 				}
+				client = resty.New()
 				_, err = client.R().
-				// SetResult(&metricsStruct).
-				// ForceContentType("application/json").
+				SetResult(&varMetrics).
 				SetBody(bodyBytes).
 				Post(strURL)
 				if err != nil {
 					log.Fatalf("Failed unmarshall response: %s", err)
 				}
-				fmt.Println(varMetrics) 
+				fmt.Println("Id: ", varMetrics.ID, "Value: ", *varMetrics.Value) 
 			}
 
 			
