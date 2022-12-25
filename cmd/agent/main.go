@@ -115,7 +115,7 @@ func mtxCounterSet(id string, counterPtr *Counter) ([]byte, error) {
 		}
 	bodyBytes, err := json.Marshal(varMetrics)
 	if err != nil {
-		log.Fatalf("Failed marshal json: %s", err)
+		log.Panicf("Failed marshal json: %s", err)
 		return nil, err
 	}
 	return bodyBytes, nil
@@ -128,7 +128,7 @@ func mtxGaugeSet(id string, gaugePtr *Gauge) ([]byte, error) {
 		}
 	bodyBytes, err := json.Marshal(varMetrics)
 	if err != nil {
-		log.Fatalf("Failed marshal json: %s", err)
+		log.Panicf("Failed marshal json: %s", err)
 		return nil, err
 	}
 	return bodyBytes, nil
@@ -176,7 +176,7 @@ func main() {
 			SetBody(bodyBytes).
 			Post(strURL)
 			if err != nil {
-				log.Fatalf("Failed unmarshall response PollCount: %s", err)
+				log.Panicf("Failed unmarshall response PollCount: %s", err)
 			}
 			fmt.Println("PollCount: ", *varMetrics.Delta) 
 
@@ -191,7 +191,7 @@ func main() {
 			SetBody(bodyBytes).
 			Post(strURL)
 			if err != nil {
-				log.Fatalf("Failed unmarshall response RandomValue: %s", err)
+				log.Panicf("Failed unmarshall response RandomValue: %s", err)
 			}
 			fmt.Println("RandomValue: ", *varMetrics.Value) 
 		
@@ -213,7 +213,7 @@ func main() {
 				SetBody(bodyBytes).
 				Post(strURL)
 				if err != nil {
-					log.Fatalf("Failed unmarshall response: %s", err)
+					log.Panicf("Failed unmarshall response: %s", err)
 				}
 				fmt.Println("Id: ", varMetrics.ID, "Value: ", *varMetrics.Value) 
 			}
