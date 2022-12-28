@@ -84,7 +84,7 @@ func onboarding() {
 
     err := env.Parse(&cfg)
     if err != nil {
-        log.Fatal(err)
+        log.Print(err)
     }
 	urlReal	= cfg.Address
 	reportIntervalReal	= cfg.ReportInterval
@@ -108,7 +108,7 @@ func onboarding() {
 
 }
 func mtxCounterSet(id string, counterPtr *Counter) ([]byte, error) {
-	fmt.Println("---------mtxCounterSet-----------------id--", id, "*counterPtr", *counterPtr)
+	// fmt.Println("---------mtxCounterSet-----------------id--", id, "*counterPtr", *counterPtr)
 
 	var varMetrics Metrics = Metrics{
 			ID: id,
@@ -180,8 +180,8 @@ func main() {
 			if err != nil {
 				log.Printf("Failed unmarshall response PollCount: %s\n", err)
 			}
-			fmt.Println("varMetrics: ", varMetrics) 
-			fmt.Println("PollCount: ", *varMetrics.Delta) 
+			// fmt.Println("varMetrics: ", varMetrics) 
+			// fmt.Println("PollCount: ", *varMetrics.Delta) 
 
 			//RandomValue----------------------------------------------------------
 			bodyBytes, err = mtxGaugeSet("RandomValue", &RandomValue)
@@ -196,7 +196,7 @@ func main() {
 			if err != nil {
 				log.Printf("Failed unmarshall response RandomValue: %s", err)
 			}
-			fmt.Println("varMetrics: ", varMetrics) 
+			// fmt.Println("varMetrics: ", varMetrics) 
 			// fmt.Println("RandomValue: ", *varMetrics.Value) 
 		
 			// Gauge ----------------------------------------------------------
@@ -219,7 +219,7 @@ func main() {
 				if err != nil {
 					log.Printf("Failed unmarshall response: %s", err)
 				}
-				fmt.Println("Id: ", varMetrics.ID, "Value: ", *varMetrics.Value) 
+				// fmt.Println("Id: ", varMetrics.ID, "Value: ", *varMetrics.Value) 
 			}
 
 			
