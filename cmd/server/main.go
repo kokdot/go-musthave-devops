@@ -14,11 +14,11 @@ import (
 
 	"github.com/kokdot/go-musthave-devops/internal/handler"
 )
-func SaveToFile() {
-    fmt.Println("---------SaveToFile  m: -------------------")
+// func SaveToFile() {
+//     fmt.Println("---------SaveToFile  m: -------------------")
 
-    handler.DownloadingToFile()
-}
+//     handler.DownloadingToFile()
+// }
 
 
 
@@ -26,8 +26,8 @@ func SaveToFile() {
 
 func main() {
     handler.InterfaceInit()
-    fmt.Println("\n --------main.func ---m: ", handler.M)
-    SaveToFile()
+    // fmt.Println("\n --------main.func ---m: ", handler.M)
+    // SaveToFile()
 	// onboarding()
 
     // определяем роутер chi

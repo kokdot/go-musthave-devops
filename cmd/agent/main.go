@@ -3,7 +3,7 @@ package main
 import (
 	// "bytes"
 	"fmt"
-	"log"
+	// "log"
 	"encoding/json"
 	"github.com/caarlos0/env/v6"
 	// "net/http"
@@ -18,13 +18,13 @@ import (
 
 const (
 	Url            = "127.0.0.1:8080"
-	PollInterval   = 2
-	ReportInterval = 10
+	PollInterval time.Duration  = 2
+	ReportInterval time.Duration = 10
 )
 type Config struct {
     Address  string 		`env:"ADDRESS" envDefault:"127.0.0.1:8080"`
-    ReportInterval int	 `env:"REPORT_INTERVAL" envDefault:"10"`
-    PollInterval int	 `env:"POLL_INTERVAL" envDefault:"2"`
+    ReportInterval time.Duration	 `env:"REPORT_INTERVAL" envDefault:"10s"`
+    PollInterval time.Duration	 `env:"POLL_INTERVAL" envDefault:"2s"`
 }
 
 var wg sync.WaitGroup 
@@ -84,27 +84,26 @@ func onboarding() {
 
     err := env.Parse(&cfg)
     if err != nil {
-        log.Print(err)
+        fmt.Println(err)
     }
-	urlReal	= cfg.Address
-	reportIntervalReal	= cfg.ReportInterval
-	pollIntervalReal	= cfg.PollInterval
+	
 
 	urlRealPtr := flag.String("a", "127.0.0.1:8080", "ip adddress of server")
     reportIntervalRealPtr := flag.Int("r", 10, "interval of perort")
     pollIntervalRealPtr := flag.Int("p", 2, "interval of poll")
 
     flag.Parse()
-	if urlReal == Url {
-        urlReal = *urlRealPtr
-	}
+	urlReal = *urlRealPtr
+	reportIntervalReal = time.Duration(*reportIntervalRealPtr)
+	pollIntervalReal = time.Duration(*pollIntervalRealPtr)
+
+	urlReal	= cfg.Address
+	reportIntervalReal	= cfg.ReportInterval
+	pollIntervalReal	= cfg.PollInterval
 	urlReal = "http://" + urlReal
-	if reportIntervalReal == ReportInterval {
-		reportIntervalReal = *reportIntervalRealPtr
-	}
-	if pollIntervalReal == PollInterval {
-		pollIntervalReal = *pollIntervalRealPtr
-	}
+	fmt.Println("urlReal:     ", urlReal)
+	fmt.Println("reportIntervalReal:     ", reportIntervalReal)
+	fmt.Println("pollIntervalReal:     ", pollIntervalReal)
 
 }
 func mtxCounterSet(id string, counterPtr *Counter) ([]byte, error) {
@@ -156,9 +155,12 @@ func main() {
 	go func(m *MonitorMap, rtm runtime.MemStats) {//}, mutex *sync.RWMutex) {
 		defer wg.Done()
 
-		var interval = time.Duration(pollIntervalReal) * time.Second
+		// var interval = pollIntervalReal
+		// var interval = time.Duration(pollIntervalReal) * time.Second
+		// fmt.Println("interval MonitorMap:        ", interval)
+
 		for {
-			<-time.After(interval)
+			<-time.After(pollIntervalReal)
 			runtime.ReadMemStats(&rtm)
 			NewMonitor(m, rtm)//, mutex)
 			PollCount++
@@ -170,10 +172,11 @@ func main() {
 	
 	go func() {
 		defer wg.Done()
-		var interval = time.Duration(reportIntervalReal) * time.Second
+		// var interval = reportIntervalReal
+		// fmt.Println("interval PollCount:        ", interval)
 		for {
 
-			<-time.After(interval) 
+			<-time.After(reportIntervalReal) 
 			
 			//PollCount----------------------------------------------------------
 			strURL := fmt.Sprintf("%s/update/", urlReal)
@@ -209,8 +212,8 @@ func main() {
 			if err != nil {
 				fmt.Printf("Failed unmarshall response RandomValue: %s\n", err)
 			}
-			// fmt.Println("varMetrics: ", varMetrics) 
-			// fmt.Println("RandomValue: ", *varMetrics.Value) 
+			fmt.Println("varMetrics: ", varMetrics) 
+			fmt.Println("RandomValue: ", *varMetrics.Value) 
 
 				//RandomValueGet---------------------------------------------------
 			// strURLGet := fmt.Sprintf("%s/value/", urlReal)
@@ -238,26 +241,26 @@ func main() {
 
 			// Gauge ----------------------------------------------------------
 			//n := 0
-			for key, val := range m {
-				// n++
-				// if n > 1 {
-				// 	break
-				// }
-				// fmt.Println("key: ", key, ";  val: ", val)
-				bodyBytes, err = mtxGaugeSet(key, &val)
-				if err != nil {
-					fmt.Println(err)
-				}
-				client := resty.New()
-				_, err = client.R().
-				SetResult(&varMetrics).
-				SetBody(bodyBytes).
-				Post(strURL)
-				if err != nil {
-					fmt.Printf("Failed unmarshall response: %s\n", err)
-				}
-				// fmt.Println("-----Update;------- Id: ", varMetrics.ID, "Value: ", *varMetrics.Value) 
-			}
+			// for key, val := range m {
+			// 	// n++
+			// 	// if n > 1 {
+			// 	// 	break
+			// 	// }
+			// 	// fmt.Println("key: ", key, ";  val: ", val)
+			// 	bodyBytes, err = mtxGaugeSet(key, &val)
+			// 	if err != nil {
+			// 		fmt.Println(err)
+			// 	}
+			// 	client := resty.New()
+			// 	_, err = client.R().
+			// 	SetResult(&varMetrics).
+			// 	SetBody(bodyBytes).
+			// 	Post(strURL)
+			// 	if err != nil {
+			// 		fmt.Printf("Failed unmarshall response: %s\n", err)
+			// 	}
+			// 	// fmt.Println("-----Update;------- Id: ", varMetrics.ID, "Value: ", *varMetrics.Value) 
+			// }
 			// Gauge ------Get----------------------------------------------------
 			// n := 0
 			// fmt.Println("---------------------------------------------")

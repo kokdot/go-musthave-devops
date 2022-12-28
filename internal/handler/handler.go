@@ -24,13 +24,13 @@ const (
 )
 const (
     url = "127.0.0.1:8080"
-    StoreInterval = 200
+    StoreInterval time.Duration = 200
     StoreFile = "/tmp/devops-metrics-db.json"
     Restore = false
 )
 type Config struct {
     Address  string 		`env:"ADDRESS" envDefault:"127.0.0.1:8080"`
-    StoreInterval  int 		`env:"STORE_INTERVAL" envDefault:"30"`
+    StoreInterval  time.Duration `env:"STORE_INTERVAL" envDefault:"30s"`
     StoreFile  string 		`env:"STORE_FILE" envDefault:"/tmp/devops-metrics-db.json"`
     Restore  bool 		`env:"RESTORE" envDefault:"true"`
 }
@@ -45,7 +45,7 @@ var (
 )
 
 func init() {
-	fmt.Println("---------init-------------------")
+	// fmt.Println("---------init-------------------")/>;./ 
     onboarding()
 }
 func InterfaceInit() {
@@ -79,7 +79,7 @@ func InterfaceInit() {
                     log.Printf("Can't to read data froM file, err: %s", err)
                 }
             }
-            // DownloadingToFile()
+            DownloadingToFile()
             M = ms
         }
     } else {
@@ -116,22 +116,19 @@ func onboarding() {
 
     err := env.Parse(&cfg)
     if err != nil {
-        log.Print(err)
+        fmt.Println(err)
     }
-    fmt.Printf("main:  %+v\n", cfg)
+    // fmt.Printf("main:  %+v\n", cfg)
 
     urlRealPtr := flag.String("a", "127.0.0.1:8080", "ip adddress of server")
     restorePtr := flag.Bool("r", true, "restore Metrics(Bool)")
     storeFilePtr := flag.String("f", "/tmp/devops-metrics-db.json", "file name")
-    storeIntervalPtr := flag.Int("i", 300, "interval of download")
+    storeIntervalPtr := flag.Duration("i", 300, "interval of download")
 
     flag.Parse()
 	// fmt.Println("-----2----storeInterval-------------------", storeInterval)
 
-    fmt.Println("urlRealPrt:", *urlRealPtr)
-    fmt.Println("restorePtr:", *restorePtr)
-    fmt.Println("storeFilePtr:", *storeFilePtr)
-    fmt.Println("storeIntervalPtr:", *storeIntervalPtr)
+    
     UrlReal = *urlRealPtr
     storeInterval = *storeIntervalPtr
     storeFile = *storeFilePtr
@@ -147,7 +144,10 @@ func onboarding() {
     // fmt.Println("---------onboarding m: -------------------", M)
     // fmt.Println("---------onboarding m: -------------------", ms)
 	// fmt.Println("---5------cfg.StoreInterval-------------------", cfg.StoreInterval)
-    
+    fmt.Println("UrlReal:", UrlReal)
+    fmt.Println("restore:", restore)
+    fmt.Println("storeFile:", storeFile)
+    fmt.Println("storeInterval:", storeInterval)
     
    
     
@@ -158,7 +158,8 @@ func DownloadingToFile() {
     // fmt.Println("---------DownloadingToFile-------------------", storeInterval)
 
     go func() {
-        var interval = time.Duration(storeInterval) * time.Second
+        var interval = storeInterval
+        // var interval = time.Duration(storeInterval) * time.Second
         for {
             <-time.After(interval) 
             fmt.Println("main; line: 67; DownloadToFile", ";  file:  ")
@@ -233,8 +234,8 @@ func GetValue(w http.ResponseWriter, r *http.Request) {
         return
     }
     mtxOLd, err := M.Get(mtxNew.ID)
-    fmt.Println("----------GetValue------mtxNew.----:   ", mtxNew)
-    fmt.Println("----------GetValue------mtxOld:----:  ", mtxOLd)
+    // fmt.Println("----------GetValue------mtxNew.----:   ", mtxNew)
+    // fmt.Println("----------GetValue------mtxOld:----:  ", mtxOLd)
     if err != nil {
         w.Header().Set("content-type", "application/json")
         w.WriteHeader(http.StatusNotFound)
