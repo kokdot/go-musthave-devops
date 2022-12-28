@@ -39,6 +39,8 @@ var(
 	pollIntervalReal = PollInterval
 	reportIntervalReal = ReportInterval
 	urlReal = Url
+	cfg Config
+
 	// urlReal = "http://" + Url
 )
 
@@ -80,7 +82,6 @@ func NewMonitor(m *MonitorMap, rtm runtime.MemStats) {//}, mutex *sync.RWMutex) 
 	// mutex.Unlock()
 }
 func onboarding() {
-	var cfg Config
 
     err := env.Parse(&cfg)
     if err != nil {
@@ -89,13 +90,13 @@ func onboarding() {
 	
 
 	urlRealPtr := flag.String("a", "127.0.0.1:8080", "ip adddress of server")
-    reportIntervalRealPtr := flag.Int("r", 10, "interval of perort")
-    pollIntervalRealPtr := flag.Int("p", 2, "interval of poll")
+    reportIntervalRealPtr := flag.Duration("r", 10, "interval of perort")
+    pollIntervalRealPtr := flag.Duration("p", 2, "interval of poll")
 
     flag.Parse()
 	urlReal = *urlRealPtr
-	reportIntervalReal = time.Duration(*reportIntervalRealPtr)
-	pollIntervalReal = time.Duration(*pollIntervalRealPtr)
+	reportIntervalReal = *reportIntervalRealPtr
+	pollIntervalReal = *pollIntervalRealPtr
 
 	urlReal	= cfg.Address
 	reportIntervalReal	= cfg.ReportInterval
@@ -107,7 +108,7 @@ func onboarding() {
 
 }
 func mtxCounterSet(id string, counterPtr *Counter) ([]byte, error) {
-	fmt.Println("---------mtxCounterSet-----------------id--", id, "*counterPtr", *counterPtr)
+	// fmt.Println("---------mtxCounterSet-----------------id--", id, "*counterPtr", *counterPtr)
 
 	var varMetrics Metrics = Metrics{
 			ID: id,
@@ -122,7 +123,7 @@ func mtxCounterSet(id string, counterPtr *Counter) ([]byte, error) {
 	return bodyBytes, nil
 }
 func mtxGaugeSet(id string, gaugePtr *Gauge) ([]byte, error) {
-	fmt.Println("---------mtxGaugeSet-----------------id--", id, "*gaugePtr", *gaugePtr)
+	// fmt.Println("---------mtxGaugeSet-----------------id--", id, "*gaugePtr", *gaugePtr)
 
 	var varMetrics Metrics = Metrics{
 			ID: id,
@@ -214,8 +215,8 @@ func main() {
 			if err != nil {
 				fmt.Printf("Failed unmarshall response RandomValue: %s\n", err)
 			}
-			fmt.Println("varMetrics: ", varMetrics) 
-			fmt.Println("RandomValue: ", *varMetrics.Value) 
+			// fmt.Println("varMetrics: ", varMetrics) 
+			// fmt.Println("RandomValue: ", *varMetrics.Value) 
 
 				//RandomValueGet---------------------------------------------------
 			// strURLGet := fmt.Sprintf("%s/value/", urlReal)
@@ -259,7 +260,7 @@ func main() {
 				SetBody(bodyBytes).
 				Post(strURL)
 				if err != nil {
-					fmt.Printf("Failed unmarshall response: %s\n", err)
+					fmt.Printf("Failed unmarshall response Monitor, ID: %s; error: %s\n", key, err)
 				}
 				// fmt.Println("-----Update;------- Id: ", varMetrics.ID, "Value: ", *varMetrics.Value) 
 			}
