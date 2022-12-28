@@ -108,6 +108,8 @@ func onboarding() {
 
 }
 func mtxCounterSet(id string, counterPtr *Counter) ([]byte, error) {
+	fmt.Println("---------mtxCounterSet-----------------id--", id, "*counterPtr", *counterPtr)
+
 	var varMetrics Metrics = Metrics{
 			ID: id,
 			MType: "Counter",
@@ -115,7 +117,7 @@ func mtxCounterSet(id string, counterPtr *Counter) ([]byte, error) {
 		}
 	bodyBytes, err := json.Marshal(varMetrics)
 	if err != nil {
-		log.Panicf("Failed marshal json: %s", err)
+		log.Printf("Failed marshal json: %s", err)
 		return nil, err
 	}
 	return bodyBytes, nil
@@ -128,7 +130,7 @@ func mtxGaugeSet(id string, gaugePtr *Gauge) ([]byte, error) {
 		}
 	bodyBytes, err := json.Marshal(varMetrics)
 	if err != nil {
-		log.Panicf("Failed marshal json: %s", err)
+		log.Printf("Failed marshal json: %s", err)
 		return nil, err
 	}
 	return bodyBytes, nil
@@ -176,8 +178,9 @@ func main() {
 			SetBody(bodyBytes).
 			Post(strURL)
 			if err != nil {
-				log.Panicf("Failed unmarshall response PollCount: %s", err)
+				log.Printf("Failed unmarshall response PollCount: %s\n", err)
 			}
+			fmt.Println("varMetrics: ", varMetrics) 
 			fmt.Println("PollCount: ", *varMetrics.Delta) 
 
 			//RandomValue----------------------------------------------------------
@@ -191,12 +194,13 @@ func main() {
 			SetBody(bodyBytes).
 			Post(strURL)
 			if err != nil {
-				log.Panicf("Failed unmarshall response RandomValue: %s", err)
+				log.Printf("Failed unmarshall response RandomValue: %s", err)
 			}
-			fmt.Println("RandomValue: ", *varMetrics.Value) 
+			fmt.Println("varMetrics: ", varMetrics) 
+			// fmt.Println("RandomValue: ", *varMetrics.Value) 
 		
 			// Gauge ----------------------------------------------------------
-			// // n := 0
+			// //n := 0
 			for key, val := range m {
 				// n++
 				// if n > 1 {
@@ -213,7 +217,7 @@ func main() {
 				SetBody(bodyBytes).
 				Post(strURL)
 				if err != nil {
-					log.Panicf("Failed unmarshall response: %s", err)
+					log.Printf("Failed unmarshall response: %s", err)
 				}
 				fmt.Println("Id: ", varMetrics.ID, "Value: ", *varMetrics.Value) 
 			}

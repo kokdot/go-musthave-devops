@@ -3,10 +3,10 @@ package store
 import (
 	"fmt"
 	"errors"
-	"os"
-	"bufio"
-	"log"
-	"encoding/json"
+	// "os"
+	// "bufio"
+	// "log"
+	// "encoding/json"
 )
 
 
@@ -15,20 +15,57 @@ type Gauge float64
 type StoreMap map[string]Metrics
 
 type MemStorage struct {
-	StoreMap   StoreMap
+	StoreMap   *StoreMap
+	// ProducerPtr *producer
+	// ConsumerPtr *consumer
+	file string
 }
+func NewMemStorageWithFile(filename string) (*MemStorage, error) {
+	// p, err := NewProducer(filename)
+	// if err != nil {
+	// 	return nil, err
+	// }
+	// c, err := NewConsumer(filename)
+	// if err != nil {
+	// 	return nil, err
+	// }
+	sm := make(StoreMap)
+	return &MemStorage{
+		StoreMap : &sm, 
+		file: filename,
+		// ProducerPtr: p,
+		// ConsumerPtr: c,
 
+	}, nil
+}
+func NewMemStorage() *MemStorage {
+	sm := make(StoreMap)
+	return &MemStorage{
+		StoreMap : &sm, 
+	}
+}
+//------------------------------------interface--------------------------------------
+type Consumer interface {
+    ReadStorage() (*StoreMap, error) // для чтения события
+    Close() error               // для закрытия ресурса (файла)
+}
+type Producer interface {
+    WriteStorage() error // для записи события
+    Close() error            // для закрытия ресурса (файла)
+}
 type Repo interface {
-	Save(mtx *Metrics) *Metrics
+	Save(mtx *Metrics) (*Metrics, error)
 	Get(id string) (*Metrics, error)
-	GetAll() (StoreMap)
-	SaveCounterValue(name string, counter Counter) Counter
-	SaveGaugeValue(name string, gauge Gauge)
+	GetAll() (StoreMap, error)
+	SaveCounterValue(name string, counter Counter) (Counter, error)
+	SaveGaugeValue(name string, gauge Gauge) error
 	GetCounterValue(name string) (Counter, error)
 	GetGaugeValue(name string) (Gauge, error)
-	GetAllValues() string
-	DownloadMemStorage(file string)
-	UpdateMemStorage(file string) *MemStorage
+	GetAllValues() (string, error)
+	ReadStorage() (*StoreMap, error)
+	WriteStorage() error 
+	// WriteStorage(file string)
+	// ReadStorage(file string) *MemStorage
 }
 type Metrics struct {
 	ID    string   `json:"id"`              // имя метрики
@@ -39,119 +76,6 @@ type Metrics struct {
 var zeroG Gauge = 0
 var zeroC Counter = 0
 
-type Producer interface {
-    WriteMemStorage(memStorage *MemStorage) // для записи события
-    Close() error            // для закрытия ресурса (файла)
-}
-
-type Consumer interface {
-    ReadMemStorage() (*MemStorage, error) // для чтения события
-    Close() error               // для закрытия ресурса (файла)
-}
-type producer struct {
-    file *os.File
-    // добавляем writer в Producer
-    writer *bufio.Writer
-}
-
-func (m MemStorage) UpdateMemStorage(file string) *MemStorage {
-	consumerPtr, err := NewConsumer(file)
-	if err != nil {
-        log.Fatal(err)
-    }
-	ms, err := consumerPtr.ReadMemStorage()
-	if err != nil {
-        log.Fatal(err)
-    }
-	return ms
-}
-
-func (m MemStorage) DownloadMemStorage(file string) {
-	producerPtr, err := NewProducer(file)
-	if err != nil {
-		fmt.Println("store; line: 77; DownloadMemStorage file: ", file, "   ;err: ", err)
-        log.Fatal(err)
-    }
-	err = producerPtr.WriteMemStorage(&m)
-	if err != nil {
-        log.Fatal(err)
-    }
-}
-
-func NewProducer(filename string) (*producer, error) {
-    file, err := os.OpenFile(filename, os.O_WRONLY|os.O_CREATE, 0777)
-	file.Truncate(0)
-    // file, err := os.OpenFile(filename, os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0777)
-    if err != nil {
-        return nil, err
-    }
-
-    return &producer{
-        file: file,
-        // создаём новый Writer
-        writer: bufio.NewWriter(file),
-    }, nil
-}
-
-func (p *producer) WriteMemStorage(memStorage *MemStorage) error {
-    data, err := json.Marshal(&memStorage)
-    if err != nil {
-        return err
-    }
-
-    // записываем событие в буфер
-    if _, err := p.writer.Write(data); err != nil {
-        return err
-    }
-
-    // добавляем перенос строки
-    if err := p.writer.WriteByte('\n'); err != nil {
-        return err
-    }
-
-    // записываем буфер в файл
-    return p.writer.Flush()
-}
-type consumer struct {
-    file *os.File
-    // заменяем reader на scanner
-    scanner *bufio.Scanner
-}
-
-func NewConsumer(filename string) (*consumer, error) {
-    file, err := os.OpenFile(filename, os.O_RDONLY|os.O_CREATE, 0777)
-    // file, err := os.OpenFile(filename, os.O_RDONLY|os.O_CREATE, 0777)
-    if err != nil {
-        return nil, err
-    }
-
-    return &consumer{
-        file: file,
-        // создаём новый scanner
-        scanner: bufio.NewScanner(file),
-    }, nil
-}
-
-func (c *consumer) ReadMemStorage() (*MemStorage, error) {
-    // одиночное сканирование до следующей строки
-    if !c.scanner.Scan() {
-        return nil, c.scanner.Err()
-    }
-    // читаем данные из scanner
-    data := c.scanner.Bytes()
-
-    memStorage := MemStorage{}
-    err := json.Unmarshal(data, &memStorage)
-    if err != nil {
-        return nil, err
-    }
-
-    return &memStorage, nil
-}
-
-func (c *consumer) Close() error {
-    return c.file.Close()
-}
 func NewMetrics(id string, mType string) Metrics {
 	if mType == "Gauge" {
 		return Metrics{
@@ -168,68 +92,103 @@ func NewMetrics(id string, mType string) Metrics {
 	}
 }
 
+func (m MemStorage) Save(mtxNew *Metrics) (*Metrics, error) {
+	if m.StoreMap == nil {
+		return nil, errors.New("memStorage is nil")
+	}
+	fmt.Println("---------Save-------------------")
+	if mtxNew == nil {
+	fmt.Println("---------mtx.new is nil-------------------")
 
-
-func (m MemStorage) Save(mtxNew *Metrics) *Metrics {
+	}
+	fmt.Println("---------mtxNew-------------------:   " , mtxNew)
 	switch mtxNew.MType {
 	case "Gauge":
-		m.StoreMap[mtxNew.ID] = *mtxNew
-		return mtxNew
+        // fmt.Println("---------Gauge-------------------")
+        // fmt.Println("---------Save-------------------")
+        // fmt.Println("---------Save-------------------")
+		
+		(*m.StoreMap)[mtxNew.ID] = *mtxNew
+		return mtxNew, nil
 	case "Counter":
-		mtxOld, ok := m.StoreMap[mtxNew.ID]
+        fmt.Println("---------Counter-------------------")
+		mtxOld, ok := (*m.StoreMap)[mtxNew.ID]
 		if !ok {
-			m.StoreMap[mtxNew.ID] = *mtxNew
-			return mtxNew
+			(*m.StoreMap)[mtxNew.ID] = *mtxNew
+			return mtxNew, nil
 		}
 		*mtxOld.Delta += *mtxNew.Delta
-		return &mtxOld
+		return &mtxOld, nil
 	}
-	return mtxNew
+	return mtxNew, nil
 }
 
 func (m MemStorage) Get(id string) (*Metrics, error) {
-	mtxOld, ok := m.StoreMap[id]
+	if m.StoreMap == nil {
+		return nil, errors.New("memStorage is nil")
+	}
+	mtxOld, ok := (*m.StoreMap)[id]
 	if !ok {
 		return nil, errors.New("metrics not found")
 	}
 	return &mtxOld, nil
 }
 
-func (m MemStorage) GetAll() StoreMap {
-	return m.StoreMap
+func (m MemStorage) GetAll() (StoreMap, error) {
+	if m.StoreMap == nil {
+		return nil, errors.New("memStorage is nil")
+	}
+	return *m.StoreMap, nil
 }
 
-func (m *MemStorage) SaveCounterValue(id string, counter Counter) Counter {
-// func (m *MemStorage) SaveCounterValue(name string, counter Counter) Counter {
-	mtxOld, ok := m.StoreMap[id]
+func (m *MemStorage) SaveCounterValue(id string, counter Counter) (Counter, error) {
+	var counter1 Counter
+	if m.StoreMap == nil {
+		return counter1, errors.New("memStorage is nil")
+	}
+	mtxOld, ok := (*m.StoreMap)[id]
 	if !ok {
 		mtxNew := NewMetrics(id, "Counter")
 		mtxNew.Delta = &counter
-		m.StoreMap[id] = mtxNew
-		return counter
+		(*m.StoreMap)[id] = mtxNew
+		return counter, nil
 	}
 	*mtxOld.Delta += counter
-	return *mtxOld.Delta
+	return *mtxOld.Delta, nil
 }
 
-func (m *MemStorage) SaveGaugeValue(id string, gauge Gauge) {
-	mtxOld, ok := m.StoreMap[id]
-	// fmt.Println("OK:  ", ok, "-----------------********************************************-----------------")
-
+func (m *MemStorage) SaveGaugeValue(id string, gauge Gauge) error {
+	if m.StoreMap == nil {
+		return errors.New("memStorage is nil")
+	}
+	mtxOld, ok := (*m.StoreMap)[id]
 	if !ok {
 		mtxNew := NewMetrics(id, "Gauge")
 		mtxNew.Value = &gauge
-		m.StoreMap[id] = mtxNew
+		(*m.StoreMap)[id] = mtxNew
 	}else {
-		// fmt.Println("*mtxOld:  ", mtxOld, "----------------------------------")
-		// fmt.Println("*mtxOld.Value:  ", *mtxOld.Value, "----------------------------------")
 		*mtxOld.Value = gauge
-		
 	}
+	return nil
 }
+// func (m *MemStorage) Close() error {
+// 	err := (*m.ConsumerPtr).file.Close()
+// 	if err != nil {
+// 		return err
+// 	}
+// 	err = (*m.ProducerPtr).file.Close()
+// 	if err != nil {
+// 		return err
+// 	}
+// 	return nil
+// }
 
 func (m *MemStorage) GetCounterValue(id string) (Counter, error) {
-	mtxOld, ok := m.StoreMap[id]
+	var counter1 Counter
+	if m.StoreMap == nil {
+		return counter1, errors.New("memStorage is nil")
+	}
+	mtxOld, ok := (*m.StoreMap)[id]
 	if !ok {
 		return 0, errors.New("this counter don't find")
 	}
@@ -237,8 +196,12 @@ func (m *MemStorage) GetCounterValue(id string) (Counter, error) {
 }
 
 func (m *MemStorage) GetGaugeValue(id string) (Gauge, error) {
+	var gauge1 Gauge
+	if m.StoreMap == nil {
+		return gauge1, errors.New("memStorage is nil")
+	}
 	// fmt.Println("id:  ", id, "-----------------------((((((((((((((((((((((((((((((((((((")
-	mtxOld, ok := m.StoreMap[id]
+	mtxOld, ok := (*m.StoreMap)[id]
 	// fmt.Println("mtxOld:  ", mtxOld, ";  OK: ", ok, "MemStorage", m)
 	if !ok {
 		return 0, errors.New("this gauge don't find")
@@ -247,11 +210,53 @@ func (m *MemStorage) GetGaugeValue(id string) (Gauge, error) {
 	return *mtxOld.Value, nil
 }
 
-func (m *MemStorage) GetAllValues() string {
+func (m *MemStorage) GetAllValues() (string, error) {
 	var str string
-	for key, val := range m.StoreMap {
-		str += fmt.Sprintf("%s: %v %v\n", key, val.Value, val.Delta)
+	var v Gauge
+	var d Counter
+	if m.StoreMap == nil {
+		return "", errors.New("storeMap is nil")
+	}
+	for key, val := range (*m.StoreMap) {
+		if val.Delta != nil {
+			d = *val.Delta
+		}
+		if val.Value == nil {
+			v = *val.Value
+		}
+		str += fmt.Sprintf("%s: %v %v\n", key, v, d)
 
 	}
-	return str
+	return str, nil
+}
+
+func (m MemStorage) ReadStorage() (*StoreMap, error) {
+	c, err := NewConsumer(m.file)
+	if err != nil  {
+		err1 := fmt.Errorf("can't to create consumer: %s", err)
+		return nil, err1
+    }
+	sm, err := c.ReadStorage()
+	if sm == nil && err !=  nil {
+		err1 := fmt.Errorf("file for StoreMap is ampty: %s", err)
+		return nil, err1
+	} else if sm == nil {
+		return nil, errors.New("file for StoreMap is ampty")
+	}
+	(*m.StoreMap) = *sm
+	return sm, nil
+}
+
+func (m MemStorage) WriteStorage() error{
+	p, err := NewProducer(m.file)
+	if err != nil  {
+		err1 := fmt.Errorf("can't to create producer: %s", err)
+		return err1
+    }
+	err = p.WriteStorage((m.StoreMap))
+	if err != nil {
+        err1 := fmt.Errorf("can't to write memStorege: %s", err)
+		return err1
+    }
+	return nil
 }
