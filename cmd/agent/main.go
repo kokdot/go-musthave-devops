@@ -107,7 +107,7 @@ func onboarding() {
 
 }
 func mtxCounterSet(id string, counterPtr *Counter) ([]byte, error) {
-	// fmt.Println("---------mtxCounterSet-----------------id--", id, "*counterPtr", *counterPtr)
+	fmt.Println("---------mtxCounterSet-----------------id--", id, "*counterPtr", *counterPtr)
 
 	var varMetrics Metrics = Metrics{
 			ID: id,
@@ -122,6 +122,8 @@ func mtxCounterSet(id string, counterPtr *Counter) ([]byte, error) {
 	return bodyBytes, nil
 }
 func mtxGaugeSet(id string, gaugePtr *Gauge) ([]byte, error) {
+	fmt.Println("---------mtxGaugeSet-----------------id--", id, "*gaugePtr", *gaugePtr)
+
 	var varMetrics Metrics = Metrics{
 			ID: id,
 			MType: "Gauge",
@@ -241,26 +243,26 @@ func main() {
 
 			// Gauge ----------------------------------------------------------
 			//n := 0
-			// for key, val := range m {
-			// 	// n++
-			// 	// if n > 1 {
-			// 	// 	break
-			// 	// }
-			// 	// fmt.Println("key: ", key, ";  val: ", val)
-			// 	bodyBytes, err = mtxGaugeSet(key, &val)
-			// 	if err != nil {
-			// 		fmt.Println(err)
-			// 	}
-			// 	client := resty.New()
-			// 	_, err = client.R().
-			// 	SetResult(&varMetrics).
-			// 	SetBody(bodyBytes).
-			// 	Post(strURL)
-			// 	if err != nil {
-			// 		fmt.Printf("Failed unmarshall response: %s\n", err)
-			// 	}
-			// 	// fmt.Println("-----Update;------- Id: ", varMetrics.ID, "Value: ", *varMetrics.Value) 
-			// }
+			for key, val := range m {
+				// n++
+				// if n > 1 {
+				// 	break
+				// }
+				// fmt.Println("key: ", key, ";  val: ", val)
+				bodyBytes, err = mtxGaugeSet(key, &val)
+				if err != nil {
+					fmt.Println(err)
+				}
+				client := resty.New()
+				_, err = client.R().
+				SetResult(&varMetrics).
+				SetBody(bodyBytes).
+				Post(strURL)
+				if err != nil {
+					fmt.Printf("Failed unmarshall response: %s\n", err)
+				}
+				// fmt.Println("-----Update;------- Id: ", varMetrics.ID, "Value: ", *varMetrics.Value) 
+			}
 			// Gauge ------Get----------------------------------------------------
 			// n := 0
 			// fmt.Println("---------------------------------------------")
