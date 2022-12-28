@@ -102,6 +102,10 @@ func (m MemStorage) Save(mtxNew *Metrics) (*Metrics, error) {
 
 	}
 	fmt.Println("---------mtxNew-------------------:   " , mtxNew)
+	if mtxNew.Value != nil {
+		fmt.Println("---------mtxNew-------------------:   " , *mtxNew.Value)
+
+	}
 	switch mtxNew.MType {
 	case "Gauge":
         // fmt.Println("---------Gauge-------------------")

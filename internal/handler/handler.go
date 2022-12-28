@@ -84,7 +84,7 @@ func InterfaceInit() {
         }
     } else {
         //---------save to FileStorage------------------
-        fmt.Println("---------save to FileStorage-------------------")
+        // fmt.Println("---------save to FileStorage-------------------")
 
         if storeFile == ""{
             ms, err := store.NewFileStorage()
@@ -111,8 +111,8 @@ func InterfaceInit() {
 }
 
 func onboarding() {
-	fmt.Println("---------onboarding-------------------")
-	fmt.Println("------1---storeInterval-------------------", storeInterval)
+	// fmt.Println("---------onboarding-------------------")
+	// fmt.Println("------1---storeInterval-------------------", storeInterval)
 
     err := env.Parse(&cfg)
     if err != nil {
@@ -126,7 +126,7 @@ func onboarding() {
     storeIntervalPtr := flag.Int("i", 300, "interval of download")
 
     flag.Parse()
-	fmt.Println("-----2----storeInterval-------------------", storeInterval)
+	// fmt.Println("-----2----storeInterval-------------------", storeInterval)
 
     fmt.Println("urlRealPrt:", *urlRealPtr)
     fmt.Println("restorePtr:", *restorePtr)
@@ -136,17 +136,17 @@ func onboarding() {
     storeInterval = *storeIntervalPtr
     storeFile = *storeFilePtr
     restore = *restorePtr
-	fmt.Println("----3-----storeInterval-------------------", storeInterval)
+	// fmt.Println("----3-----storeInterval-------------------", storeInterval)
 
     UrlReal	= cfg.Address
     storeInterval = cfg.StoreInterval
     storeFile = cfg.StoreFile
     restore = cfg.Restore
-	fmt.Println("---4------storeInterval-------------------", storeInterval)
+	// fmt.Println("---4------storeInterval-------------------", storeInterval)
 
     // fmt.Println("---------onboarding m: -------------------", M)
     // fmt.Println("---------onboarding m: -------------------", ms)
-	fmt.Println("---5------cfg.StoreInterval-------------------", cfg.StoreInterval)
+	// fmt.Println("---5------cfg.StoreInterval-------------------", cfg.StoreInterval)
     
     
    
@@ -233,6 +233,8 @@ func GetValue(w http.ResponseWriter, r *http.Request) {
         return
     }
     mtxOLd, err := M.Get(mtxNew.ID)
+    fmt.Println("----------GetValue------mtxNew.----:   ", mtxNew)
+    fmt.Println("----------GetValue------mtxOld:----:  ", mtxOLd)
     if err != nil {
         w.Header().Set("content-type", "application/json")
         w.WriteHeader(http.StatusNotFound)
