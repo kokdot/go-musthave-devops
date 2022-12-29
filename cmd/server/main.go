@@ -51,11 +51,11 @@ var (
 )
 
 
-func init() {
-    onboarding()
+// func init() {
+//     onboarding()
 
 
-}
+// }
 func onboarding() {
 	// fmt.Println("---------onboarding-------------------")
 	// fmt.Println("------1---storeInterval-------------------", storeInterval)
@@ -98,6 +98,8 @@ func onboarding() {
 }
 
 func main() {
+    onboarding()
+
     handler.InterfaceInit(storeInterval, storeFile, restore)
     // fmt.Println("\n --------main.func ---m: ", handler.M)
     // SaveToFile()
