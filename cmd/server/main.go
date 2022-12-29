@@ -26,6 +26,8 @@ import (
 //:PATH="$PATH:/mnt/c/Users/user/devopstest
 // devopstest -test.v -test.run=^TestIteration2[b]*$ -source-path=. -binary-path=cmd/server/server
 // devopstest -test.v -test.run=^TestIteration4$ -source-path=. -binary-path=cmd/server/server -agent-binary-path=cmd/agent/agent
+// SERVER_PORT=$(random unused-port) ADDRESS="localhost:${SERVER_PORT}" TEMP_FILE=$(random tempfile) devopstest -test.v -test.run=^TestIteration7$ -source-path=. -agent-binary-path=cmd/agent/agent -binary-path=cmd/server/server -server-port=$SERVER_PORT -database-dsn='postgres://postgres:postgres@postgres:5432/praktikum?sslmode=disable' -file-storage-path=$TEMP_FILE
+// SERVER_PORT=$(random unused-port) ADDRESS="localhost:${SERVER_PORT}" TEMP_FILE=$(random tempfile) devopstest -test.v -test.run=^TestIteration6$ -source-path=. -agent-binary-path=cmd/agent/agent -binary-path=cmd/server/server -server-port=$SERVER_PORT -database-dsn='postgres://postgres:postgres@postgres:5432/praktikum?sslmode=disable' -file-storage-path=$TEMP_FILE
 const (
     url = "127.0.0.1:8080"
     StoreInterval time.Duration = 200
