@@ -89,6 +89,13 @@ func (f FileStorage) Save(mtxNew *Metrics) (*Metrics, error) {
 		return nil, err
 	}
 	switch mtxNew.MType {
+	case "gauge":
+		(*f.StoreMap)[mtxNew.ID] = *mtxNew
+		err := f.WriteStorageSelf()
+		if err != nil {
+			return nil, err
+		} 
+		return mtxNew, nil
 	case "Gauge":
 		(*f.StoreMap)[mtxNew.ID] = *mtxNew
 		err := f.WriteStorageSelf()
@@ -96,7 +103,23 @@ func (f FileStorage) Save(mtxNew *Metrics) (*Metrics, error) {
 			return nil, err
 		} 
 		return mtxNew, nil
-	case "Counter":
+	case "counter":
+		mtxOld, ok := (*f.StoreMap)[mtxNew.ID]
+		if !ok {
+			(*f.StoreMap)[mtxNew.ID] = *mtxNew
+			err := f.WriteStorage()
+			if err != nil {
+				return nil, err
+			} 
+			return mtxNew, nil
+		}
+		*mtxOld.Delta += *mtxNew.Delta
+		err := f.WriteStorage()
+		if err != nil {
+			return nil, err
+		} 
+		return &mtxOld, nil
+		case "Counter":
 		mtxOld, ok := (*f.StoreMap)[mtxNew.ID]
 		if !ok {
 			(*f.StoreMap)[mtxNew.ID] = *mtxNew
@@ -206,7 +229,7 @@ func (f FileStorage) SaveCounterValue(id string, counter Counter) (Counter, erro
 	}
 	mtxOld, ok := (*f.StoreMap)[id]
 	if !ok {
-		mtxNew := NewMetrics(id, "Counter")
+		mtxNew := NewMetrics(id, "counter")
 		mtxNew.Delta = &counter
 		(*f.StoreMap)[id] = mtxNew
 		err := f.WriteStorage()
@@ -230,7 +253,7 @@ func (f FileStorage) SaveGaugeValue(id string, gauge Gauge) error {
 	}
 	mtxOld, ok := (*f.StoreMap)[id]
 	if !ok {
-		mtxNew := NewMetrics(id, "Gauge")
+		mtxNew := NewMetrics(id, "gauge")
 		mtxNew.Value = &gauge
 		(*f.StoreMap)[id] = mtxNew
 		err := f.WriteStorage()

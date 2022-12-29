@@ -1,13 +1,13 @@
 package main
 
 import (
-	"encoding/json"
+	// "encoding/json"
 	"fmt"
 	"io"
 	"net/http"
 	"net/http/httptest"
 	"testing"
-	"bytes"
+	// "bytes"
 
 	"github.com/stretchr/testify/assert"
 
@@ -71,149 +71,8 @@ func TestHandler(t *testing.T) {
 		mtxNew store.Metrics
 	}
 	// var valGauge store.Gauge = 4.6 
-	var valCounter store.Counter = 64
-	// tests := []struct {
-	// 	name   string
-	// 	want   want
-	// 	url    string
-	// 	method string
-	// 	mtxOld store.Metrics
-	// }{
-	// 	{
-	// 		name: "counter norm",
-	// 		want: want{
-	// 			StatusCode:  http.StatusOK,
-	// 			contentType: "text/plain; charset=utf-8",
-	// 		},
-	// 		url:    "/update/counter/PollCount/5",
-	// 		method: http.MethodPost,
-	// 	},
-	// 	{
-	// 		name: "counter norm update json",
-	// 		want: want{
-	// 			StatusCode:  http.StatusOK,
-	// 			contentType: "application/json",
-	// 			mtxNew:  store.Metrics{
-	// 				ID: "PollCount",
-	// 				MType: "Counter",
-	// 				Delta: &valCounter,
-	// 			},
-	// 		},
-	// 		url:    "/update/",
-	// 		method: http.MethodPost,
-	// 		mtxOld:  store.Metrics{
-	// 			ID: "PollCount",
-	// 			MType: "Counter",
-	// 			Delta: &valCounter,
-	// 		},
-	// 	},
-	// 	{
-	// 		name: "counter error update json",
-	// 		want: want{
-	// 			StatusCode:  http.StatusOK,
-	// 			contentType: "application/json",
-	// 			mtxNew:  store.Metrics{
-	// 				ID: "PollCount",
-	// 				MType: "Counter",
-	// 				// Delta: &valCounter,
-	// 			},
-	// 		},
-	// 		url:    "/update/",
-	// 		method: http.MethodPost,
-	// 		mtxOld:  store.Metrics{
-	// 			ID: "PollCount",
-	// 			MType: "Counter",
-	// 			Delta: &valCounter,
-	// 		},
-	// 	},
-	// 	{
-	// 		name: "counter error",
-	// 		want: want{
-	// 			StatusCode:  http.StatusBadRequest,
-	// 			contentType: "text/plain; charset=utf-8",
-	// 		},
-	// 		url:    "/update/counter/PollCount/none",
-	// 		method: http.MethodPost,
-	// 	},
-	// 	{
-	// 		name: "gauge norm",
-	// 		want: want{
-	// 			StatusCode:  http.StatusOK,
-	// 			contentType: "text/plain; charset=utf-8",
-	// 		},
-	// 		url:    "/update/gauge/Alloc/3.6",
-	// 		method: http.MethodPost,
-	// 	},
-	// 			{
-	// 		name: "gauge norm update json",
-	// 		want: want{
-	// 			StatusCode:  http.StatusOK,
-	// 			contentType: "application/json",
-	// 			mtxNew:  store.Metrics{
-	// 				ID: "PollCount",
-	// 				MType: "Counter",
-	// 				Value: &valGauge,
-	// 			},
-	// 		},
-	// 		url:    "/update/",
-	// 		method: http.MethodPost,
-	// 		mtxOld:  store.Metrics{
-	// 			ID: "PollCount",
-	// 			MType: "Counter",
-	// 			Value: &valGauge,
-	// 		},
-	// 	},
-	// 	{
-	// 		name: "gauge error",
-	// 		want: want{
-	// 			StatusCode:  http.StatusBadRequest,
-	// 			contentType: "text/plain; charset=utf-8",
-	// 		},
-	// 		url:    "/update/gauge/Alloc/none",
-	// 		method: http.MethodPost,
-	// 	},
-	// 	{
-	// 		name: "no counter no gauge",
-	// 		want: want{
-	// 			StatusCode:  http.StatusNotImplemented,
-	// 			contentType: "text/plain; charset=utf-8",
-	// 		},
-	// 		url:    "/update/error/PollCount/100",
-	// 		method: http.MethodPost,
-	// 	},
-	// 	{
-	// 		name: "default",
-	// 		want: want{
-	// 			StatusCode:  http.StatusMethodNotAllowed,
-	// 			contentType: "text/plain; charset=utf-8",
-	// 		},
-	// 		url:    "/",
-	// 		method: http.MethodPost,
-	// 	},
-	// 	{
-	// 		name: "get counter",
-	// 		want: want{
-	// 			StatusCode:  http.StatusOK,
-	// 			contentType: "text/plain; charset=utf-8",
-	// 			result:      "5",
-	// 		},
-	// 		method: http.MethodGet,
-	// 		url:    "/value/counter/PollCount",
-	// 	},
-	// 	{
-	// 		name: "get gauge",
-	// 		want: want{
-	// 			StatusCode:  http.StatusOK,
-	// 			contentType: "text/plain; charset=utf-8",
-	// 			result:      "3.6",
-	// 		},
-	// 		url:    "/value/gauge/Alloc",
-	// 		method: http.MethodGet,
-	// 	},
-	// }
-
-	//json-----------------------------------------------------
-	testsJson := []struct {
+	// var valCounter store.Counter = 64
+	tests := []struct {
 		name   string
 		want   want
 		url    string
@@ -221,24 +80,33 @@ func TestHandler(t *testing.T) {
 		mtxOld store.Metrics
 	}{
 		{
-			name: "counter norm update json",
+			name: "counter norm",
 			want: want{
 				StatusCode:  http.StatusOK,
-				contentType: "application/json",
-				mtxNew:  store.Metrics{
-					ID: "PollCount",
-					MType: "Counter",
-					Delta: &valCounter,
-				},
+				contentType: "text/plain; charset=utf-8",
 			},
-			url:    "/update/",
+			url:    "/update/counter/PollCount/5",
 			method: http.MethodPost,
-			mtxOld:  store.Metrics{
-				ID: "PollCount",
-				MType: "Counter",
-				Delta: &valCounter,
-			},
 		},
+		// {
+		// 	name: "counter norm update json",
+		// 	want: want{
+		// 		StatusCode:  http.StatusOK,
+		// 		contentType: "application/json",
+		// 		mtxNew:  store.Metrics{
+		// 			ID: "PollCount",
+		// 			MType: "Counter",
+		// 			Delta: &valCounter,
+		// 		},
+		// 	},
+		// 	url:    "/update/",
+		// 	method: http.MethodPost,
+		// 	mtxOld:  store.Metrics{
+		// 		ID: "PollCount",
+		// 		MType: "Counter",
+		// 		Delta: &valCounter,
+		// 	},
+		// },
 		// {
 		// 	name: "counter error update json",
 		// 	want: want{
@@ -258,8 +126,25 @@ func TestHandler(t *testing.T) {
 		// 		Delta: &valCounter,
 		// 	},
 		// },
-		
-		// {
+		{
+			name: "counter error",
+			want: want{
+				StatusCode:  http.StatusBadRequest,
+				contentType: "text/plain; charset=utf-8",
+			},
+			url:    "/update/counter/PollCount/none",
+			method: http.MethodPost,
+		},
+		{
+			name: "gauge norm",
+			want: want{
+				StatusCode:  http.StatusOK,
+				contentType: "text/plain; charset=utf-8",
+			},
+			url:    "/update/gauge/Alloc/3.6",
+			method: http.MethodPost,
+		},
+		// 		{
 		// 	name: "gauge norm update json",
 		// 	want: want{
 		// 		StatusCode:  http.StatusOK,
@@ -278,54 +163,136 @@ func TestHandler(t *testing.T) {
 		// 		Value: &valGauge,
 		// 	},
 		// },
+		{
+			name: "gauge error",
+			want: want{
+				StatusCode:  http.StatusBadRequest,
+				contentType: "text/plain; charset=utf-8",
+			},
+			url:    "/update/gauge/Alloc/none",
+			method: http.MethodPost,
+		},
+		{
+			name: "no counter no gauge",
+			want: want{
+				StatusCode:  http.StatusNotImplemented,
+				contentType: "text/plain; charset=utf-8",
+			},
+			url:    "/update/error/PollCount/100",
+			method: http.MethodPost,
+		},
+		{
+			name: "default",
+			want: want{
+				StatusCode:  http.StatusMethodNotAllowed,
+				contentType: "text/plain; charset=utf-8",
+			},
+			url:    "/",
+			method: http.MethodPost,
+		},
+		{
+			name: "get counter",
+			want: want{
+				StatusCode:  http.StatusOK,
+				contentType: "text/plain; charset=utf-8",
+				result:      "5",
+			},
+			method: http.MethodGet,
+			url:    "/value/counter/PollCount",
+		},
+		{
+			name: "get gauge",
+			want: want{
+				StatusCode:  http.StatusOK,
+				contentType: "text/plain; charset=utf-8",
+				result:      "3.6",
+			},
+			url:    "/value/gauge/Alloc",
+			method: http.MethodGet,
+		},
 	}
-	ts := httptest.NewServer(r)
-	defer ts.Close()
 
-	// for _, tt := range tests {
-	// 	t.Run(tt.name, func(t *testing.T) {
-	// 		// tt.Skip()
-	// 		request := httptest.NewRequest(tt.method, tt.url, nil)
-	// 		w := httptest.NewRecorder()
-	// 		r.ServeHTTP(w, request)
-	// 		result := w.Result()
-	// 		body, err := io.ReadAll(result.Body)
-	// 		result.Body.Close()
-	// 		assert.NoError(t, err)
-	// 		assert.Equal(t, tt.want.StatusCode, result.StatusCode)
-	// 		fmt.Println(tt.name)
-	// 		if tt.name != "default" {
-	// 			assert.Equal(t, tt.want.contentType, result.Header.Get("Content-Type"))
-	// 		}
-	// 		if tt.method == http.MethodGet {
-	// 			assert.Equal(t, tt.want.result, string(body))
-	// 		}
-	// 	})
+	//json-----------------------------------------------------
+	// testsJson := []struct {
+	// 	name   string
+	// 	want   want
+	// 	url    string
+	// 	method string
+	// 	mtxOld store.Metrics
+	// }{
+	// 	{
+	// 		name: "counter norm update json",
+	// 		want: want{
+	// 			StatusCode:  http.StatusOK,
+	// 			contentType: "application/json",
+	// 			mtxNew:  store.Metrics{
+	// 				ID: "PollCount",
+	// 				MType: "Counter",
+	// 				Delta: &valCounter,
+	// 			},
+	// 		},
+	// 		url:    "/update/",
+	// 		method: http.MethodPost,
+	// 		mtxOld:  store.Metrics{
+	// 			ID: "PollCount",
+	// 			MType: "Counter",
+	// 			Delta: &valCounter,
+	// 		},
+	// 	},
+	// 	// {
+	// 	// 	name: "counter error update json",
+	// 	// 	want: want{
+	// 	// 		StatusCode:  http.StatusOK,
+	// 	// 		contentType: "application/json",
+	// 	// 		mtxNew:  store.Metrics{
+	// 	// 			ID: "PollCount",
+	// 	// 			MType: "Counter",
+	// 	// 			// Delta: &valCounter,
+	// 	// 		},
+	// 	// 	},
+	// 	// 	url:    "/update/",
+	// 	// 	method: http.MethodPost,
+	// 	// 	mtxOld:  store.Metrics{
+	// 	// 		ID: "PollCount",
+	// 	// 		MType: "Counter",
+	// 	// 		Delta: &valCounter,
+	// 	// 	},
+	// 	// },
+	// 	// {
+	// 	// 	name: "gauge norm update json",
+	// 	// 	want: want{
+	// 	// 		StatusCode:  http.StatusOK,
+	// 	// 		contentType: "application/json",
+	// 	// 		mtxNew:  store.Metrics{
+	// 	// 			ID: "PollCount",
+	// 	// 			MType: "Counter",
+	// 	// 			Value: &valGauge,
+	// 	// 		},
+	// 	// 	},
+	// 	// 	url:    "/update/",
+	// 	// 	method: http.MethodPost,
+	// 	// 	mtxOld:  store.Metrics{
+	// 	// 		ID: "PollCount",
+	// 	// 		MType: "Counter",
+	// 	// 		Value: &valGauge,
+	// 	// 	},
+	// 	// },
 	// }
-	for _, tt := range testsJson {
-		t.Run(tt.name, func(t *testing.T) {
-			fmt.Println(tt.name)
-			fmt.Println("tt.mtxOld:   ", int(*tt.mtxOld.Delta))
+	// ts := httptest.NewServer(r)
+	// defer ts.Close()
 
-			bodyBytes, _ := json.Marshal(tt.mtxOld)
-			buf := bytes.NewReader(bodyBytes)
-			request := httptest.NewRequest(tt.method, tt.url, buf)
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			// tt.Skip()
+			request := httptest.NewRequest(tt.method, tt.url, nil)
 			w := httptest.NewRecorder()
 			r.ServeHTTP(w, request)
-			r.ServeHTTP(w, request)
-			r.ServeHTTP(w, request)
 			result := w.Result()
-
-			body, _ := io.ReadAll(result.Body)
-    		var mtxNew store.Metrics
-			_ = json.Unmarshal(bodyBytes, &mtxNew)
-
+			body, err := io.ReadAll(result.Body)
 			result.Body.Close()
-
-			// assert.NoError(t, err)
-			fmt.Println("mtxNew:   ", int(*mtxNew.Delta))
+			assert.NoError(t, err)
 			assert.Equal(t, tt.want.StatusCode, result.StatusCode)
-			assert.Equal(t, tt.want.mtxNew, mtxNew)
+			fmt.Println(tt.name)
 			if tt.name != "default" {
 				assert.Equal(t, tt.want.contentType, result.Header.Get("Content-Type"))
 			}
@@ -334,4 +301,36 @@ func TestHandler(t *testing.T) {
 			}
 		})
 	}
+	// for _, tt := range testsJson {
+	// 	t.Run(tt.name, func(t *testing.T) {
+	// 		fmt.Println(tt.name)
+	// 		fmt.Println("tt.mtxOld:   ", int(*tt.mtxOld.Delta))
+
+	// 		bodyBytes, _ := json.Marshal(tt.mtxOld)
+	// 		buf := bytes.NewReader(bodyBytes)
+	// 		request := httptest.NewRequest(tt.method, tt.url, buf)
+	// 		w := httptest.NewRecorder()
+	// 		r.ServeHTTP(w, request)
+	// 		// r.ServeHTTP(w, request)
+	// 		// r.ServeHTTP(w, request)
+	// 		result := w.Result()
+
+	// 		body, _ := io.ReadAll(result.Body)
+    // 		var mtxNew store.Metrics
+	// 		_ = json.Unmarshal(bodyBytes, &mtxNew)
+
+	// 		result.Body.Close()
+
+	// 		// assert.NoError(t, err)
+	// 		fmt.Println("mtxNew:   ", int(*mtxNew.Delta))
+	// 		assert.Equal(t, tt.want.StatusCode, result.StatusCode)
+	// 		assert.Equal(t, tt.want.mtxNew, mtxNew)
+	// 		if tt.name != "default" {
+	// 			assert.Equal(t, tt.want.contentType, result.Header.Get("Content-Type"))
+	// 		}
+	// 		if tt.method == http.MethodGet {
+	// 			assert.Equal(t, tt.want.result, string(body))
+	// 		}
+	// 	})
+	// }
 }

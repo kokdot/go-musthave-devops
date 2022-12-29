@@ -33,7 +33,7 @@ type Gauge float64
 type Counter int64
 type MonitorMap map[string]Gauge
 var PollCount Counter
-var RandomValue Gauge
+var RandomValue Gauge 
 
 var( 
 	pollIntervalReal = PollInterval
@@ -112,7 +112,7 @@ func mtxCounterSet(id string, counterPtr *Counter) ([]byte, error) {
 
 	var varMetrics Metrics = Metrics{
 			ID: id,
-			MType: "Counter",
+			MType: "counter",
 			Delta: counterPtr,
 		}
 	bodyBytes, err := json.Marshal(varMetrics)
@@ -127,7 +127,7 @@ func mtxGaugeSet(id string, gaugePtr *Gauge) ([]byte, error) {
 
 	var varMetrics Metrics = Metrics{
 			ID: id,
-			MType: "Gauge",
+			MType: "gauge",
 			Value: gaugePtr,
 		}
 	bodyBytes, err := json.Marshal(varMetrics)
@@ -169,6 +169,8 @@ func main() {
 			PollCount++
 			RandomValue = Gauge(rand.Float64())
 			// fmt.Println(m)
+			// <-time.After(pollIntervalReal)
+
 		}
 	}(&m, rtm)
 	
@@ -296,7 +298,8 @@ func main() {
 			// 	// fmt.Println("-----Get;------- Id: ", varMetrics.ID, "Value: ", *varMetrics.Value) 
 			// }
 
-			
+			// <-time.After(reportIntervalReal) 
+				
 		}
 	}()
 	wg.Wait()

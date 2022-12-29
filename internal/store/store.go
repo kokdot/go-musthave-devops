@@ -3,6 +3,7 @@ package store
 import (
 	"fmt"
 	"errors"
+	"sort"
 	// "os"
 	// "bufio"
 	// "log"
@@ -30,6 +31,11 @@ func NewMemStorageWithFile(filename string) (*MemStorage, error) {
 	// 	return nil, err
 	// }
 	sm := make(StoreMap)
+	sm["1"] = Metrics{
+		ID: "1",
+		MType: "1",
+		
+	}
 	return &MemStorage{
 		StoreMap : &sm, 
 		file: filename,
@@ -38,11 +44,16 @@ func NewMemStorageWithFile(filename string) (*MemStorage, error) {
 
 	}, nil
 }
-func NewMemStorage() *MemStorage {
+func NewMemStorage() (*MemStorage, error) {
 	sm := make(StoreMap)
-	return &MemStorage{
-		StoreMap : &sm, 
+	sm["1"] = Metrics{
+		ID: "1",
+		MType: "1",
+
 	}
+	return &MemStorage{
+		StoreMap : &sm,
+	}, nil
 }
 //------------------------------------interface--------------------------------------
 type Consumer interface {
@@ -77,16 +88,16 @@ var zeroG Gauge = 0
 var zeroC Counter = 0
 
 func NewMetrics(id string, mType string) Metrics {
-	if mType == "Gauge" {
+	if mType == "gauge" {
 		return Metrics{
 		ID: id,
-		MType: "Gauge",
+		MType: "gauge",
 		Value: &zeroG,
 		}
 	} else {
 		return Metrics{
 			ID: id,
-			MType: "Counter",
+			MType: "counter",
 			Delta: &zeroC,
 		}
 	}
@@ -94,28 +105,51 @@ func NewMetrics(id string, mType string) Metrics {
 
 func (m MemStorage) Save(mtxNew *Metrics) (*Metrics, error) {
 	if m.StoreMap == nil {
+		// fmt.Println("--store---Save--err line 107-----------------------------")
 		return nil, errors.New("memStorage is nil")
 	}
-	fmt.Println("---------Save-------------------")
+	// fmt.Println("--111---store----Save-------------------")
 	if mtxNew == nil {
-	fmt.Println("---------mtx.new is nil-------------------")
+	// fmt.Println("--113--store---Save line 112-----mtx.new is nil-------------------")
 
 	}
-	fmt.Println("---------mtxNew-------------------:   " , mtxNew)
+	// fmt.Println("---116--store---Save line 115----mtxNew-------------------:   " , mtxNew)
 	if mtxNew.Value != nil {
-		fmt.Println("---------mtxNew-------------------:   " , *mtxNew.Value)
+		fmt.Println("--118---store---Save line 117----mtxNew-------------------:   " , *mtxNew.Value)
 
 	}
 	switch mtxNew.MType {
 	case "Gauge":
-        // fmt.Println("---------Gauge-------------------")
-        // fmt.Println("---------Save-------------------")
-        // fmt.Println("---------Save-------------------")
+        // fmt.Println("---123---store---Save line 122---Gauge-------------------")
+        // fmt.Println("---124--store---Save line----Save-------------------")
+        // fmt.Println("---125--store---Save line----Save-------------------")
 		
 		(*m.StoreMap)[mtxNew.ID] = *mtxNew
+		// sm, _ := m.GetAll()
+        // fmt.Println("--129---store---Save line----Save---m.GetAll()----------------:   ", sm)
+
 		return mtxNew, nil
-	case "Counter":
-        fmt.Println("---------Counter-------------------")
+		case "gauge":
+        // fmt.Println("---123---store---Save line 122---Gauge-------------------")
+        // fmt.Println("---124--store---Save line----Save-------------------")
+        // fmt.Println("---125--store---Save line----Save-------------------")
+		
+		(*m.StoreMap)[mtxNew.ID] = *mtxNew
+		// sm, _ := m.GetAll()
+        // fmt.Println("--129---store---Save line----Save---m.GetAll()----------------:   ", sm)
+
+		return mtxNew, nil
+	case "counter":
+        // fmt.Println("---133--store----Counter-------------------")
+		mtxOld, ok := (*m.StoreMap)[mtxNew.ID]
+		if !ok {
+			(*m.StoreMap)[mtxNew.ID] = *mtxNew
+			return mtxNew, nil
+		}
+		*mtxOld.Delta += *mtxNew.Delta
+		return &mtxOld, nil
+		case "Counter":
+        // fmt.Println("---133--store----Counter-------------------")
 		mtxOld, ok := (*m.StoreMap)[mtxNew.ID]
 		if !ok {
 			(*m.StoreMap)[mtxNew.ID] = *mtxNew
@@ -218,18 +252,26 @@ func (m *MemStorage) GetAllValues() (string, error) {
 	var str string
 	var v Gauge
 	var d Counter
+	var i int
 	if m.StoreMap == nil {
 		return "", errors.New("storeMap is nil")
 	}
-	for key, val := range (*m.StoreMap) {
-		if val.Delta != nil {
-			d = *val.Delta
-		}
-		if val.Value == nil {
-			v = *val.Value
-		}
-		str += fmt.Sprintf("%s: %v %v\n", key, v, d)
+	sm := *m.StoreMap
+	keys := make([]string, 0, len(sm))
+	for k := range sm {
+		keys = append(keys, k)
+	}
+	sort.Strings(keys)
 
+	for _, key := range keys {
+		i++
+		if sm[key].Delta != nil {
+			d = *sm[key].Delta
+		}
+		if sm[key].Value != nil {
+			v = *sm[key].Value
+		}
+		str += fmt.Sprintf("%d; %s: %v %v\n",i , key, v, d)
 	}
 	return str, nil
 }
