@@ -34,6 +34,7 @@ const (
     StoreFile = "/tmp/devops-metrics-db.json"
     Restore = false
 )
+
 type Config struct {
     Address  string 		`env:"ADDRESS"`// envDefault:"127.0.0.1:8080"`
     StoreInterval  time.Duration `env:"STORE_INTERVAL"`// envDefault:"30s"`
@@ -97,22 +98,27 @@ func onboarding() {
     // fmt.Println("---------onboarding m: -------------------", M)
     // fmt.Println("---------onboarding m: -------------------", ms)
 	// fmt.Println("---5------cfg.StoreInterval-------------------", cfg.StoreInterval)
+    fmt.Println("--------------------------const-------------------------------")
+    fmt.Println("url:  ", url)
+    fmt.Println("StoreInterval:  ", StoreInterval)
+    fmt.Println("StoreFile:  ", StoreFile)
+    fmt.Println("Restore:  ", Restore)
+    fmt.Println("---------------------------flag------------------------------")
     fmt.Println("urlRealPtr:", *urlRealPtr)
     fmt.Println("restorePtr:", *restorePtr)
     fmt.Println("storeFilePtr:", *storeFilePtr)
     fmt.Println("storeIntervalPtr:", *storeIntervalPtr)
-    fmt.Println("---------------------------------------------------------")
-    
-    fmt.Println("UrlReal:", UrlReal)
-    fmt.Println("restore:", restore)
-    fmt.Println("storeFile:", storeFile)
-    fmt.Println("storeInterval:", storeInterval)
-fmt.Println("---------------------------------------------------------")
+    fmt.Println("---------------------------cfg------------------------------")
     fmt.Println("cfg.Address:", cfg.Address)
     fmt.Println("cfg.Restore:", cfg.Restore)
     fmt.Println("cfg.StoreFile:", cfg.StoreFile)
     fmt.Println("cfg.StoreInterval:", cfg.StoreInterval)
-    
+    fmt.Println("UrlReal:", UrlReal)
+    fmt.Println("------------------------real---------------------------------")
+    fmt.Println("restore:", restore)
+    fmt.Println("storeFile:", storeFile)
+    fmt.Println("storeInterval:", storeInterval)
+    fmt.Println("------------------------Ok---------------------------------")
 }
 
 func main() {

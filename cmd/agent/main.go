@@ -85,17 +85,13 @@ func NewMonitor(m *MonitorMap, rtm runtime.MemStats) {//}, mutex *sync.RWMutex) 
 	// mutex.Unlock()
 }
 func onboarding() {
-
     err := env.Parse(&cfg)
     if err != nil {
-        fmt.Println(err)
+        fmt.Println("fail to parse cfg:  ", err)
     }
-	
-
 	urlRealPtr := flag.String("a", "127.0.0.1:8080", "ip adddress of server")
     reportIntervalRealPtr := flag.Duration("r", 10, "interval of perort")
     pollIntervalRealPtr := flag.Duration("p", 2, "interval of poll")
-
     flag.Parse()
 	urlReal = *urlRealPtr
 	reportIntervalReal = *reportIntervalRealPtr
@@ -113,10 +109,24 @@ func onboarding() {
 	// reportIntervalReal	= cfg.ReportInterval
 	// pollIntervalReal	= cfg.PollInterval
 	urlReal = "http://" + urlReal
+
+    fmt.Println("--------------------------const-------------------------------")
+	fmt.Println("Url:     ", url)
+	fmt.Println("ReportIntervalReal:     ", ReportIntervalReal)
+	fmt.Println("pollIntervalReal:     ", PollIntervalReal)
+	fmt.Println("--------------------------flag-------------------------------")
+	fmt.Println("urlRealPtr:     ", urlRealPtr)
+	fmt.Println("reportIntervalRealPtr:     ", reportIntervalRealPtr)
+	fmt.Println("pollIntervalRealPtr:     ", pollIntervalRealPtr)
+	fmt.Println("--------------------------cfg-------------------------------")
+	fmt.Println("cfg.Address:     ", cfg.Address)
+	fmt.Println("cfg.ReportInterval:     ", cfg.ReportInterval)
+	fmt.Println("cfg.PollInterval:     ", cfg.PollInterval)
+	fmt.Println("--------------------------real-------------------------------")
 	fmt.Println("urlReal:     ", urlReal)
 	fmt.Println("reportIntervalReal:     ", reportIntervalReal)
 	fmt.Println("pollIntervalReal:     ", pollIntervalReal)
-
+	fmt.Println("--------------------------Ok-------------------------------")
 }
 func mtxCounterSet(id string, counterPtr *Counter) ([]byte, error) {
 	// fmt.Println("---------mtxCounterSet-----------------id--", id, "*counterPtr", *counterPtr)
