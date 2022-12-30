@@ -101,9 +101,17 @@ func onboarding() {
 	reportIntervalReal = *reportIntervalRealPtr
 	pollIntervalReal = *pollIntervalRealPtr
 
-	urlReal	= cfg.Address
-	reportIntervalReal	= cfg.ReportInterval
-	pollIntervalReal	= cfg.PollInterval
+	if cfg.Address != "" {
+        urlReal	= cfg.Address
+    }
+	if cfg.ReportInterval != 0 {
+        reportIntervalReal = cfg.ReportInterval
+	}
+	if cfg.PollInterval != 0 {
+        pollIntervalReal = cfg.PollInterval
+	}
+	// reportIntervalReal	= cfg.ReportInterval
+	// pollIntervalReal	= cfg.PollInterval
 	urlReal = "http://" + urlReal
 	fmt.Println("urlReal:     ", urlReal)
 	fmt.Println("reportIntervalReal:     ", reportIntervalReal)

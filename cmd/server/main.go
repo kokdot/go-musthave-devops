@@ -89,7 +89,7 @@ func onboarding() {
     if cfg.StoreFile != "" {
         storeFile = cfg.StoreFile
     }
-    if !restore {
+    if cfg.Restore {
         restore = cfg.Restore
     } 
 	// fmt.Println("---4------storeInterval-------------------", storeInterval)
