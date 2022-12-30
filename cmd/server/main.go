@@ -35,10 +35,10 @@ const (
     Restore = false
 )
 type Config struct {
-    Address  string 		`env:"ADDRESS" envDefault:"127.0.0.1:8080"`
-    StoreInterval  time.Duration `env:"STORE_INTERVAL" envDefault:"30s"`
-    StoreFile  string 		`env:"STORE_FILE" envDefault:"/tmp/devops-metrics-db.json"`
-    Restore  bool 		`env:"RESTORE" envDefault:"true"`
+    Address  string 		`env:"ADDRESS"`// envDefault:"127.0.0.1:8080"`
+    StoreInterval  time.Duration `env:"STORE_INTERVAL"`// envDefault:"30s"`
+    StoreFile  string 		`env:"STORE_FILE"`// envDefault:"/tmp/devops-metrics-db.json"`
+    Restore  bool 		`env:"RESTORE"`// envDefault:"true"`
 }
 var (
     M store.Repo 
@@ -57,7 +57,7 @@ var (
 
 // }
 func onboarding() {
-	// fmt.Println("---------onboarding-------------------")
+	fmt.Println("---------onboarding-------------------")
 	// fmt.Println("------1---storeInterval-------------------", storeInterval)
 
     err := env.Parse(&cfg)
@@ -80,20 +80,38 @@ func onboarding() {
     storeFile = *storeFilePtr
     restore = *restorePtr
 	// fmt.Println("----3-----storeInterval-------------------", storeInterval)
-
-    UrlReal	= cfg.Address
-    storeInterval = cfg.StoreInterval
-    storeFile = cfg.StoreFile
-    restore = cfg.Restore
+    if cfg.Address != "" {
+        UrlReal	= cfg.Address
+    }
+    if cfg.StoreInterval != 0 {
+        storeInterval = cfg.StoreInterval
+    }
+    if cfg.StoreFile != "" {
+        storeFile = cfg.StoreFile
+    }
+    if !restore {
+        restore = cfg.Restore
+    } 
 	// fmt.Println("---4------storeInterval-------------------", storeInterval)
 
     // fmt.Println("---------onboarding m: -------------------", M)
     // fmt.Println("---------onboarding m: -------------------", ms)
 	// fmt.Println("---5------cfg.StoreInterval-------------------", cfg.StoreInterval)
+    fmt.Println("urlRealPtr:", *urlRealPtr)
+    fmt.Println("restorePtr:", *restorePtr)
+    fmt.Println("storeFilePtr:", *storeFilePtr)
+    fmt.Println("storeIntervalPtr:", *storeIntervalPtr)
+    fmt.Println("---------------------------------------------------------")
+    
     fmt.Println("UrlReal:", UrlReal)
     fmt.Println("restore:", restore)
     fmt.Println("storeFile:", storeFile)
     fmt.Println("storeInterval:", storeInterval)
+fmt.Println("---------------------------------------------------------")
+    fmt.Println("cfg.Address:", cfg.Address)
+    fmt.Println("cfg.Restore:", cfg.Restore)
+    fmt.Println("cfg.StoreFile:", cfg.StoreFile)
+    fmt.Println("cfg.StoreInterval:", cfg.StoreInterval)
     
 }
 
