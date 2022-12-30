@@ -70,7 +70,7 @@ func onboarding() {
     urlRealPtr := flag.String("a", "127.0.0.1:8080", "ip adddress of server")
     restorePtr := flag.Bool("r", true, "restore Metrics(Bool)")
     storeFilePtr := flag.String("f", "/tmp/devops-metrics-db.json", "file name")
-    storeIntervalPtr := flag.Duration("i", 300, "interval of download")
+    storeIntervalPtr := flag.Duration("i", 300000000000, "interval of download")
 
     flag.Parse()
 	// fmt.Println("-----2----storeInterval-------------------", storeInterval)
