@@ -18,8 +18,8 @@ import (
 
 const (
 	Url            = "127.0.0.1:8080"
-	PollInterval time.Duration  = 2
-	ReportInterval time.Duration = 10
+	PollInterval time.Duration  = 2 * time.Second
+	ReportInterval time.Duration = 10 * time.Second
 )
 type Config struct {
     Address  string 		`env:"ADDRESS"`// envDefault:"127.0.0.1:8080"`
@@ -111,9 +111,9 @@ func onboarding() {
 	urlReal = "http://" + urlReal
 
     fmt.Println("--------------------------const-------------------------------")
-	fmt.Println("Url:     ", url)
-	fmt.Println("ReportIntervalReal:     ", ReportIntervalReal)
-	fmt.Println("pollIntervalReal:     ", PollIntervalReal)
+	fmt.Println("Url:     ", Url)
+	fmt.Println("ReportIntervalReal:     ", ReportInterval)
+	fmt.Println("pollIntervalReal:     ", PollInterval)
 	fmt.Println("--------------------------flag-------------------------------")
 	fmt.Println("urlRealPtr:     ", urlRealPtr)
 	fmt.Println("reportIntervalRealPtr:     ", reportIntervalRealPtr)
