@@ -18,8 +18,8 @@ import (
 
 const (
 	Url            = "127.0.0.1:8080"
-	PollInterval time.Duration  = 2 * time.Second
-	ReportInterval time.Duration = 10 * time.Second
+	PollInterval time.Duration  = time.Second * 2
+	ReportInterval time.Duration = time.Second * 10
 )
 type Config struct {
     Address  string 		`env:"ADDRESS"`// envDefault:"127.0.0.1:8080"`
