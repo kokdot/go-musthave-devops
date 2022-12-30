@@ -22,9 +22,9 @@ const (
 	ReportInterval time.Duration = 10
 )
 type Config struct {
-    Address  string 		`env:"ADDRESS" envDefault:"127.0.0.1:8080"`
-    ReportInterval time.Duration	 `env:"REPORT_INTERVAL" envDefault:"10s"`
-    PollInterval time.Duration	 `env:"POLL_INTERVAL" envDefault:"2s"`
+    Address  string 		`env:"ADDRESS"`// envDefault:"127.0.0.1:8080"`
+    ReportInterval time.Duration	 `env:"REPORT_INTERVAL"`// envDefault:"10s"`
+    PollInterval time.Duration	 `env:"POLL_INTERVAL"`// envDefault:"2s"`
 }
 
 var wg sync.WaitGroup 
@@ -148,18 +148,18 @@ func mtxGaugeSet(id string, gaugePtr *Gauge) ([]byte, error) {
 	}
 	return bodyBytes, nil
 }
-func mtxGaugeGet(id string) ([]byte, error) {
-	var varMetrics Metrics = Metrics{
-			ID: id,
-			MType: "Gauge",
-		}
-	bodyBytes, err := json.Marshal(varMetrics)
-	if err != nil {
-		fmt.Printf("Failed marshal json: %s\n", err)
-		return nil, err
-	}
-	return bodyBytes, nil
-}
+// func mtxGaugeGet(id string) ([]byte, error) {
+// 	var varMetrics Metrics = Metrics{
+// 			ID: id,
+// 			MType: "Gauge",
+// 		}
+// 	bodyBytes, err := json.Marshal(varMetrics)
+// 	if err != nil {
+// 		fmt.Printf("Failed marshal json: %s\n", err)
+// 		return nil, err
+// 	}
+// 	return bodyBytes, nil
+// }
 func main() {
 	wg.Add(2)
 	onboarding()
@@ -196,7 +196,7 @@ func main() {
 			
 			//PollCount----------------------------------------------------------
 			strURL := fmt.Sprintf("%s/update/", urlReal)
-			strURLGet := fmt.Sprintf("%s/value/", urlReal)
+			// strURLGet := fmt.Sprintf("%s/value/", urlReal)
 			var varMetrics Metrics
 			var bodyBytes []byte
 			var err error
@@ -232,82 +232,82 @@ func main() {
 			// fmt.Println("RandomValue: ", *varMetrics.Value) 
 
 				//RandomValueGet---------------------------------------------------
-			// strURLGet := fmt.Sprintf("%s/value/", urlReal)
-			// var metricsStructGet Metrics
-			// // randomValue := float64(RandomValue)
-			// // varMetrics = Metrics{
-			// 	// 	ID: "RandomValue",
-			// 	// 	MType: "Gauge",
-			// 	// }
-			// 	bodyBytes, err := mtxGaugeGet("RandomValue")
-			// 	// bodyBytes, err = json.Marshal(varMetrics)
-			// 	// if err != nil {
-			// 	// 	fmt.Printf("Failed marshal json: %s\n", err)
-			// 	// }
-			// 	// var varMetrics1 Metrics
-			// 	client := resty.New()
-			// 	_, err = client.R().
-			// SetResult(&metricsStructGet).
-			// SetBody(bodyBytes).
-			// Post(strURLGet)
-			// if err != nil {
-			// 	log.Printf("Failed unmarshall response: %s\n", err)
-			// }
-			// fmt.Println("RandomValueGet:  ", *metricsStructGet.Value) 
+			strURLGet := fmt.Sprintf("%s/value/", urlReal)
+			var metricsStructGet Metrics
+			// randomValue := float64(RandomValue)
+			// varMetrics = Metrics{
+				// 	ID: "RandomValue",
+				// 	MType: "Gauge",
+				// }
+				bodyBytes, err := mtxGaugeGet("RandomValue")
+				// bodyBytes, err = json.Marshal(varMetrics)
+				// if err != nil {
+				// 	fmt.Printf("Failed marshal json: %s\n", err)
+				// }
+				// var varMetrics1 Metrics
+				client := resty.New()
+				_, err = client.R().
+			SetResult(&metricsStructGet).
+			SetBody(bodyBytes).
+			Post(strURLGet)
+			if err != nil {
+				log.Printf("Failed unmarshall response: %s\n", err)
+			}
+			fmt.Println("RandomValueGet:  ", *metricsStructGet.Value) 
 
-			// Gauge ----------------------------------------------------------
-			//n := 0
-			// for key, val := range m {
-			// 	// n++
-			// 	// if n > 1 {
-			// 	// 	break
-			// 	// }
-			// 	// fmt.Println("key: ", key, ";  val: ", val)
-			// 	bodyBytes, err = mtxGaugeSet(key, &val)
-			// 	if err != nil {
-			// 		fmt.Println(err)
-			// 	}
-			// 	client := resty.New()
-			// 	_, err = client.R().
-			// 	SetResult(&varMetrics).
-			// 	SetBody(bodyBytes).
-			// 	Post(strURL)
-			// 	if err != nil {
-			// 		fmt.Printf("Failed unmarshall response Monitor, ID: %s; error: %s\n", key, err)
-			// 	}
-			// 	// fmt.Println("-----Update;------- Id: ", varMetrics.ID, "Value: ", *varMetrics.Value) 
-			// }
-			// Gauge ------Get----------------------------------------------------
-			// n := 0
-			fmt.Println("---------------------------------------------")
-			for key, _ := range m {
+			Gauge ----------------------------------------------------------
+			n := 0
+			for key, val := range m {
 				// n++
-				// if n > 3 {
+				// if n > 1 {
 				// 	break
 				// }
 				// fmt.Println("key: ", key, ";  val: ", val)
-				bodyBytes, err = mtxGaugeGet(key)
+				bodyBytes, err = mtxGaugeSet(key, &val)
 				if err != nil {
 					fmt.Println(err)
 				}
-				// _ = bodyBytes
 				client := resty.New()
 				_, err = client.R().
 				SetResult(&varMetrics).
 				SetBody(bodyBytes).
-				Post(strURLGet)
+				Post(strURL)
 				if err != nil {
-					fmt.Printf("Failed unmarshall response: %s\n", err)
+					fmt.Printf("Failed unmarshall response Monitor, ID: %s; error: %s\n", key, err)
 				}
-				if varMetrics.Value == nil {
-					fmt.Println("-----Get;------- Id: ", varMetrics.ID, "Value is nil: ", varMetrics) 
-
-				} else {
-					fmt.Println("-----Get;------- Id: ", varMetrics.ID, "Value: ", *varMetrics.Value) 
-
-				}
-				// fmt.Println("-----Get;------- Id: ", varMetrics.ID, "Value: ", *varMetrics.Value) 
+				// fmt.Println("-----Update;------- Id: ", varMetrics.ID, "Value: ", *varMetrics.Value) 
 			}
+			// Gauge ------Get----------------------------------------------------
+			// n := 0
+			// fmt.Println("---------------------------------------------")
+			// for key, _ := range m {
+			// 	// n++
+			// 	// if n > 3 {
+			// 	// 	break
+			// 	// }
+			// 	// fmt.Println("key: ", key, ";  val: ", val)
+			// 	bodyBytes, err = mtxGaugeGet(key)
+			// 	if err != nil {
+			// 		fmt.Println(err)
+			// 	}
+			// 	// _ = bodyBytes
+			// 	client := resty.New()
+			// 	_, err = client.R().
+			// 	SetResult(&varMetrics).
+			// 	SetBody(bodyBytes).
+			// 	Post(strURLGet)
+			// 	if err != nil {
+			// 		fmt.Printf("Failed unmarshall response: %s\n", err)
+			// 	}
+			// 	if varMetrics.Value == nil {
+			// 		fmt.Println("-----Get;------- Id: ", varMetrics.ID, "Value is nil: ", varMetrics) 
+
+			// 	} else {
+			// 		fmt.Println("-----Get;------- Id: ", varMetrics.ID, "Value: ", *varMetrics.Value) 
+
+			// 	}
+			// 	// fmt.Println("-----Get;------- Id: ", varMetrics.ID, "Value: ", *varMetrics.Value) 
+			// }
 
 			// <-time.After(reportIntervalReal) 
 				
