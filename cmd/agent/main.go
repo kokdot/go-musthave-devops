@@ -242,31 +242,31 @@ func main() {
 			// fmt.Println("RandomValue: ", *varMetrics.Value) 
 
 				//RandomValueGet---------------------------------------------------
-			strURLGet := fmt.Sprintf("%s/value/", urlReal)
-			var metricsStructGet Metrics
-			// randomValue := float64(RandomValue)
-			// varMetrics = Metrics{
-				// 	ID: "RandomValue",
-				// 	MType: "Gauge",
-				// }
-				bodyBytes, err := mtxGaugeGet("RandomValue")
-				// bodyBytes, err = json.Marshal(varMetrics)
-				// if err != nil {
-				// 	fmt.Printf("Failed marshal json: %s\n", err)
-				// }
-				// var varMetrics1 Metrics
-				client := resty.New()
-				_, err = client.R().
-			SetResult(&metricsStructGet).
-			SetBody(bodyBytes).
-			Post(strURLGet)
-			if err != nil {
-				log.Printf("Failed unmarshall response: %s\n", err)
-			}
-			fmt.Println("RandomValueGet:  ", *metricsStructGet.Value) 
+			// strURLGet := fmt.Sprintf("%s/value/", urlReal)
+			// var metricsStructGet Metrics
+			// // randomValue := float64(RandomValue)
+			// // varMetrics = Metrics{
+			// 	// 	ID: "RandomValue",
+			// 	// 	MType: "Gauge",
+			// 	// }
+			// 	bodyBytes, err := mtxGaugeGet("RandomValue")
+			// 	// bodyBytes, err = json.Marshal(varMetrics)
+			// 	// if err != nil {
+			// 	// 	fmt.Printf("Failed marshal json: %s\n", err)
+			// 	// }
+			// 	// var varMetrics1 Metrics
+			// 	client := resty.New()
+			// 	_, err = client.R().
+			// SetResult(&metricsStructGet).
+			// SetBody(bodyBytes).
+			// Post(strURLGet)
+			// if err != nil {
+			// 	log.Printf("Failed unmarshall response: %s\n", err)
+			// }
+			// fmt.Println("RandomValueGet:  ", *metricsStructGet.Value) 
 
-			Gauge ----------------------------------------------------------
-			n := 0
+			// Gauge ----------------------------------------------------------
+			// n := 0
 			for key, val := range m {
 				// n++
 				// if n > 1 {
