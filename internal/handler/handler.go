@@ -38,7 +38,7 @@ const (
 //     Restore  bool 		`env:"RESTORE" envDefault:"true"`
 // }
 var (
-	ms = new(store.MemStorage)
+	// ms = new(store.MemStorage)
 	M  store.Repo
 	//     UrlReal = url
 	StoreInterval time.Duration// = StoreInterval
@@ -195,12 +195,12 @@ func PostUpdate(w http.ResponseWriter, r *http.Request) {
 		return
 	}
         // fmt.Println("-197-handler--PostUpdate-----m/txNew-------------------", mtxNew)
-    if mtxNew.Delta != nil {
+    // if mtxNew.Delta != nil {
         // fmt.Println("--199--handler---PostUpdate-----mtxNew-------------------", mtxNew, "delta:  ", *mtxNew.Delta)
-    }
-    if mtxNew.Value != nil {
-        fmt.Println("--202---handler----PostUpdate-----mtxNew-------------------", mtxNew, "Value:  ", *mtxNew.Value)
-    }
+    // }
+    // if mtxNew.Value != nil {
+    //     fmt.Println("--202---handler----PostUpdate-----mtxNew-------------------", mtxNew, "Value:  ", *mtxNew.Value)
+    // }
     // sm, _ := M.GetAllValues()
     // fmt.Println("----205---handler-------------/-------------------------------------------")
 	// fmt.Println("--206--handler-----PostUpdate----sm-!!!!!!!!-----------------\n:  ", sm)
@@ -354,7 +354,7 @@ func PostCounterCtx(next http.Handler) http.Handler {
 		if nameDataStr == "" || valueDataStr == "" {
 			w.Header().Set("content-type", "text/plain; charset=utf-8")
 			w.WriteHeader(http.StatusNotFound)
-			fmt.Fprint(w, "http.StatusNotFound")
+			// fmt.Fprint(w, "http.StatusNotFound")
 			return
 		}
 		nameData = nameDataStr
@@ -362,13 +362,13 @@ func PostCounterCtx(next http.Handler) http.Handler {
 		if err != nil {
 			w.Header().Set("content-type", "text/plain; charset=utf-8")
 			w.WriteHeader(http.StatusBadRequest)
-			fmt.Fprint(w, "http.StatusBadRequest")
+			// fmt.Fprint(w, "http.StatusBadRequest")
 			return
 		}
 
 		ctx := context.WithValue(r.Context(), nameDataKey, nameData)
 		ctx = context.WithValue(ctx, valueDataKey, valueData)
-		next.ServeHTTP(w, r.WithContext(ctx))
+        next.ServeHTTP(w, r.WithContext(ctx))// -------------------------------371
 	})
 }
 func GetCtx(next http.Handler) http.Handler {
@@ -378,7 +378,7 @@ func GetCtx(next http.Handler) http.Handler {
 		if nameDataStr == "" {
 			w.Header().Set("content-type", "text/plain; charset=utf-8")
 			w.WriteHeader(http.StatusNotFound)
-			fmt.Fprint(w, "line: 115; http.StatusNotFound")
+			// fmt.Fprint(w, "line: 115; http.StatusNotFound")
 			return
 		}
 		nameData = nameDataStr
@@ -399,7 +399,7 @@ func PostGaugeCtx(next http.Handler) http.Handler {
 		if nameDataStr == "" || valueDataStr == "" {
 			w.Header().Set("content-type", "text/plain; charset=utf-8")
 			w.WriteHeader(http.StatusNotFound)
-			fmt.Fprint(w, "http.StatusNotFound")
+			// fmt.Fprint(w, "http.StatusNotFound")
 			return
 		}
 		nameData = nameDataStr
@@ -407,7 +407,7 @@ func PostGaugeCtx(next http.Handler) http.Handler {
 		if err != nil {
 			w.Header().Set("content-type", "text/plain; charset=utf-8")
 			w.WriteHeader(http.StatusBadRequest)
-			fmt.Fprint(w, "http.StatusBadRequest")
+			// fmt.Fprint(w, "http.StatusBadRequest")
 			return
 		}
 
@@ -419,27 +419,54 @@ func PostGaugeCtx(next http.Handler) http.Handler {
 func PostUpdateCounter(w http.ResponseWriter, r *http.Request) {
 	valueData := r.Context().Value(valueDataKey).(int)
 	nameData := r.Context().Value(nameDataKey).(string)
-	// fmt.Println("__________________________________", m)
-	M.SaveCounterValue(nameData, store.Counter(valueData))
+	// fmt.Println("__________________________________\n", M)
+    sm, _ := M.GetAllValues()
+	fmt.Println("__________________________________\n", sm)
+	counter, err := M.SaveCounterValue(nameData, store.Counter(valueData))//-----------------424
+    if err != nil {
+        w.Header().Set("content-type", "text/plain; charset=utf-8")
+        w.WriteHeader(http.StatusBadRequest)
+        // fmt.Fprint(w, counter)
+        return
+    }
+    // fmt.Println("__________________________________", M)
+    sm, _ = M.GetAllValues()
+	fmt.Println("__________________________________\n", sm)
 	w.Header().Set("content-type", "text/plain; charset=utf-8")
 	w.WriteHeader(http.StatusOK)
-	fmt.Fprint(w, "http.StatusOK")
+	fmt.Fprint(w, counter)
 }
 func PostUpdateGauge(w http.ResponseWriter, r *http.Request) {
 	valueData := r.Context().Value(valueDataKey).(float64)
 	nameData := r.Context().Value(nameDataKey).(string)
-	M.SaveGaugeValue(nameData, store.Gauge(valueData))
+    // fmt.Println("__________________________________\n", M)
+    sm, _ := M.GetAllValues()
+	fmt.Println("__________________________________\n", sm)
+	err := M.SaveGaugeValue(nameData, store.Gauge(valueData))
+    if err != nil {
+        w.Header().Set("content-type", "text/plain; charset=utf-8")
+        w.WriteHeader(http.StatusBadRequest)
+        // fmt.Fprint(w, valueData)``
+        return
+    }
+    // fmt.Println("__________________________________\n", M)
+    sm, _ = M.GetAllValues()
+	fmt.Println("__________________________________\n", sm)
 	w.Header().Set("content-type", "text/plain; charset=utf-8")
 	w.WriteHeader(http.StatusOK)
-	fmt.Fprint(w, "http.StatusOK")
+	fmt.Fprint(w, valueData)
 }
 func GetCounter(w http.ResponseWriter, r *http.Request) {
 	nameData := r.Context().Value(nameDataKey).(string)
+     sm, _ := M.GetAllValues()
+	fmt.Println("__________________________________\n", sm)
 	n, err := M.GetCounterValue(nameData)
+     sm, _ = M.GetAllValues()
+	fmt.Println("__________________________________\n", sm)
 	if err != nil {
 		w.Header().Set("content-type", "text/plain; charset=utf-8")
 		w.WriteHeader(http.StatusNotFound)
-		fmt.Fprint(w, "line: 175; http.StatusNotFound")
+		// fmt.Fprint(w, "line: 175; http.StatusNotFound")
 	} else {
 		w.Header().Set("content-type", "text/plain; charset=utf-8")
 		w.WriteHeader(http.StatusOK)
@@ -448,11 +475,15 @@ func GetCounter(w http.ResponseWriter, r *http.Request) {
 }
 func GetGauge(w http.ResponseWriter, r *http.Request) {
 	nameData := r.Context().Value(nameDataKey).(string)
+     sm, _ := M.GetAllValues()
+	fmt.Println("__________________________________\n", sm)
 	n, err := M.GetGaugeValue(nameData)
+     sm, _ = M.GetAllValues()
+	fmt.Println("__________________________________\n", sm)
 	if err != nil {
 		w.Header().Set("content-type", "text/plain; charset=utf-8")
 		w.WriteHeader(http.StatusNotFound)
-		fmt.Fprint(w, "line: 188; http.StatusNotFound, error: ", err)
+		// fmt.Fprint(w, "line: 188; http.StatusNotFound, error: ", err)
 	} else {
 		w.Header().Set("content-type", "text/plain; charset=utf-8")
 		w.WriteHeader(http.StatusOK)

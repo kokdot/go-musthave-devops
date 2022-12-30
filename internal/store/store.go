@@ -129,7 +129,7 @@ func (m MemStorage) Save(mtxNew *Metrics) (*Metrics, error) {
         // fmt.Println("--129---store---Save line----Save---m.GetAll()----------------:   ", sm)
 
 		return mtxNew, nil
-		case "gauge":
+	case "gauge":
         // fmt.Println("---123---store---Save line 122---Gauge-------------------")
         // fmt.Println("---124--store---Save line----Save-------------------")
         // fmt.Println("---125--store---Save line----Save-------------------")
@@ -148,7 +148,7 @@ func (m MemStorage) Save(mtxNew *Metrics) (*Metrics, error) {
 		}
 		*mtxOld.Delta += *mtxNew.Delta
 		return &mtxOld, nil
-		case "Counter":
+	case "Counter":
         // fmt.Println("---133--store----Counter-------------------")
 		mtxOld, ok := (*m.StoreMap)[mtxNew.ID]
 		if !ok {
@@ -180,13 +180,13 @@ func (m MemStorage) GetAll() (StoreMap, error) {
 }
 
 func (m *MemStorage) SaveCounterValue(id string, counter Counter) (Counter, error) {
-	var counter1 Counter
+	// var counter1 Counter
 	if m.StoreMap == nil {
-		return counter1, errors.New("memStorage is nil")
+		return counter, errors.New("memStorage is nil")
 	}
 	mtxOld, ok := (*m.StoreMap)[id]
 	if !ok {
-		mtxNew := NewMetrics(id, "Counter")
+		mtxNew := NewMetrics(id, "counter")
 		mtxNew.Delta = &counter
 		(*m.StoreMap)[id] = mtxNew
 		return counter, nil
@@ -201,7 +201,7 @@ func (m *MemStorage) SaveGaugeValue(id string, gauge Gauge) error {
 	}
 	mtxOld, ok := (*m.StoreMap)[id]
 	if !ok {
-		mtxNew := NewMetrics(id, "Gauge")
+		mtxNew := NewMetrics(id, "gauge")
 		mtxNew.Value = &gauge
 		(*m.StoreMap)[id] = mtxNew
 	}else {
