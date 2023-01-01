@@ -230,21 +230,21 @@ func main() {
 				fmt.Println(err)
 			}
 			client := resty.New()
-			resp, err := client.R().
+			_, err = client.R().
 			// SetHeader("Content-Type", "application/json").
-			SetHeader("Content-Type", "text/html, application/json").
+			// SetHeader("Content-Type", "text/html, application/json").
 			SetHeader("Accept-Encoding", "gzip").
 			SetResult(&varMetrics).
 			SetBody(bodyBytes).
 			Post(strURL)
 			fmt.Println("--------------------------new--------------------------------------")
-			for key, value := range resp.Header() {
-				fmt.Println(key, "=", value, "\n---------------------------------------------")
-			}
+			// for key, value := range resp.Header() {
+			// 	fmt.Println(key, "=", value, "\n---------------------------------------------")
+			// }
 			if err != nil {
 				fmt.Printf("Failed unmarshall response PollCount: %s\n", err)
 			}
-			fmt.Println(" Post PollCount Delta: ", *varMetrics.Delta) 
+			// fmt.Println(" Post PollCount Delta: ", *varMetrics.Delta) 
 
 			//PollCount Get---------------------------------------------------
 
