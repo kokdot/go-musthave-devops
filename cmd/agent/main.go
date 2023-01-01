@@ -170,6 +170,20 @@ func mtxGaugeSet(id string, gaugePtr *Gauge) ([]byte, error) {
 // 	}
 // 	return bodyBytes, nil
 // }
+
+// func mtxCounterGet(id string) ([]byte, error) {
+// 	var varMetrics Metrics = Metrics{
+// 			ID: id,
+// 			MType: "counter",
+// 		}
+// 	bodyBytes, err := json.Marshal(varMetrics)
+// 	if err != nil {
+// 		fmt.Printf("Failed marshal json: %s\n", err)
+// 		return nil, err
+// 	}
+// 	return bodyBytes, nil
+// }
+
 func main() {
 	wg.Add(2)
 	onboarding()
@@ -204,7 +218,8 @@ func main() {
 
 			<-time.After(reportIntervalReal) 
 			
-			//PollCount----------------------------------------------------------
+			//PollCount Post----------------------------------------------------------
+
 			strURL := fmt.Sprintf("%s/update/", urlReal)
 			// strURLGet := fmt.Sprintf("%s/value/", urlReal)
 			var varMetrics Metrics
@@ -215,17 +230,77 @@ func main() {
 				fmt.Println(err)
 			}
 			client := resty.New()
-			_, err = client.R().
+			resp, err := client.R().
+			// SetHeader("Content-Type", "application/json").
+			SetHeader("Content-Type", "text/html, application/json").
+			SetHeader("Accept-Encoding", "gzip").
 			SetResult(&varMetrics).
 			SetBody(bodyBytes).
 			Post(strURL)
+			fmt.Println("--------------------------new--------------------------------------")
+			for key, value := range resp.Header() {
+				fmt.Println(key, "=", value, "\n---------------------------------------------")
+			}
 			if err != nil {
 				fmt.Printf("Failed unmarshall response PollCount: %s\n", err)
 			}
-			// fmt.Println("varMetrics: ", varMetrics) 
-			// fmt.Println("PollCount: ", *varMetrics.Delta) 
+			fmt.Println(" Post PollCount Delta: ", *varMetrics.Delta) 
 
-			//RandomValue----------------------------------------------------------
+			//PollCount Get---------------------------------------------------
+
+			// strURLGet := fmt.Sprintf("%s/value/", urlReal)
+			// var metricsStructGet Metrics
+			// bodyBytes, err = mtxCounterGet("PollCount")
+			// if err != nil {
+			// 	fmt.Println(err)
+			// }
+			// client = resty.New()
+			// _, err = client.R().
+			// SetResult(&metricsStructGet).
+			// SetBody(bodyBytes).
+			// Post(strURLGet)
+			// if err != nil {
+			// 	fmt.Printf("Failed unmarshall response: %s\n", err)
+			// }
+			// if metricsStructGet.Delta == nil {
+			// 	fmt.Println("Get PollCount Metrics:  ", metricsStructGet) 
+
+			// } else {
+			// 	fmt.Println("Get PollCount Delta:  ", *metricsStructGet.Delta) 
+			// }
+
+			// / Get---------------------------------------------------
+
+			// strURLGetAll := fmt.Sprintf("%s/", urlReal)
+			// // var sm map[string]Metrics
+			// // bodyBytes, err = mtxCounterGet("PollCount")
+			// // if err != nil {
+			// // 	fmt.Println(err)
+			// // }
+			// client = resty.New()
+			// resp, err = client.R().
+			// SetHeader("Accept", "html/text").
+			// SetHeader("Accept-Encoding", "gzip").
+			// // SetBody(bodyBytes).
+			// // SetResult(&sm).
+			// Get(strURLGetAll)
+			// fmt.Println("resty get-----------------------------------------------------------")
+			// // fmt.Printf("client:   %#v\n", client.Header)
+			// if err != nil {
+			// 	fmt.Printf("GetAll: Failed unmarshall response: %s\n", err)
+			// }
+			// fmt.Printf("resp:   %#v\n", resp.Header())
+			// fmt.Printf("resp:   %#v\n", string(resp.Body()))
+			// // fmt.Println("sm:  ", sm)
+			// // if metricsStructGet.Delta == nil {
+			// // 	fmt.Println("Get PollCount Metrics:  ", metricsStructGet) 
+
+			// // } else {
+			// // 	fmt.Println("Get PollCount Delta:  ", *metricsStructGet.Delta) 
+			// // }
+
+			//RandomValue POst----------------------------------------------------------
+			
 			bodyBytes, err = mtxGaugeSet("RandomValue", &RandomValue)
 			if err != nil {
 				fmt.Println(err)
@@ -238,6 +313,8 @@ func main() {
 			if err != nil {
 				fmt.Printf("Failed unmarshall response RandomValue: %s\n", err)
 			}
+
+
 			// fmt.Println("varMetrics: ", varMetrics) 
 			// fmt.Println("RandomValue: ", *varMetrics.Value) 
 
@@ -267,6 +344,7 @@ func main() {
 
 			// Gauge ----------------------------------------------------------
 			// n := 0
+			
 			for key, val := range m {
 				// n++
 				// if n > 1 {
@@ -287,6 +365,8 @@ func main() {
 				}
 				// fmt.Println("-----Update;------- Id: ", varMetrics.ID, "Value: ", *varMetrics.Value) 
 			}
+
+
 			// Gauge ------Get----------------------------------------------------
 			// n := 0
 			// fmt.Println("---------------------------------------------")

@@ -178,6 +178,7 @@ func DownloadingToFile() {
 
 func PostUpdate(w http.ResponseWriter, r *http.Request) {
 	// fmt.Println("------PostUpdate---m-------------------", M)
+    fmt.Println("r.Header: ", r.Header)
 
 	bodyBytes, err := io.ReadAll(r.Body)
 	if err != nil {
@@ -298,6 +299,7 @@ func GetValue(w http.ResponseWriter, r *http.Request) {
 		// fmt.Fprint(w, "http.StatusBadRequest")
 		return
 	}
+	// w.Header().Set("content-type", "text/html")
 	w.Header().Set("content-type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	// fmt.Fprintf(w, "%v", bodyBytes)
@@ -322,25 +324,33 @@ func GetAllJson(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 	w.Write(bodyBytes)
 }
-
+//---------------------------------------------------------------------------GetAll---
 func GetAll(w http.ResponseWriter, r *http.Request) {
-	storeMap, err := M.GetAll()
+    fmt.Println("GetAll --------------------------------------enter---------------")
+	str, err := M.GetAllValues()
+	// storeMap, err := M.GetAll()
 	if err != nil {
-		w.Header().Set("content-type", "application/json")
+		w.Header().Set("content-type", "test/html")
+		// w.Header().Set("content-type", "application/json")
 		w.WriteHeader(http.StatusNotFound)
 		return
 	}
-	bodyBytes, err := json.Marshal(storeMap)
-	if err != nil {
-		w.Header().Set("content-type", "application/json")
-		w.WriteHeader(http.StatusNotFound)
-		return
-	}
-	fmt.Println(string(bodyBytes))
-	w.Header().Set("content-type", "text/plain; charset=utf-8")
+	// bodyBytes, err := json.Marshal(storeMap)
+	// if err != nil {
+	// 	w.Header().Set("content-type", "application/json")
+	// 	w.WriteHeader(http.StatusNotFound)
+	// 	return
+	// }
+	fmt.Println("str:   ", str)
+	// fmt.Println(string(bodyBytes))
+	w.Header().Set("content-type", "text/html")
+	// w.Header().Set("content-type", "text/html, text/plain; charset=utf-8, application/json")
+	// w.Header().Set("Content-Encoding", "gzip")
 	// w.Header().Set("content-type", "application/json")
 	w.WriteHeader(http.StatusOK)
-	fmt.Fprintf(w, "%s", bodyBytes)
+	// fmt.Fprintf(w, "%s", bodyBytes)
+	w.Write([]byte(str))
+    fmt.Println("w:   ", w)
 }
 
 func PostCounterCtx(next http.Handler) http.Handler {
@@ -422,7 +432,7 @@ func PostUpdateCounter(w http.ResponseWriter, r *http.Request) {
 	// fmt.Println("__________________________________\n", M)
     sm, _ := M.GetAllValues()
 	fmt.Println("__________________________________\n", sm)
-	counter, err := M.SaveCounterValue(nameData, store.Counter(valueData))//-----------------424
+	counter, err := M.SaveCounterValue(nameData, store.Counter(valueData))//------430
     if err != nil {
         w.Header().Set("content-type", "text/plain; charset=utf-8")
         w.WriteHeader(http.StatusBadRequest)
@@ -458,7 +468,8 @@ func PostUpdateGauge(w http.ResponseWriter, r *http.Request) {
 }
 func GetCounter(w http.ResponseWriter, r *http.Request) {
 	nameData := r.Context().Value(nameDataKey).(string)
-     sm, _ := M.GetAllValues()
+    // fmt.Println("r.Header: ", r.Header)
+    sm, _ := M.GetAllValues()
 	fmt.Println("__________________________________\n", sm)
 	n, err := M.GetCounterValue(nameData)
      sm, _ = M.GetAllValues()
@@ -468,6 +479,7 @@ func GetCounter(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusNotFound)
 		// fmt.Fprint(w, "line: 175; http.StatusNotFound")
 	} else {
+	    w.Header().Set("content-type", "text/html")
 		w.Header().Set("content-type", "text/plain; charset=utf-8")
 		w.WriteHeader(http.StatusOK)
 		fmt.Fprintf(w, "%v", n)
@@ -485,6 +497,7 @@ func GetGauge(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusNotFound)
 		// fmt.Fprint(w, "line: 188; http.StatusNotFound, error: ", err)
 	} else {
+	    w.Header().Set("content-type", "text/html")
 		w.Header().Set("content-type", "text/plain; charset=utf-8")
 		w.WriteHeader(http.StatusOK)
 		fmt.Fprintf(w, "%v", n)
