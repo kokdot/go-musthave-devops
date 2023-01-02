@@ -4,12 +4,7 @@ import (
 	"fmt"
 	"errors"
 	"sort"
-	// "os"
-	// "bufio"
-	// "log"
-	// "encoding/json"
 )
-
 
 type Counter int64
 type Gauge float64
@@ -17,19 +12,9 @@ type StoreMap map[string]Metrics
 
 type MemStorage struct {
 	StoreMap   *StoreMap
-	// ProducerPtr *producer
-	// ConsumerPtr *consumer
 	file string
 }
 func NewMemStorageWithFile(filename string) (*MemStorage, error) {
-	// p, err := NewProducer(filename)
-	// if err != nil {
-	// 	return nil, err
-	// }
-	// c, err := NewConsumer(filename)
-	// if err != nil {
-	// 	return nil, err
-	// }
 	sm := make(StoreMap)
 	sm["1"] = Metrics{
 		ID: "1",
@@ -39,9 +24,6 @@ func NewMemStorageWithFile(filename string) (*MemStorage, error) {
 	return &MemStorage{
 		StoreMap : &sm, 
 		file: filename,
-		// ProducerPtr: p,
-		// ConsumerPtr: c,
-
 	}, nil
 }
 func NewMemStorage() (*MemStorage, error) {
@@ -49,7 +31,6 @@ func NewMemStorage() (*MemStorage, error) {
 	sm["1"] = Metrics{
 		ID: "1",
 		MType: "1",
-
 	}
 	return &MemStorage{
 		StoreMap : &sm,
@@ -75,8 +56,6 @@ type Repo interface {
 	GetAllValues() (string, error)
 	ReadStorage() (*StoreMap, error)
 	WriteStorage() error 
-	// WriteStorage(file string)
-	// ReadStorage(file string) *MemStorage
 }
 type Metrics struct {
 	ID    string   `json:"id"`              // имя метрики
@@ -104,43 +83,14 @@ func NewMetrics(id string, mType string) Metrics {
 }
 
 func (m MemStorage) Save(mtxNew *Metrics) (*Metrics, error) {
-	if m.StoreMap == nil {
-		// fmt.Println("--store---Save--err line 107-----------------------------")
-		return nil, errors.New("memStorage is nil")
-	}
-	// fmt.Println("--111---store----Save-------------------")
-	if mtxNew == nil {
-	// fmt.Println("--113--store---Save line 112-----mtx.new is nil-------------------")
-
-	}
-	// fmt.Println("---116--store---Save line 115----mtxNew-------------------:   " , mtxNew)
-	if mtxNew.Value != nil {
-		fmt.Println("--118---store---Save line 118----mtxNew.Value-------------------:   " , *mtxNew.Value, "  ----ID----:  ", (*mtxNew).ID)
-
-	}
 	switch mtxNew.MType {
 	case "Gauge":
-        // fmt.Println("---123---store---Save line 122---Gauge-------------------")
-        // fmt.Println("---124--store---Save line----Save-------------------")
-        // fmt.Println("---125--store---Save line----Save-------------------")
-		
 		(*m.StoreMap)[mtxNew.ID] = *mtxNew
-		// sm, _ := m.GetAll()
-        // fmt.Println("--129---store---Save line----Save---m.GetAll()----------------:   ", sm)
-
 		return mtxNew, nil
 	case "gauge":
-        // fmt.Println("---123---store---Save line 122---Gauge-------------------")
-        // fmt.Println("---124--store---Save line----Save-------------------")
-        // fmt.Println("---125--store---Save line----Save-------------------")
-		
 		(*m.StoreMap)[mtxNew.ID] = *mtxNew
-		// sm, _ := m.GetAll()
-        // fmt.Println("--129---store---Save line----Save---m.GetAll()----------------:   ", sm)
-
 		return mtxNew, nil
 	case "counter":
-        // fmt.Println("---133--store----Counter-------------------")
 		mtxOld, ok := (*m.StoreMap)[mtxNew.ID]
 		if !ok {
 			(*m.StoreMap)[mtxNew.ID] = *mtxNew
@@ -149,7 +99,6 @@ func (m MemStorage) Save(mtxNew *Metrics) (*Metrics, error) {
 		*mtxOld.Delta += *mtxNew.Delta
 		return &mtxOld, nil
 	case "Counter":
-        // fmt.Println("---133--store----Counter-------------------")
 		mtxOld, ok := (*m.StoreMap)[mtxNew.ID]
 		if !ok {
 			(*m.StoreMap)[mtxNew.ID] = *mtxNew
@@ -180,7 +129,6 @@ func (m MemStorage) GetAll() (StoreMap, error) {
 }
 
 func (m *MemStorage) SaveCounterValue(id string, counter Counter) (Counter, error) {
-	// var counter1 Counter
 	if m.StoreMap == nil {
 		return counter, errors.New("memStorage is nil")
 	}
@@ -209,17 +157,6 @@ func (m *MemStorage) SaveGaugeValue(id string, gauge Gauge) error {
 	}
 	return nil
 }
-// func (m *MemStorage) Close() error {
-// 	err := (*m.ConsumerPtr).file.Close()
-// 	if err != nil {
-// 		return err
-// 	}
-// 	err = (*m.ProducerPtr).file.Close()
-// 	if err != nil {
-// 		return err
-// 	}
-// 	return nil
-// }
 
 func (m *MemStorage) GetCounterValue(id string) (Counter, error) {
 	var counter1 Counter
@@ -238,13 +175,10 @@ func (m *MemStorage) GetGaugeValue(id string) (Gauge, error) {
 	if m.StoreMap == nil {
 		return gauge1, errors.New("memStorage is nil")
 	}
-	// fmt.Println("id:  ", id, "-----------------------((((((((((((((((((((((((((((((((((((")
 	mtxOld, ok := (*m.StoreMap)[id]
-	// fmt.Println("mtxOld:  ", mtxOld, ";  OK: ", ok, "MemStorage", m)
 	if !ok {
 		return 0, errors.New("this gauge don't find")
 	}
-	// fmt.Println("*mtxOld.Value:  ", *mtxOld.Value, "----------------------------------")
 	return *mtxOld.Value, nil
 }
 

@@ -11,10 +11,6 @@ type FileStorage struct {
 	StoreMap   *StoreMap
 	file string
 	fileRestore string
-	// ProducerPtr *producer
-	// ProducerFilePtr *producer
-	// ConsumerPtr *consumer
-	// ConsumerFilePtr *consumer
 }
 func NewFileStorage() (*FileStorage, error) {
 	tmpfile, err := os.CreateTemp("/tmp/", "devops-metrics-db")
@@ -23,66 +19,28 @@ func NewFileStorage() (*FileStorage, error) {
     }
 	file := tmpfile.Name()
 	tmpfile.Close()
-	// p1, err := NewProducer(tmpfile.Name())
-	// if err != nil {
-	// 	return nil, err
-	// }
-	// c1, err := NewConsumer(tmpfile.Name())
-	// if err != nil {
-	// 	return nil, err
-	// }
 	sm := make(StoreMap)
 	return &FileStorage{
 		StoreMap : &sm, 
 		file: file,
-		// ProducerPtr: p1,
-		// ConsumerPtr: c1,
-
 	}, nil
 }
+
 func NewFileStorageWithFile(fileRestore string) (*FileStorage, error) {
-	// p, err := NewProducer(filename)
-	// if err != nil {
-	// 	return nil, err
-	// }
-	// c, err := NewConsumer(filename)
-	// if err != nil {
-	// 	return nil, err
-	// }
 	tmpfile, err := os.CreateTemp("/tmp/", "devops-metrics-db")
 	if err != nil {
         log.Fatal(err)
     }
 	file := tmpfile.Name()
 	tmpfile.Close()
-	// p1, err := NewProducer(tmpfile.Name())
-	// if err != nil {
-	// 	return nil, err
-	// }
-	// c1, err := NewConsumer(tmpfile.Name())
-	// if err != nil {
-	// 	return nil, err
-	// }
 	sm := make(StoreMap)
 	return &FileStorage{
 		StoreMap : &sm,
 		file: file,
 		fileRestore: fileRestore, 
-		// ProducerFilePtr: p,
-		// ConsumerFilePtr: c,
-		// ProducerPtr: p1,
-		// ConsumerPtr: c1,
-
 	}, nil
 }
-// func (f FileStorage) Read () error {
-// 	sm, err := f.ConsumerPtr.ReadStorage()
-// 	if err != nil {
-// 		return nil
-// 	}
-// 	f.StoreMap = sm
-// 	return nil
-// }
+
 func (f FileStorage) Save(mtxNew *Metrics) (*Metrics, error) {
 	_, err := f.ReadStorageSelf()
 	if err != nil {
@@ -317,14 +275,3 @@ func (f FileStorage) GetAllValues() (string, error) {
 
 	return str, nil
 }
-// func (m *FileStorage) Close() error {
-// 	err := (*m.ConsumerPtr).file.Close()
-// 	if err != nil {
-// 		return err
-// 	}
-// 	err = (*m.ProducerPtr).file.Close()
-// 	if err != nil {
-// 		return err
-// 	}
-// 	return nil
-// }

@@ -1,11 +1,8 @@
 package main
 
 import (
-	// "fmt"
-	// "encoding/json"
 	"fmt"
 	"math/rand"
-	// "runtime"
 	"sync"
 	"time"
 
@@ -13,22 +10,18 @@ import (
 	"github.com/kokdot/go-musthave-devops/internal/def"
 	"github.com/kokdot/go-musthave-devops/internal/monitor"
 	"github.com/kokdot/go-musthave-devops/internal/onboarding"
-	// "github.com/go-resty/resty/v2"
 )
 
 type Gauge = def.Gauge
 type Counter = def.Counter
 type MonitorMap = def.MonitorMap
-// type MonitorMap map[string] Gauge
 
 var (
 	pollCount Counter
 	randomValue Gauge 
 	m MonitorMap
 	wg sync.WaitGroup 
-	// urlReal string
 ) 
-
 
 func main() {
 	wg.Add(2)
@@ -39,7 +32,6 @@ func main() {
 		for {
 			<-time.After(onboarding.PollIntervalReal)
 			m = monitor.GetData(m)
-			//, mutex)
 			pollCount++
 			randomValue = Gauge(rand.Float64())
 		}
@@ -47,7 +39,6 @@ func main() {
 	
 	go func() {
 		defer wg.Done()
-		// var err error
 		for {
 			<-time.After(onboarding.ReportInterval)
 			mtxCounter, err := metrics.NewMetricsCounter("PollCount", &pollCount, onboarding.UrlReal)
@@ -61,7 +52,6 @@ func main() {
 			}
 			mtxRandomValue.Update()
 			for key, val := range m {
-				// val1 := metrics.Gauge(val)
 				mtx, err := metrics.NewMetricsGauge(key, &val, onboarding.UrlReal) 
 				if err != nil {
 					fmt.Println(err)

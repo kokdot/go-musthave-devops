@@ -3,7 +3,6 @@ import (
 	"github.com/caarlos0/env/v6"
 	"time"
 	"flag"
-	// "github.com/kokdot/go-musthave-devops/internal/def"
 	"fmt"
 )
 
@@ -48,7 +47,6 @@ func Onboarding() {
 	if cfg.PollInterval != 0 {
         PollIntervalReal = cfg.PollInterval
 	}
-	// UrlReal = "http://" + UrlReal
     fmt.Println("--------------------------const-------------------------------")
 	fmt.Println("Url:     ", Url)
 	fmt.Println("ReportIntervalReal:     ", ReportInterval)
