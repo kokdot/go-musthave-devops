@@ -16,8 +16,8 @@ type Metrics struct {
 	strURL string
 }
 
-type Gauge def.Gauge
-type Counter def.Counter
+type Gauge = def.Gauge
+type Counter = def.Counter
 
 func NewMetricsCounter(id string,  counterPtr *Counter, urlReal string) (*Metrics, error) {
 	urlReal1 := "http://" + urlReal
