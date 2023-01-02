@@ -1,7 +1,7 @@
 package monitor
 
 import (
-	"fmt"
+	// "fmt"
 	"runtime"
 
 	"github.com/kokdot/go-musthave-devops/internal/def"
