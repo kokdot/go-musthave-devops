@@ -2,6 +2,7 @@ package metrics
 
 import (
  	"github.com/go-resty/resty/v2"
+	"github.com/kokdot/go-musthave-devops/internal/def"
 	"encoding/json"
 	"fmt"
 )
@@ -15,10 +16,11 @@ type Metrics struct {
 	strURL string
 }
 
-type Gauge float64
-type Counter int64
+type Gauge def.Gauge
+type Counter def.Counter
 
-func NewMetricsCounter(id,  counterPtr *Counter, urlReal string) (*Metrics, error) {
+func NewMetricsCounter(id string,  counterPtr *Counter, urlReal string) (*Metrics, error) {
+	urlReal1 := "http://" + urlReal
 	var varMetrics Metrics = Metrics{
 			ID: id,
 			MType: "counter",
@@ -30,12 +32,13 @@ func NewMetricsCounter(id,  counterPtr *Counter, urlReal string) (*Metrics, erro
 		return nil, err
 	}
 	varMetrics.bodyBytes = bodyBytes
-	strURL := fmt.Sprintf("%s/update/", urlReal)
+	strURL := fmt.Sprintf("%s/update/", urlReal1)
 	varMetrics.strURL = strURL
 	return &varMetrics, nil
 }
 
 func NewMetricsGauge(id string, gaugePtr *Gauge,  urlReal string) (*Metrics, error) {
+	urlReal1 := "http://" + urlReal
 	var varMetrics Metrics = Metrics{
 			ID: id,
 			MType: "gauge",
@@ -47,12 +50,13 @@ func NewMetricsGauge(id string, gaugePtr *Gauge,  urlReal string) (*Metrics, err
 		return nil, err
 	}
 	varMetrics.bodyBytes = bodyBytes
-	strURL := fmt.Sprintf("%s/update/", urlReal)
+	strURL := fmt.Sprintf("%s/update/", urlReal1)
 	varMetrics.strURL = strURL
 	return &varMetrics, nil
 }
 
 func NewMetricsGet(id, mType, urlReal string) (*Metrics, error) {
+	urlReal1 := "http://" + urlReal
 	var varMetrics Metrics = Metrics{
 			ID: id,
 			MType: mType,
@@ -63,7 +67,7 @@ func NewMetricsGet(id, mType, urlReal string) (*Metrics, error) {
 		return nil, err
 	}
 	varMetrics.bodyBytes = bodyBytes
-	strURL := fmt.Sprintf("%s/value/", urlReal)
+	strURL := fmt.Sprintf("%s/value/", urlReal1)
 	varMetrics.strURL = strURL
 	return &varMetrics, nil
 }

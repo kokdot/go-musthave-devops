@@ -3,6 +3,7 @@ import (
 	"github.com/caarlos0/env/v6"
 	"time"
 	"flag"
+	// "github.com/kokdot/go-musthave-devops/internal/def"
 	"fmt"
 )
 
@@ -19,13 +20,13 @@ type Config struct {
 }
 
 var( 
-	pollIntervalReal = PollInterval
-	reportIntervalReal = ReportInterval
-	urlReal = Url
+	PollIntervalReal = PollInterval
+	ReportIntervalReal = ReportInterval
+	UrlReal = Url
 	cfg Config
 )
 
-func onboarding() {
+func Onboarding() {
     err := env.Parse(&cfg)
     if err != nil {
         fmt.Println("fail to parse cfg:  ", err)
@@ -34,20 +35,20 @@ func onboarding() {
     reportIntervalRealPtr := flag.Duration("r", 10000000000, "interval of perort")
     pollIntervalRealPtr := flag.Duration("p", 2000000000, "interval of poll")
     flag.Parse()
-	urlReal = *urlRealPtr
-	reportIntervalReal = *reportIntervalRealPtr
-	pollIntervalReal = *pollIntervalRealPtr
+	UrlReal = *urlRealPtr
+	ReportIntervalReal = *reportIntervalRealPtr
+	PollIntervalReal = *pollIntervalRealPtr
 
 	if cfg.Address != "" {
-        urlReal	= cfg.Address
+        UrlReal	= cfg.Address
     }
 	if cfg.ReportInterval != 0 {
-        reportIntervalReal = cfg.ReportInterval
+        ReportIntervalReal = cfg.ReportInterval
 	}
 	if cfg.PollInterval != 0 {
-        pollIntervalReal = cfg.PollInterval
+        PollIntervalReal = cfg.PollInterval
 	}
-	urlReal = "http://" + urlReal
+	// UrlReal = "http://" + UrlReal
     fmt.Println("--------------------------const-------------------------------")
 	fmt.Println("Url:     ", Url)
 	fmt.Println("ReportIntervalReal:     ", ReportInterval)
@@ -61,8 +62,8 @@ func onboarding() {
 	fmt.Println("cfg.ReportInterval:     ", cfg.ReportInterval)
 	fmt.Println("cfg.PollInterval:     ", cfg.PollInterval)
 	fmt.Println("--------------------------real-------------------------------")
-	fmt.Println("urlReal:     ", urlReal)
-	fmt.Println("reportIntervalReal:     ", reportIntervalReal)
-	fmt.Println("pollIntervalReal:     ", pollIntervalReal)
+	fmt.Println("urlReal:     ", UrlReal)
+	fmt.Println("reportIntervalReal:     ", ReportIntervalReal)
+	fmt.Println("pollIntervalReal:     ", PollIntervalReal)
 	fmt.Println("--------------------------Ok-------------------------------")
 }
