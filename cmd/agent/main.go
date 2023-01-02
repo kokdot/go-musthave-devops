@@ -48,15 +48,13 @@ func main() {
 		defer wg.Done()
 		// var err error
 		for {
-
-			
 			<-time.After(onboarding.ReportInterval)
-			mtxCounter, err := metrics.NewMetricsCounter("pollCount", &pollCount, urlReal)
+			mtxCounter, err := metrics.NewMetricsCounter("PollCount", &pollCount, urlReal)
 			if err != nil {
 				fmt.Println(err)
 			}
 			mtxCounter.Update()
-			mtxRandomValue, err := metrics.NewMetricsGauge("randomValue", &randomValue, urlReal)
+			mtxRandomValue, err := metrics.NewMetricsGauge("RandomValue", &randomValue, urlReal)
 			if err != nil {
 				fmt.Println(err)
 			}
