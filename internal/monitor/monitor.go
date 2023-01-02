@@ -1,15 +1,17 @@
 package monitor
 
 import (
-	"github.com/kokdot/go-musthave-devops/internal/def"
+	"fmt"
 	"runtime"
+
+	"github.com/kokdot/go-musthave-devops/internal/def"
 )
 type Gauge = def.Gauge
-type MonitorMap = def.MonitorMap
-var m MonitorMap = make(def.MonitorMap)
+// type MonitorMap = def.MonitorMap
+// var m def.MonitorMap = make(def.MonitorMap)
 var rtm runtime.MemStats
 
-func NewMonitor(m *MonitorMap, rtm runtime.MemStats) {
+func NewMonitor(m *def.MonitorMap, rtm runtime.MemStats) {
 	(*m)["Alloc"] = Gauge(rtm.Alloc)
 	(*m)["BuckHashSys"] = Gauge(rtm.BuckHashSys)
 	(*m)["TotalAlloc"] = Gauge(rtm.TotalAlloc)
@@ -41,8 +43,9 @@ func NewMonitor(m *MonitorMap, rtm runtime.MemStats) {
 	// mutex.Unlock()
 }
 
-func GetData() MonitorMap {
+func GetData(m *def.MonitorMap) *def.MonitorMap {
 	runtime.ReadMemStats(&rtm)
-	NewMonitor(&m, rtm)
+	// fmt.Println("m:   ", m, "   rtm:   ", rtm)
+	NewMonitor(m, rtm)
 	return m
 }

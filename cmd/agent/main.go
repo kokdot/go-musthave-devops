@@ -18,13 +18,13 @@ import (
 
 type Gauge = def.Gauge
 type Counter = def.Counter
-type MonitorMap = monitor.MonitorMap
+type MonitorMap = def.MonitorMap
 // type MonitorMap map[string] Gauge
 
 var (
 	pollCount Counter
 	randomValue Gauge 
-	m monitor.MonitorMap
+	m MonitorMap
 	wg sync.WaitGroup 
 	// urlReal string
 ) 
@@ -33,11 +33,12 @@ var (
 func main() {
 	wg.Add(2)
 	onboarding.Onboarding()
-	m = monitor.GetData()
+	m = make(def.MonitorMap)
 	go func(m *MonitorMap) {
 		defer wg.Done()
 		for {
 			<-time.After(onboarding.PollIntervalReal)
+			m = monitor.GetData(m)
 			//, mutex)
 			pollCount++
 			randomValue = Gauge(rand.Float64())
