@@ -206,8 +206,30 @@ func PostUpdate(w http.ResponseWriter, r *http.Request) {
     // fmt.Println("----205---handler-------------/-------------------------------------------")
 	// fmt.Println("--206--handler-----PostUpdate----sm-!!!!!!!!-----------------\n:  ", sm)
     // fmt.Println("---207---handler---------------------------------------------------------")
+	if mtxNew.ID == "Alloc"{
+		fmt.Println("-------Post-----------Alloc start----------------------")
+		 sm := ""
+		if M != nil {
+		fmt.Println("-----PostUpdate----M-------------------", M)
 
+			sm, _ = M.GetAllValues()
+
+		}
+		fmt.Println("-----PostUpdate----sm-------------------", sm)
+		fmt.Println("----------------------------------------")
+	}
 	mtxOld, err := M.Save(&mtxNew)
+	if mtxNew.ID == "Alloc"{
+		 sm := ""
+		if M != nil {
+		fmt.Println("-----PostUpdate----M-------------------", M)
+
+			sm, _ = M.GetAllValues()
+
+		}
+		fmt.Println("-----PostUpdate----sm-------------------", sm)
+		fmt.Println("-----Post--Alloc-----finish----------------------------")
+	}
     // fmt.Println("---210----handler--------M.Save----------------")
         // fmt.Println("--211---handler-----PostUpdate-----mtxOld-------------------", mtxNew)
     // if mtxNew.Delta != nil {
@@ -270,8 +292,32 @@ func GetValue(w http.ResponseWriter, r *http.Request) {
 		// fmt.Fprint(w, "http.StatusBadRequest")
 		return
 	}
+	if mtxNew.ID == "Alloc"{
+		fmt.Println("-------Get-----------Alloc start----------------------")
+		 sm := ""
+		if M != nil {
+		fmt.Println("-----GetValue----M-------------------", M)
+
+			sm, _ = M.GetAllValues()
+
+		}
+		fmt.Println("-----GetValue----sm-------------------", sm)
+		fmt.Println("----------------------------------------")
+	}
 	mtxOLd, err := M.Get(mtxNew.ID) 
-	fmt.Println("----------GetValue------mtxNew.----:   ", mtxNew)
+	if mtxNew.ID == "Alloc"{
+		 sm := ""
+		if M != nil {
+		fmt.Println("-----GetValue----M-------------------", M)
+
+			sm, _ = M.GetAllValues()
+
+		}
+		fmt.Println("-----GetValue----sm-------------------", sm)
+		fmt.Println("----Get---------Alloc finish---------------------------")
+	}
+
+	fmt.Println("----------GetValue------mtxNew.----:   ", mtxNew, "--id---:   ", mtxNew.ID)
 	// // fmt.Println("----------GetValue------mtxOld:----:  ", mtxOLd)
     // if mtxNew.Delta != nil {
     //     fmt.Println("----GetValue-----mtxOld-------------------", mtxOLd, "delta:  ", *mtxOLd.Delta)
