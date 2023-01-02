@@ -115,7 +115,7 @@ func (m MemStorage) Save(mtxNew *Metrics) (*Metrics, error) {
 	}
 	// fmt.Println("---116--store---Save line 115----mtxNew-------------------:   " , mtxNew)
 	if mtxNew.Value != nil {
-		fmt.Println("--118---store---Save line 117----mtxNew-------------------:   " , *mtxNew.Value)
+		fmt.Println("--118---store---Save line 118----mtxNew.Value-------------------:   " , *mtxNew.Value, "  ----ID----:  ", *mtxNew.Value)
 
 	}
 	switch mtxNew.MType {
