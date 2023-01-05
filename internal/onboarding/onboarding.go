@@ -7,7 +7,7 @@ import (
 )
 
 const (
-	Url           				 	= "127.0.0.1:8080"
+	URL           				 	= "127.0.0.1:8080"
 	PollInterval time.Duration  	= time.Second * 2
 	ReportInterval time.Duration 	= time.Second * 10
 )
@@ -21,7 +21,7 @@ type Config struct {
 var( 
 	PollIntervalReal = PollInterval
 	ReportIntervalReal = ReportInterval
-	UrlReal = Url
+	URLReal = URL
 	cfg Config
 )
 
@@ -34,12 +34,12 @@ func Onboarding() {
     reportIntervalRealPtr := flag.Duration("r", 10000000000, "interval of perort")
     pollIntervalRealPtr := flag.Duration("p", 2000000000, "interval of poll")
     flag.Parse()
-	UrlReal = *urlRealPtr
+	URLReal = *urlRealPtr
 	ReportIntervalReal = *reportIntervalRealPtr
 	PollIntervalReal = *pollIntervalRealPtr
 
 	if cfg.Address != "" {
-        UrlReal	= cfg.Address
+        URLReal	= cfg.Address
     }
 	if cfg.ReportInterval != 0 {
         ReportIntervalReal = cfg.ReportInterval
@@ -48,7 +48,7 @@ func Onboarding() {
         PollIntervalReal = cfg.PollInterval
 	}
     fmt.Println("--------------------------const-------------------------------")
-	fmt.Println("Url:     ", Url)
+	fmt.Println("URL:     ", URL)
 	fmt.Println("ReportIntervalReal:     ", ReportInterval)
 	fmt.Println("pollIntervalReal:     ", PollInterval)
 	fmt.Println("--------------------------flag-------------------------------")
@@ -60,7 +60,7 @@ func Onboarding() {
 	fmt.Println("cfg.ReportInterval:     ", cfg.ReportInterval)
 	fmt.Println("cfg.PollInterval:     ", cfg.PollInterval)
 	fmt.Println("--------------------------real-------------------------------")
-	fmt.Println("urlReal:     ", UrlReal)
+	fmt.Println("urlReal:     ", URLReal)
 	fmt.Println("reportIntervalReal:     ", ReportIntervalReal)
 	fmt.Println("pollIntervalReal:     ", PollIntervalReal)
 	fmt.Println("--------------------------Ok-------------------------------")

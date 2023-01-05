@@ -41,18 +41,18 @@ func main() {
 		defer wg.Done()
 		for {
 			<-time.After(onboarding.ReportInterval)
-			mtxCounter, err := metrics.NewMetricsCounter("PollCount", &pollCount, onboarding.UrlReal)
+			mtxCounter, err := metrics.NewMetricsCounter("PollCount", &pollCount, onboarding.URLReal)
 			if err != nil {
 				fmt.Println(err)
 			}
 			mtxCounter.Update()
-			mtxRandomValue, err := metrics.NewMetricsGauge("RandomValue", &randomValue, onboarding.UrlReal)
+			mtxRandomValue, err := metrics.NewMetricsGauge("RandomValue", &randomValue, onboarding.URLReal)
 			if err != nil {
 				fmt.Println(err)
 			}
 			mtxRandomValue.Update()
 			for key, val := range m {
-				mtx, err := metrics.NewMetricsGauge(key, &val, onboarding.UrlReal) 
+				mtx, err := metrics.NewMetricsGauge(key, &val, onboarding.URLReal) 
 				if err != nil {
 					fmt.Println(err)
 				}

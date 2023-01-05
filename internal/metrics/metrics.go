@@ -21,7 +21,7 @@ type Counter = def.Counter
 
 func NewMetricsCounter(id string,  counterPtr *Counter, urlReal string) (*Metrics, error) {
 	urlReal1 := "http://" + urlReal
-	var varMetrics Metrics = Metrics{
+	var varMetrics = Metrics{
 			ID: id,
 			MType: "counter",
 			Delta: counterPtr,
@@ -39,7 +39,7 @@ func NewMetricsCounter(id string,  counterPtr *Counter, urlReal string) (*Metric
 
 func NewMetricsGauge(id string, gaugePtr *Gauge,  urlReal string) (*Metrics, error) {
 	urlReal1 := "http://" + urlReal
-	var varMetrics Metrics = Metrics{
+	var varMetrics = Metrics{
 			ID: id,
 			MType: "gauge",
 			Value: gaugePtr,
@@ -57,7 +57,7 @@ func NewMetricsGauge(id string, gaugePtr *Gauge,  urlReal string) (*Metrics, err
 
 func NewMetricsGet(id, mType, urlReal string) (*Metrics, error) {
 	urlReal1 := "http://" + urlReal
-	var varMetrics Metrics = Metrics{
+	var varMetrics = Metrics{
 			ID: id,
 			MType: mType,
 		}

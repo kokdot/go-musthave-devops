@@ -160,7 +160,7 @@ func GetValue(w http.ResponseWriter, r *http.Request) {
 	w.Write(bodyBytes)
 }
 
-func GetAllJson(w http.ResponseWriter, r *http.Request) {
+func GetAllJSON(w http.ResponseWriter, r *http.Request) {
 	storeMap, err := M.GetAll()
 	if err != nil {
 		w.Header().Set("content-type", "application/json")

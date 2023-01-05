@@ -17,11 +17,6 @@ import (
 	"github.com/kokdot/go-musthave-devops/internal/handler"
 	"github.com/kokdot/go-musthave-devops/internal/store"
 )
-// func SaveToFile() {
-//     fmt.Println("---------SaveToFile  m: -------------------")
-
-//     handler.DownloadingToFile()
-// }
 
 //:PATH="$PATH:/mnt/c/Users/user/devopstest
 // devopstest -test.v -test.run=^TestIteration2[b]*$ -source-path=. -binary-path=cmd/server/server
@@ -30,7 +25,7 @@ import (
 // SERVER_PORT=$(random unused-port) ADDRESS="localhost:${SERVER_PORT}" TEMP_FILE=$(random tempfile) devopstest -test.v -test.run=^TestIteration6$ -source-path=. -agent-binary-path=cmd/agent/agent -binary-path=cmd/server/server -server-port=$SERVER_PORT -database-dsn='postgres://postgres:postgres@postgres:5432/praktikum?sslmode=disable' -file-storage-path=$TEMP_FILE
 //devopstest -test.v -test.run=^TestIteration8 -source-path=. -agent-binary-path=cmd/agent/agent -binary-path=cmd/server/server -server-port=8080 -database-dsn='postgres://postgres:postgres@postgres:5432/praktikum?sslmode=disable' -file-storage-path=azxs123
 const (
-    url = "127.0.0.1:8080"
+    URL = "127.0.0.1:8080"
     StoreInterval time.Duration = time.Second * 200
     StoreFile = "/tmp/devops-metrics-db.json"
     Restore = false
@@ -45,19 +40,13 @@ type Config struct {
 var (
     M store.Repo 
     // ms = new(store.MemStorage)
-    UrlReal = url
+    URLReal = URL
 	storeInterval = StoreInterval
 	storeFile = StoreFile
 	restore = Restore
     cfg Config
 )
 
-
-// func init() {
-//     onboarding()
-
-
-// }
 func onboarding() {
 	fmt.Println("---------onboarding-------------------")
 	// fmt.Println("------1---storeInterval-------------------", storeInterval)
@@ -68,7 +57,7 @@ func onboarding() {
     }
     // fmt.Printf("main:  %+v\n", cfg)
 
-    urlRealPtr := flag.String("a", "127.0.0.1:8080", "ip adddress of server")
+    URLRealPtr := flag.String("a", "127.0.0.1:8080", "ip adddress of server")
     restorePtr := flag.Bool("r", true, "restore Metrics(Bool)")
     storeFilePtr := flag.String("f", "/tmp/devops-metrics-db.json", "file name")
     storeIntervalPtr := flag.Duration("i", 300000000000, "interval of download")
@@ -77,13 +66,13 @@ func onboarding() {
 	// fmt.Println("-----2----storeInterval-------------------", storeInterval)
 
     
-    UrlReal = *urlRealPtr
+    URLReal = *URLRealPtr
     storeInterval = *storeIntervalPtr
     storeFile = *storeFilePtr
     restore = *restorePtr
 	// fmt.Println("----3-----storeInterval-------------------", storeInterval)
     if cfg.Address != "" {
-        UrlReal	= cfg.Address
+        URLReal	= cfg.Address
     }
     if cfg.StoreInterval != 0 {
         storeInterval = cfg.StoreInterval
@@ -100,12 +89,12 @@ func onboarding() {
     // fmt.Println("---------onboarding m: -------------------", ms)
 	// fmt.Println("---5------cfg.StoreInterval-------------------", cfg.StoreInterval)
     fmt.Println("--------------------------const-------------------------------")
-    fmt.Println("url:  ", url)
+    fmt.Println("URL:  ", URL)
     fmt.Println("StoreInterval:  ", StoreInterval)
     fmt.Println("StoreFile:  ", StoreFile)
     fmt.Println("Restore:  ", Restore)
     fmt.Println("---------------------------flag------------------------------")
-    fmt.Println("urlRealPtr:", *urlRealPtr)
+    fmt.Println("URLRealPtr:", *URLRealPtr)
     fmt.Println("restorePtr:", *restorePtr)
     fmt.Println("storeFilePtr:", *storeFilePtr)
     fmt.Println("storeIntervalPtr:", *storeIntervalPtr)
@@ -115,7 +104,7 @@ func onboarding() {
     fmt.Println("cfg.StoreFile:", cfg.StoreFile)
     fmt.Println("cfg.StoreInterval:", cfg.StoreInterval)
     fmt.Println("------------------------real---------------------------------")
-    fmt.Println("UrlReal:", UrlReal)
+    fmt.Println("URLReal:", URLReal)
     fmt.Println("restore:", restore)
     fmt.Println("storeFile:", storeFile)
     fmt.Println("storeInterval:", storeInterval)
@@ -179,6 +168,6 @@ func main() {
         })
 	})
 
-    log.Fatal(http.ListenAndServe(UrlReal, r))
+    log.Fatal(http.ListenAndServe(URLReal, r))
     // log.Fatal(http.ListenAndServe(":8080", r))
 }
