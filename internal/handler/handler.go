@@ -14,7 +14,7 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/kokdot/go-musthave-devops/internal/store"
 )
-
+ 
 type key int
 
 const (
@@ -95,7 +95,8 @@ func DownloadingToFile() {
 }
 
 func PostUpdate(w http.ResponseWriter, r *http.Request) {
-    fmt.Println("r.Header: ", r.Header)
+	fmt.Println("--------------------PostUpdate-------------------------start-------------------------------")
+
 	bodyBytes, err := io.ReadAll(r.Body)
 	if err != nil {
 		w.Header().Set("content-type", "application/json")
@@ -109,7 +110,21 @@ func PostUpdate(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusNotFound)
 		return
 	}
+	fmt.Printf("\n----------PostUpdate------mtxNew.----:   %#v\n", mtxNew)
+	if store.Key != "" {
+		fmt.Println("----------------------------if store.Key != ampty string-------------------------------------")
+		if !store.MtxValid(&mtxNew) {
+			fmt.Printf("\n-------if !store.MtxValid(&mtxNew).----:   %#v\n", mtxNew)
+			
+			w.Header().Set("content-type", "application/json")
+			w.WriteHeader(http.StatusBadRequest)
+			return
+		}
+    }
+	// fmt.Println("----------------------------------------------------------------------------")
+	// fmt.Printf("\n----------PostUpdate------mtxNew.----:   %#v\n", mtxNew)
 	mtxOld, err := M.Save(&mtxNew)
+	fmt.Printf("\n----------PostUpdate------mtxOld.----:   %#v\n", mtxOld)
 	if err != nil {
 		w.Header().Set("content-type", "application/json")
 		w.WriteHeader(http.StatusBadRequest)
@@ -127,6 +142,8 @@ func PostUpdate(w http.ResponseWriter, r *http.Request) {
 }
 
 func GetValue(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("--------------------GetValue-------------------------start-------------------------------")
+
 	bodyBytes, err := io.ReadAll(r.Body)
 	if err != nil {
 		w.Header().Set("content-type", "application/json")
@@ -140,9 +157,11 @@ func GetValue(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
-	mtxOLd, err := M.Get(mtxNew.ID) 
+	fmt.Printf("\n----------GetValue------mtxNew.----:   %#v\n", mtxNew)
 
-	fmt.Println("----------GetValue------mtxNew.----:   ", mtxNew, "--id---:   ", mtxNew.ID)
+	mtxOLd, err := M.Get(mtxNew.ID) 
+	// fmt.Println("----------------------------------------------------------------------------")
+	fmt.Printf("\n----------GetValue------mtxOLd.----:   %#v\n", mtxOLd)
 	if err != nil {
         fmt.Println("-----------------------------------err line 274, err:  ", err)
 		w.Header().Set("content-type", "application/json")

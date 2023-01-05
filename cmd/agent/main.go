@@ -9,7 +9,7 @@ import (
 	"github.com/kokdot/go-musthave-devops/internal/metrics"
 	"github.com/kokdot/go-musthave-devops/internal/def"
 	"github.com/kokdot/go-musthave-devops/internal/monitor"
-	"github.com/kokdot/go-musthave-devops/internal/onboarding"
+	"github.com/kokdot/go-musthave-devops/internal/onboarding_agent"
 )
 
 type Gauge = def.Gauge
@@ -25,12 +25,12 @@ var (
 
 func main() {
 	wg.Add(2)
-	onboarding.Onboarding()
+	onboarding_agent.OnboardingAgent()
 	m = make(def.MonitorMap)
 	go func(m *MonitorMap) {
 		defer wg.Done()
 		for {
-			<-time.After(onboarding.PollIntervalReal)
+			<-time.After(onboarding_agent.PollIntervalReal)
 			m = monitor.GetData(m)
 			pollCount++
 			randomValue = Gauge(rand.Float64())
@@ -40,19 +40,22 @@ func main() {
 	go func() {
 		defer wg.Done()
 		for {
-			<-time.After(onboarding.ReportInterval)
-			mtxCounter, err := metrics.NewMetricsCounter("PollCount", &pollCount, onboarding.URLReal)
+			<-time.After(onboarding_agent.ReportInterval)
+			mtxCounter, err := metrics.NewMetricsCounter("PollCount", &pollCount, onboarding_agent.URLReal)
+			fmt.Printf("mtxRandomValue:    %#v\n", mtxCounter)
 			if err != nil {
 				fmt.Println(err)
 			}
 			mtxCounter.Update()
-			mtxRandomValue, err := metrics.NewMetricsGauge("RandomValue", &randomValue, onboarding.URLReal)
+			mtxRandomValue, err := metrics.NewMetricsGauge("RandomValue", &randomValue, onboarding_agent.URLReal)
+			fmt.Printf("mtxRandomValue:    %#v\n", mtxRandomValue)
 			if err != nil {
 				fmt.Println(err)
 			}
 			mtxRandomValue.Update()
 			for key, val := range m {
-				mtx, err := metrics.NewMetricsGauge(key, &val, onboarding.URLReal) 
+				mtx, err := metrics.NewMetricsGauge(key, &val, onboarding_agent.URLReal) 
+				fmt.Printf("mtxRandomValue:    %#v\n", mtx)
 				if err != nil {
 					fmt.Println(err)
 				}
