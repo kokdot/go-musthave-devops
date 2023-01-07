@@ -15,7 +15,8 @@ type Metrics struct {
 	MType string   `json:"type"`            // параметр, принимающий значение gauge или counter
 	Delta *Counter   `json:"delta,omitempty"` // значение метрики в случае передачи counter
 	Value *Gauge `json:"value,omitempty"` // значение метрики в случае передачи gauge
-	Hash  []byte   `json:"hash,omitempty"`  // значение хеш-функции
+	Hash  string   `json:"hash,omitempty"`  // значение хеш-функции
+	// Hash  []byte   `json:"hash,omitempty"`  // значение хеш-функции
 	bodyBytes []byte
 	strURL string
 }
@@ -52,7 +53,7 @@ func NewMetricsCounter(id string,  counterPtr *Counter, urlReal string) (*Metric
 			ID: id,
 			MType: "counter",
 			Delta: counterPtr,
-			Hash: dst,
+			Hash: fmt.Sprintf("%x", dst),
 		}
 	bodyBytes, err := json.Marshal(varMetrics)
 	if err != nil {
@@ -94,7 +95,7 @@ func NewMetricsGauge(id string, gaugePtr *Gauge,  urlReal string) (*Metrics, err
 			ID: id,
 			MType: "gauge",
 			Value: gaugePtr,
-			Hash: dst,
+			Hash: fmt.Sprintf("%x", dst),
 		}
 	bodyBytes, err := json.Marshal(varMetrics)
 	if err != nil {

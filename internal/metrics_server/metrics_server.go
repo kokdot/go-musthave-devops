@@ -39,7 +39,7 @@ func NewCounterMetrics(id string, counter Counter, key string) *Metrics {
 			ID: id,
 			MType: "counter",
 			Delta: &counter,
-			Hash: dst,
+			Hash: fmt.Sprintf("%x", dst),
 		}
 	return &varMetrics
 }
@@ -53,7 +53,7 @@ func NewGaugeMetrics(id string, gauge Gauge, key string) *Metrics {
 			ID: id,
 			MType: "gauge",
 			Value: &gauge,
-			Hash: dst,
+			Hash: fmt.Sprintf("%x", dst),
 		}
 	return &varMetrics
 }
@@ -61,7 +61,7 @@ func MtxValid(mtx *Metrics, key string) bool {
 	if key == "" {
 		return true
 	}
-	if mtx.Hash == nil {
+	if mtx.Hash == "" {
 		return false
 	}
 	var src []byte
@@ -80,5 +80,6 @@ func MtxValid(mtx *Metrics, key string) bool {
 	fmt.Println("hash old: ", dst)
 	fmt.Println("hash new: ", mtx.Hash)
 	fmt.Println("hmac.Equal(dst, mtx.Hash): ", hmac.Equal(dst, mtx.Hash))
-	return hmac.Equal(dst, mtx.Hash)
+	return (fmt.Sprintf("%x", dst) == mtx.Hash)
+	// return hmac.Equal(dst, mtx.Hash)
 }
