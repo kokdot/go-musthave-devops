@@ -29,9 +29,9 @@ func NewMetrics(id string, mType string) Metrics {
 }
 func NewCounterMetrics(id string, counter Counter, key string) *Metrics {
 	src := []byte(fmt.Sprintf("%s:counter:%d", id, counter))
-	if key == "" {
-		panic("bad")
-	}
+	// if key == "" {
+	// 	panic("bad")
+	// }
 	h := hmac.New(sha256.New, []byte(key))
     h.Write(src)
     dst := h.Sum(nil)
@@ -77,9 +77,10 @@ func MtxValid(mtx *Metrics, key string) bool {
 	h := hmac.New(sha256.New, []byte(key))
     h.Write(src)
     dst := h.Sum(nil)
-	fmt.Println("hash old: ", dst)
+	fmt.Println("hash old: ", fmt.Sprintf("%x", dst))
 	fmt.Println("hash new: ", mtx.Hash)
-	fmt.Println("hmac.Equal(dst, mtx.Hash): ", hmac.Equal(dst, mtx.Hash))
+	fmt.Println("hmac.Equal(dst, mtx.Hash): ", (fmt.Sprintf("%x", dst) == mtx.Hash))
+	// fmt.Println("hmac.Equal(dst, mtx.Hash): ", hmac.Equal(dst, mtx.Hash))
 	return (fmt.Sprintf("%x", dst) == mtx.Hash)
 	// return hmac.Equal(dst, mtx.Hash)
 }

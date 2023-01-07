@@ -25,7 +25,7 @@ type MemStorage struct {
 	url string
 }
 
-var key string
+// var key string
 
 func (m MemStorage) GetURL() string {
 	return m.url
@@ -71,7 +71,7 @@ func NewMemStorage(storeInterval time.Duration, storeFile string, restore bool, 
 }
 
 func (m MemStorage) Save(mtxNew *Metrics) (*Metrics, error) {
-	if key != "" {
+	if key := m.GetKey(); key != "" {
 
 		switch mtxNew.MType {
 		case "Gauge":
@@ -87,7 +87,7 @@ func (m MemStorage) Save(mtxNew *Metrics) (*Metrics, error) {
 				return mtxNew, nil
 			}
 			delta := *mtxNew.Delta + *mtxOld.Delta
-			mtxOld = *metrics_server.NewCounterMetrics(mtxNew.ID, delta, m.GetKey())
+			mtxOld = *metrics_server.NewCounterMetrics(mtxNew.ID, delta, key)
 			(*m.StoreMap)[mtxOld.ID] = mtxOld
 			return &mtxOld, nil
 		case "Counter":
@@ -97,7 +97,7 @@ func (m MemStorage) Save(mtxNew *Metrics) (*Metrics, error) {
 				return mtxNew, nil
 			}
 			delta := *mtxNew.Delta + *mtxOld.Delta
-			mtxOld = *metrics_server.NewCounterMetrics(mtxNew.ID, delta, m.GetKey())
+			mtxOld = *metrics_server.NewCounterMetrics(mtxNew.ID, delta, key)
 			(*m.StoreMap)[mtxOld.ID] = mtxOld
 			return &mtxOld, nil
 		}
@@ -144,12 +144,12 @@ func (m MemStorage) Get(id string) (*Metrics, error) {
 	// 	return &mtxOld, nil
 	// }
 	fmt.Printf("mtxOld:   %#v", mtxOld)
-	if key != "" {
+	if key := m.GetKey(); key != "" {
 
 		if mtxOld.MType == "Gauge" || mtxOld.MType == "gauge" {
-			mtxOld = *metrics_server.NewGaugeMetrics(mtxOld.ID, *mtxOld.Value, m.GetKey())
+			mtxOld = *metrics_server.NewGaugeMetrics(mtxOld.ID, *mtxOld.Value, key)
 		} else {
-				mtxOld = *metrics_server.NewCounterMetrics(mtxOld.ID, *mtxOld.Delta, m.GetKey()) //-------------------------------------line : 216
+				mtxOld = *metrics_server.NewCounterMetrics(mtxOld.ID, *mtxOld.Delta, key) //-------------------------------------line : 216
 		}
 			return &mtxOld, nil
 	} else {
