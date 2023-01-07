@@ -6,7 +6,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/kokdot/go-musthave-devops/internal/metrics"
+	"github.com/kokdot/go-musthave-devops/internal/metrics_agent"
 	"github.com/kokdot/go-musthave-devops/internal/def"
 	"github.com/kokdot/go-musthave-devops/internal/monitor"
 	"github.com/kokdot/go-musthave-devops/internal/onboarding_agent"
@@ -41,21 +41,21 @@ func main() {
 		defer wg.Done()
 		for {
 			<-time.After(onboarding_agent.ReportInterval)
-			mtxCounter, err := metrics.NewMetricsCounter("PollCount", &pollCount, onboarding_agent.URLReal)
-			fmt.Printf("mtxRandomValue:    %#v\n", mtxCounter)
+			mtxCounter, err := metrics_agent.NewMetricsCounter("PollCount", &pollCount, onboarding_agent.URLReal)
+			// fmt.Printf("mtxRandomValue:    %#v\n", mtxCounter)
 			if err != nil {
 				fmt.Println(err)
 			}
 			mtxCounter.Update()
-			mtxRandomValue, err := metrics.NewMetricsGauge("RandomValue", &randomValue, onboarding_agent.URLReal)
-			fmt.Printf("mtxRandomValue:    %#v\n", mtxRandomValue)
+			mtxRandomValue, err := metrics_agent.NewMetricsGauge("RandomValue", &randomValue, onboarding_agent.URLReal)
+			// fmt.Printf("mtxRandomValue:    %#v\n", mtxRandomValue)
 			if err != nil {
 				fmt.Println(err)
 			}
 			mtxRandomValue.Update()
 			for key, val := range m {
-				mtx, err := metrics.NewMetricsGauge(key, &val, onboarding_agent.URLReal) 
-				fmt.Printf("mtxRandomValue:    %#v\n", mtx)
+				mtx, err := metrics_agent.NewMetricsGauge(key, &val, onboarding_agent.URLReal) 
+				// fmt.Printf("mtxRandomValue:    %#v\n", mtx)
 				if err != nil {
 					fmt.Println(err)
 				}

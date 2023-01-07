@@ -6,93 +6,35 @@ import (
 	"io"
 
 	"context"
-	"log"
+	// "log"
 	"net/http"
 	"strconv"
-	"time"
+	// "time"
 
 	"github.com/go-chi/chi/v5"
+	// "github.com/kokdot/go-musthave-devops/internal/interface_init"
+	"github.com/kokdot/go-musthave-devops/internal/metrics_server"
 	"github.com/kokdot/go-musthave-devops/internal/store"
+	"github.com/kokdot/go-musthave-devops/internal/repo"
 )
  
-type key int
+type keyData int
 
 const (
-	nameDataKey key = iota
+	nameDataKey keyData = iota
 	valueDataKey
 )
 
-var (
-	M  store.Repo
-	StoreInterval time.Duration// = StoreInterval
-)
+var m  repo.Repo
 
-func InterfaceInit(storeInterval time.Duration, storeFile string, restore bool) {
-    StoreInterval = storeInterval
-	if storeInterval > 0 {
-		if storeFile == "" {
-			ms, err := store.NewMemStorage()
-            if err != nil {
-				log.Fatalf("failed to create MemStorage, err: %s", err)
-			}
-			M = ms
-		} else {
-			ms, err := store.NewMemStorageWithFile(storeFile)
-			if err != nil {
-				log.Fatalf("failed to create MemStorage, err: %s", err)
-			}
-			M = ms
-			if restore {
-				_, err := M.ReadStorage()
-				if err != nil {
-					log.Printf("Can't to read data froM file, err: %s", err)
-				}
-			}
-			DownloadingToFile()
-			M = ms
-		}
-	} else {
-		if storeFile == "" {
-			ms, err := store.NewFileStorage()
-			if err != nil {
-				log.Fatalf("failed to create FileStorage, err: %s", err)
-			}
-			M = ms
-		} else {
-			ms, err := store.NewFileStorageWithFile(storeFile)
-			if err != nil {
-				log.Fatalf("failed to create FileStorage, err: %s", err)
-			}
-			M = ms
-			if restore {
-				_, err := M.ReadStorage()
-				if err != nil {
-					log.Printf("Can't to read data from file, err: %s", err)
-				}
-			}
-		}
-	}
+func PutM(M repo.Repo) {
+	m = M
 }
 
+// var	key = m.GetKey()
 
 
-func DownloadingToFile() {
-	// fmt.Println("---------DownloadingToFile m: -------------------", M)
-	// fmt.Println("---------DownloadingToFile-------------------", storeInterval)
 
-	go func() {
-		// var interval = StoreInterval
-		// var interval = time.Duration(storeInterval) * time.Second
-		for {
-			<-time.After(StoreInterval)
-			fmt.Println("main; line: 67; DownloadToFile", ";  file:  ")
-			err := M.WriteStorage()
-			if err != nil {
-				log.Printf("StoreMap did not been saved in file, err: %s", err)
-			}
-		}
-	}()
-}
 
 func PostUpdate(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("--------------------PostUpdate-------------------------start-------------------------------")
@@ -103,7 +45,7 @@ func PostUpdate(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusNotFound)
 		return
 	}
-	var mtxNew store.Metrics
+	var mtxNew metrics_server.Metrics
 	err = json.Unmarshal(bodyBytes, &mtxNew)
 	if err != nil {
 		w.Header().Set("content-type", "application/json")
@@ -111,9 +53,9 @@ func PostUpdate(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	fmt.Printf("\n----------PostUpdate------mtxNew.----:   %#v\n", mtxNew)
-	if store.Key != "" {
+	if m.GetKey() != "" {
 		fmt.Println("----------------------------if store.Key != ampty string-------------------------------------")
-		if !store.MtxValid(&mtxNew) {
+		if !metrics_server.MtxValid(&mtxNew, m.GetKey()) {
 			fmt.Printf("\n-------if !store.MtxValid(&mtxNew).----:   %#v\n", mtxNew)
 			
 			w.Header().Set("content-type", "application/json")
@@ -123,8 +65,32 @@ func PostUpdate(w http.ResponseWriter, r *http.Request) {
     }
 	// fmt.Println("----------------------------------------------------------------------------")
 	// fmt.Printf("\n----------PostUpdate------mtxNew.----:   %#v\n", mtxNew)
-	mtxOld, err := M.Save(&mtxNew)
-	fmt.Printf("\n----------PostUpdate------mtxOld.----:   %#v\n", mtxOld)
+	// fmt.Println("-126-handler--PostUpdate-----m/txNew-------------------", mtxNew)
+    // if mtxNew.Delta != nil {
+    // 	fmt.Println("--199--handler---PostUpdate-----mtxNew-------------------", mtxNew, "delta:  ", *mtxNew.Delta)
+    // }
+    // if mtxNew.Value != nil {
+    //     fmt.Println("--202---handler----PostUpdate-----mtxNew-------------------", mtxNew, "Value:  ", *mtxNew.Value)
+    // }
+    // sm, _ := M.GetAllValues()
+    // fmt.Println("----205---handler-------------/-------------------------------------------")
+	// fmt.Println("--206--handler-----PostUpdate----sm-!!!!!!!!-----------------\n:  ", sm)
+    // fmt.Println("---207---handler---------------------------------------------------------")
+	fmt.Printf("m:   %#v", m)
+	mtxOld, err := m.Save(&mtxNew)//----------------------------------------------------------------------------Save---
+	// fmt.Println("---210----handler--------M.Save----------------")
+    // fmt.Println("--211---handler-----PostUpdate-----mtxOld-------------------", mtxNew)
+    // if mtxNew.Delta != nil {
+    // fmt.Println("--213----handler------PostUpdate-----mtxOld-------------------", mtxNew, "delta:  ", *mtxNew.Delta)
+    // }
+    // if mtxNew.Value != nil {
+    // fmt.Println("--216----handler------PostUpdate-----mtxOld-------------------", mtxNew, "Value:  ", *mtxNew.Value)
+    // }
+    // sm, _ = M.GetAllValues()
+	// fmt.Println("--219-------handler----PostUpdate----sm-------------------", sm)
+    // fmt.Println("---220-------handler---------------------------------------------------------------------------")
+    // fmt.Println("----221--------handler-------------------------------------------------------------------------")
+	// fmt.Printf("\n----------PostUpdate------mtxOld.----:   %#v\n", mtxOld)
 	if err != nil {
 		w.Header().Set("content-type", "application/json")
 		w.WriteHeader(http.StatusBadRequest)
@@ -159,7 +125,7 @@ func GetValue(w http.ResponseWriter, r *http.Request) {
 	}
 	fmt.Printf("\n----------GetValue------mtxNew.----:   %#v\n", mtxNew)
 
-	mtxOLd, err := M.Get(mtxNew.ID) 
+	mtxOLd, err := m.Get(mtxNew.ID) 
 	// fmt.Println("----------------------------------------------------------------------------")
 	fmt.Printf("\n----------GetValue------mtxOLd.----:   %#v\n", mtxOLd)
 	if err != nil {
@@ -180,7 +146,7 @@ func GetValue(w http.ResponseWriter, r *http.Request) {
 }
 
 func GetAllJSON(w http.ResponseWriter, r *http.Request) {
-	storeMap, err := M.GetAll()
+	storeMap, err := m.GetAll()
 	if err != nil {
 		w.Header().Set("content-type", "application/json")
 		w.WriteHeader(http.StatusNotFound)
@@ -198,7 +164,7 @@ func GetAllJSON(w http.ResponseWriter, r *http.Request) {
 	w.Write(bodyBytes)
 }
 func GetAll(w http.ResponseWriter, r *http.Request) {
-	str, err := M.GetAllValues()
+	str, err := m.GetAllValues()
 	if err != nil {
 		w.Header().Set("content-type", "test/html")
 		w.WriteHeader(http.StatusNotFound)
@@ -273,7 +239,7 @@ func PostGaugeCtx(next http.Handler) http.Handler {
 func PostUpdateCounter(w http.ResponseWriter, r *http.Request) {
 	valueData := r.Context().Value(valueDataKey).(int)
 	nameData := r.Context().Value(nameDataKey).(string)
-	counter, err := M.SaveCounterValue(nameData, store.Counter(valueData))//------430
+	counter, err := m.SaveCounterValue(nameData, store.Counter(valueData))//------430
     if err != nil {
         w.Header().Set("content-type", "text/plain; charset=utf-8")
         w.WriteHeader(http.StatusBadRequest)
@@ -286,7 +252,7 @@ func PostUpdateCounter(w http.ResponseWriter, r *http.Request) {
 func PostUpdateGauge(w http.ResponseWriter, r *http.Request) {
 	valueData := r.Context().Value(valueDataKey).(float64)
 	nameData := r.Context().Value(nameDataKey).(string)
-	err := M.SaveGaugeValue(nameData, store.Gauge(valueData))
+	err := m.SaveGaugeValue(nameData, repo.Gauge(valueData))
     if err != nil {
         w.Header().Set("content-type", "text/plain; charset=utf-8")
         w.WriteHeader(http.StatusBadRequest)
@@ -298,7 +264,7 @@ func PostUpdateGauge(w http.ResponseWriter, r *http.Request) {
 }
 func GetCounter(w http.ResponseWriter, r *http.Request) {
 	nameData := r.Context().Value(nameDataKey).(string)
-	n, err := M.GetCounterValue(nameData)
+	n, err := m.GetCounterValue(nameData)
 	if err != nil {
 		w.Header().Set("content-type", "text/plain; charset=utf-8")
 		w.WriteHeader(http.StatusNotFound)
@@ -311,7 +277,7 @@ func GetCounter(w http.ResponseWriter, r *http.Request) {
 }
 func GetGauge(w http.ResponseWriter, r *http.Request) {
 	nameData := r.Context().Value(nameDataKey).(string)
-	n, err := M.GetGaugeValue(nameData)
+	n, err := m.GetGaugeValue(nameData)
 	if err != nil {
 		w.Header().Set("content-type", "text/plain; charset=utf-8")
 		w.WriteHeader(http.StatusNotFound)

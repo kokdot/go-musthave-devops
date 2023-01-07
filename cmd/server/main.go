@@ -17,9 +17,11 @@ import (
 	// "time"
 
 	"github.com/kokdot/go-musthave-devops/internal/handler"
+	"github.com/kokdot/go-musthave-devops/internal/interface_init"
 	"github.com/kokdot/go-musthave-devops/internal/onboarding_server"
+	"github.com/kokdot/go-musthave-devops/internal/repo"
 	"github.com/kokdot/go-musthave-devops/internal/store"
-	// "github.com/kokdot/go-musthave-devops/internal/store"
+	"github.com/kokdot/go-musthave-devops/internal/downloading_to_file"
 )
 
 //:PATH="$PATH:/mnt/c/Users/user/devopstest
@@ -30,13 +32,45 @@ import (
 //devopstest -test.v -test.run=^TestIteration8 -source-path=. -agent-binary-path=cmd/agent/agent -binary-path=cmd/server/server -server-port=8080 -database-dsn='postgres://postgres:postgres@postgres:5432/praktikum?sslmode=disable' -file-storage-path=azxs123
 //SERVER_PORT=$(random unused-port)
 //devopstest -test.v -test.run=^TestIteration9$ -source-path=. -agent-binary-path=cmd/agent/agent -binary-path=cmd/server/server -server-port=8080 -file-storage-path=/tmp/wert123 -database-dsn='postgres://postgres:postgres@postgres:5432/praktikum?sslmode=disable' -key=/tmp/wert1234
-// SERVER_PORT="33658" ADDRESS="localhost:33658" TEMP_FILE="/tmp/tgy785"  devopstest -test.v -test.run=^TestIteration6$ -source-path=. -agent-binary-path=cmd/agent/agent -binary-path=cmd/server/server -server-port=33658 -database-dsn='postgres://postgres:postgres@postgres:5432/praktikum?sslmode=disable' -file-storage-path=tgy785
+// SERVER_PORT="33658" ADDRESS="localhost:33658" TEMP_FILE="/tmp/tgy785"  devopstest -test.v -test.run=^TestIteration6$ -source-path=. -agent-binary-path=cmd/agent/agent -binary-path=cmd/server/server -server-port=33658 -database-dsn='postgres://postgres:postgres@postgres:5432/praktikum?sslmode=disable' -file-storage-path=/tmp/tgy785
+// func init() {
+//     onboarding_server.OnboardingServer()
 
+// }
+var (
+	ms  store.MemStorage
+	m  repo.Repo
+    // url = onboarding_server.GetURL()
+	// storeInterval time.Duration = onboarding_server.GetStoreInterval()
+	// storeFile = onboarding_server.GetStoreFile()
+	// restore = onboarding_server.GetRestore()
+	// key = onboarding_server.GetKey()
+)
 func main() {
-    onboarding_server.OnboardingServer()
-
-    handler.InterfaceInit(onboarding_server.StoreInterval, onboarding_server.StoreFileReal, onboarding_server.Restore)
-    store.GetKey(onboarding_server.KeyReal)
+    // onboarding_server.GetValues()
+    // fmt.Println("--onboarding_server.StoreInterval", onboarding_server.StoreInterval) 
+	// fmt.Println("--onboarding_server.StoreFileReal", onboarding_server.StoreFileReal)
+	// fmt.Println("--onboarding_server.Restore", onboarding_server.Restore)
+    
+    url, storeFile, key, restore, storeInterval  := onboarding_server.OnboardingServer()
+    fmt.Println("--------------------main-------------------------------------------")
+    fmt.Println("url:  ", url)
+    fmt.Println("storeInterval:  ", storeInterval)
+    fmt.Println("storeFile:  ", storeFile)
+    fmt.Println("restore:  ", restore)
+    fmt.Println("key:  ", key)
+    m := interface_init.InterfaceInit(storeInterval, storeFile, restore, url, key)
+    handler.PutM(m)
+    fmt.Printf("m:   %#v", m)
+    fmt.Println("--------------------main--started-----------------------------------------")
+    if m.GetRestore() {
+        m.ReadStorage()
+        // str, _ := m.GetAllValues()
+        // fmt.Printf("sm:    %v", str)
+    }
+    if m.GetStoreFile() != "" {
+        downloading_to_file.DownloadingToFile(m)
+    }
 
     // определяем роутер chi
     r := chi.NewRouter()
@@ -87,6 +121,6 @@ func main() {
         })
 	})
 
-    log.Fatal(http.ListenAndServe(onboarding_server.URLReal, r))
+    log.Fatal(http.ListenAndServe(url, r))
     // log.Fatal(http.ListenAndServe(":8080", r))
 }

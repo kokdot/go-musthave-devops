@@ -3,7 +3,7 @@ package onboarding_server
 import (
 	"fmt"
     "time"
-	"github.com/kokdot/go-musthave-devops/internal/store"
+	// "github.com/kokdot/go-musthave-devops/internal/store"
 	"flag"
     "github.com/caarlos0/env/v6"
 )
@@ -23,49 +23,49 @@ type Config struct {
     Key string 			`env:"KEY"`
 }
 var (
-    M store.Repo 
+    // m store.Repo 
     // ms = new(store.MemStorage)
-    URLReal = URL
-	StoreIntervalReal = StoreInterval
-	StoreFileReal = StoreFile
-	RestoreReal = Restore
-    KeyReal = Key
+    urlReal = URL
+	storeIntervalReal = StoreInterval
+	storeFileReal = StoreFile
+	restoreReal = Restore
+    keyReal = Key
     cfg Config
 )
-func OnboardingServer() {
+func OnboardingServer() (string, string, string, bool, time.Duration) {
 	fmt.Println("---------onboarding-------------------")
     err := env.Parse(&cfg)
     if err != nil {
         fmt.Println(err)
     }
 
-    URLRealPtr := flag.String("a", "127.0.0.1:8080", "ip adddress of server")
+    urlRealPtr := flag.String("a", "127.0.0.1:8080", "ip adddress of server")
     restorePtr := flag.Bool("r", true, "restore Metrics(Bool)")
     storeFilePtr := flag.String("f", "/tmp/devops-metrics-db.json", "file name")
     storeIntervalPtr := flag.Duration("i", 300000000000, "interval of download")
     keyPtr := flag.String("k", "", "secret key")
 
     flag.Parse()
-    URLReal = *URLRealPtr
-    StoreIntervalReal = *storeIntervalPtr
-    StoreFileReal = *storeFilePtr
-    RestoreReal = *restorePtr
-    KeyReal = *keyPtr
+    urlReal = *urlRealPtr
+    storeIntervalReal = *storeIntervalPtr
+    storeFileReal = *storeFilePtr
+    restoreReal = *restorePtr
+    keyReal = *keyPtr
 
     if cfg.Address != "" {
-        URLReal	= cfg.Address
+        urlReal	= cfg.Address
     }
     if cfg.StoreInterval != 0 {
-        StoreIntervalReal = cfg.StoreInterval
+        storeIntervalReal = cfg.StoreInterval
     }
     if cfg.StoreFile != "" {
-        StoreFileReal = cfg.StoreFile
+        storeFileReal = cfg.StoreFile
     }
     if cfg.Restore {
-        RestoreReal = cfg.Restore
+        restoreReal = cfg.Restore
     } 
     if cfg.Key != "" {
-        KeyReal	= cfg.Key
+        keyReal	= cfg.Key
     }
     fmt.Println("--------------------------const-------------server------------------")
     fmt.Println("URL:  ", URL)
@@ -74,7 +74,7 @@ func OnboardingServer() {
     fmt.Println("Restore:  ", Restore)
     fmt.Println("Key:  ", Key)
     fmt.Println("---------------------------flag------------------------------")
-    fmt.Println("URLRealPtr:", *URLRealPtr)
+    fmt.Println("URLRealPtr:", *urlRealPtr)
     fmt.Println("restorePtr:", *restorePtr)
     fmt.Println("storeFilePtr:", *storeFilePtr)
     fmt.Println("storeIntervalPtr:", *storeIntervalPtr)
@@ -86,10 +86,40 @@ func OnboardingServer() {
     fmt.Println("cfg.StoreInterval:", cfg.StoreInterval)
     fmt.Println("cfg.Key:", cfg.Key)
     fmt.Println("------------------------real---------------------------------")
-    fmt.Println("URLReal:", URLReal)
-    fmt.Println("RestoreReal:", RestoreReal)
-    fmt.Println("StoreFileReal:", StoreFileReal)
-    fmt.Println("StoreIntervalReal:", StoreIntervalReal)
-    fmt.Println("KeyReal:", KeyReal)
+    fmt.Println("urlReal:", urlReal)
+    fmt.Println("restoreReal:", restoreReal)
+    fmt.Println("storeFileReal:", storeFileReal)
+    fmt.Println("storeIntervalReal:", storeIntervalReal)
+    fmt.Println("keyReal:", keyReal)
     fmt.Println("------------------------Ok---------------------------------")
+    return urlReal, storeFileReal, keyReal, restoreReal, storeIntervalReal
+}
+
+// func GetValues() {
+//     fmt.Println("URLReal:", urlReal)
+//     fmt.Println("RestoreReal:", restoreReal)
+//     fmt.Println("StoreFileReal:", storeFileReal)
+//     fmt.Println("StoreIntervalReal:", storeIntervalReal)
+//     fmt.Println("KeyReal:", keyReal)
+// }
+
+func GetStoreInterval() time.Duration {
+    return storeIntervalReal
+}
+
+func GetStoreFile() string {
+    return storeFileReal
+}
+
+
+func GetRestore() bool {
+    return restoreReal
+}
+
+func GetURL() string {
+    return urlReal
+}
+
+func GetKey() string {
+    return keyReal
 }
