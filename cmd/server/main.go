@@ -19,8 +19,8 @@ import (
 	"github.com/kokdot/go-musthave-devops/internal/handler"
 	"github.com/kokdot/go-musthave-devops/internal/interface_init"
 	"github.com/kokdot/go-musthave-devops/internal/onboarding_server"
-	"github.com/kokdot/go-musthave-devops/internal/repo"
-	"github.com/kokdot/go-musthave-devops/internal/store"
+	// "github.com/kokdot/go-musthave-devops/internal/repo"
+	// "github.com/kokdot/go-musthave-devops/internal/store"
 	"github.com/kokdot/go-musthave-devops/internal/downloading_to_file"
 )
 
@@ -38,8 +38,8 @@ import (
 
 // }
 var (
-	ms  store.MemStorage
-	m  repo.Repo
+	// ms  store.MemStorage
+	// m  repo.Repo
     // url = onboarding_server.GetURL()
 	// storeInterval time.Duration = onboarding_server.GetStoreInterval()
 	// storeFile = onboarding_server.GetStoreFile()
@@ -47,11 +47,6 @@ var (
 	// key = onboarding_server.GetKey()
 )
 func main() {
-    // onboarding_server.GetValues()
-    // fmt.Println("--onboarding_server.StoreInterval", onboarding_server.StoreInterval) 
-	// fmt.Println("--onboarding_server.StoreFileReal", onboarding_server.StoreFileReal)
-	// fmt.Println("--onboarding_server.Restore", onboarding_server.Restore)
-    
     url, storeFile, key, restore, storeInterval  := onboarding_server.OnboardingServer()
     fmt.Println("--------------------main-------------------------------------------")
     fmt.Println("url:  ", url)
@@ -59,14 +54,13 @@ func main() {
     fmt.Println("storeFile:  ", storeFile)
     fmt.Println("restore:  ", restore)
     fmt.Println("key:  ", key)
+
     m := interface_init.InterfaceInit(storeInterval, storeFile, restore, url, key)
     handler.PutM(m)
     fmt.Printf("m:   %#v", m)
     fmt.Println("--------------------main--started-----------------------------------------")
     if m.GetRestore() {
         m.ReadStorage()
-        // str, _ := m.GetAllValues()
-        // fmt.Printf("sm:    %v", str)
     }
     if m.GetStoreFile() != "" {
         downloading_to_file.DownloadingToFile(m)

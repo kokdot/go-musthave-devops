@@ -8,7 +8,7 @@ import (
 	"time"
 
 	"github.com/kokdot/go-musthave-devops/internal/metrics_server"
-	_ "github.com/kokdot/go-musthave-devops/internal/repo"
+	// _ "github.com/kokdot/go-musthave-devops/internal/repo"
 )
 
 type FileStorage struct {
@@ -56,20 +56,6 @@ func (f FileStorage) GetKey() string {
 func (f FileStorage) GetStoreInterval() time.Duration {
 	return f.storeInterval
 }
-// func NewFileStorageWithFile(fileRestore string) (*FileStorage, error) {
-// 	tmpfile, err := os.CreateTemp("/tmp/", "devops-metrics-db")
-// 	if err != nil {
-//         log.Fatal(err)
-//     }
-// 	file := tmpfile.Name()
-// 	tmpfile.Close()
-// 	sm := make(StoreMap)
-// 	return &FileStorage{
-// 		StoreMap : &sm,
-// 		file: file,
-// 		fileRestore: fileRestore, 
-// 	}, nil
-// }
 
 func (f FileStorage) Save(mtxNew *Metrics) (*Metrics, error) {
 	_, err := f.ReadStorageSelf()

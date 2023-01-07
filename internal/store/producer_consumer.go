@@ -3,9 +3,7 @@ package store
 import (
 	"bufio"
 	"encoding/json"
-	"fmt"
 	"os"
-	// "fmt"
 )
 
 //------------------------------------producer--------------------------------------
@@ -17,8 +15,6 @@ type producer struct {
 }
 func NewProducer(filename string) (*producer, error) {
     file, err := os.OpenFile(filename, os.O_WRONLY|os.O_CREATE, 0777)
-	// file.Truncate(0)
-    // file, err := os.OpenFile(filename, os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0777)
     if err != nil {
         return nil, err
     }
@@ -31,13 +27,11 @@ func NewProducer(filename string) (*producer, error) {
 }
 
 func (p *producer) WriteStorage(storeMap *StoreMap) error {
-    // fmt.Println("--------WriteStorage------storeMap--------------", *storeMap)
 	p.file.Truncate(0)
     data, err := json.Marshal(storeMap)
     if err != nil {
         return err
     }
-    // fmt.Println("--------WriteStorage------date--------------", data)
     // записываем событие в буфер
     if _, err := p.writer.Write(data); err != nil {
         return err
@@ -66,7 +60,6 @@ type consumer struct {
 
 func NewConsumer(filename string) (*consumer, error) {
     file, err := os.OpenFile(filename, os.O_RDONLY|os.O_CREATE, 0777)
-    // file, err := os.OpenFile(filename, os.O_RDONLY|os.O_CREATE, 0777)
     if err != nil {
         return nil, err
     }
@@ -78,21 +71,12 @@ func NewConsumer(filename string) (*consumer, error) {
     }, nil
 }
 func (c *consumer) ReadStorage() (*StoreMap, error) {
-    fmt.Println("---------consumer ReadStorage-------------------", "consumer:  ", c)
-    // fmt.Println("---------consumer ReadStorage-------------------", "; c.file:  ", c.file.Name(), "; c.scanner", c.scanner)
-
-
     // одиночное сканирование до следующей строки
     if !c.scanner.Scan() {
-	    // fmt.Println("---------consumer ReadStorage---!c.scanner.Scan()----------------", "err:  ", c.scanner.Err())
-
         return nil, c.scanner.Err()
     }
     // читаем данные из scanner
     data := c.scanner.Bytes()
-    // fmt.Println("---------consumer ReadStorage---data----------------", "data:  ", data)
-
-
     sm := StoreMap{}
     err := json.Unmarshal(data, &sm)
     if err != nil {

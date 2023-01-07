@@ -23,8 +23,6 @@ type Config struct {
     Key string 			`env:"KEY"`
 }
 var (
-    // m store.Repo 
-    // ms = new(store.MemStorage)
     urlReal = URL
 	storeIntervalReal = StoreInterval
 	storeFileReal = StoreFile
@@ -40,7 +38,7 @@ func OnboardingServer() (string, string, string, bool, time.Duration) {
     }
 
     urlRealPtr := flag.String("a", "127.0.0.1:8080", "ip adddress of server")
-    restorePtr := flag.Bool("r", true, "restore Metrics(Bool)")
+    restorePtr := flag.Bool("r", false, "restore Metrics(Bool)")
     storeFilePtr := flag.String("f", "/tmp/devops-metrics-db.json", "file name")
     storeIntervalPtr := flag.Duration("i", 300000000000, "interval of download")
     keyPtr := flag.String("k", "", "secret key")
@@ -95,13 +93,6 @@ func OnboardingServer() (string, string, string, bool, time.Duration) {
     return urlReal, storeFileReal, keyReal, restoreReal, storeIntervalReal
 }
 
-// func GetValues() {
-//     fmt.Println("URLReal:", urlReal)
-//     fmt.Println("RestoreReal:", restoreReal)
-//     fmt.Println("StoreFileReal:", storeFileReal)
-//     fmt.Println("StoreIntervalReal:", storeIntervalReal)
-//     fmt.Println("KeyReal:", keyReal)
-// }
 
 func GetStoreInterval() time.Duration {
     return storeIntervalReal

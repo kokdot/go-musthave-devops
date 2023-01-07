@@ -26,12 +26,7 @@ type MemStorage struct {
 }
 
 var key string
-// var (
-// 	// m  store.Repo = interface_init.GetM()
-// 	// storeInterval time.Duration = onboarding_server.GetStoreInterval()
-// 	// storeFile = onboarding_server.GetStoreFile()
-// 	key = onboarding_server.GetKey()
-// )
+
 func (m MemStorage) GetURL() string {
 	return m.url
 }
@@ -74,13 +69,6 @@ func NewMemStorage(storeInterval time.Duration, storeFile string, restore bool, 
 		url: url,
 	}, nil
 }
-//------------------------------------interface--------------------------------------
-
-
-
-
-
-
 
 func (m MemStorage) Save(mtxNew *Metrics) (*Metrics, error) {
 	if key != "" {

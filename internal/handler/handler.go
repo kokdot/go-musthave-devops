@@ -31,11 +31,6 @@ func PutM(M repo.Repo) {
 	m = M
 }
 
-// var	key = m.GetKey()
-
-
-
-
 func PostUpdate(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("--------------------PostUpdate-------------------------start-------------------------------")
 
@@ -63,34 +58,9 @@ func PostUpdate(w http.ResponseWriter, r *http.Request) {
 			return
 		}
     }
-	// fmt.Println("----------------------------------------------------------------------------")
-	// fmt.Printf("\n----------PostUpdate------mtxNew.----:   %#v\n", mtxNew)
-	// fmt.Println("-126-handler--PostUpdate-----m/txNew-------------------", mtxNew)
-    // if mtxNew.Delta != nil {
-    // 	fmt.Println("--199--handler---PostUpdate-----mtxNew-------------------", mtxNew, "delta:  ", *mtxNew.Delta)
-    // }
-    // if mtxNew.Value != nil {
-    //     fmt.Println("--202---handler----PostUpdate-----mtxNew-------------------", mtxNew, "Value:  ", *mtxNew.Value)
-    // }
-    // sm, _ := M.GetAllValues()
-    // fmt.Println("----205---handler-------------/-------------------------------------------")
-	// fmt.Println("--206--handler-----PostUpdate----sm-!!!!!!!!-----------------\n:  ", sm)
-    // fmt.Println("---207---handler---------------------------------------------------------")
-	fmt.Printf("m:   %#v", m)
+
 	mtxOld, err := m.Save(&mtxNew)//----------------------------------------------------------------------------Save---
-	// fmt.Println("---210----handler--------M.Save----------------")
-    // fmt.Println("--211---handler-----PostUpdate-----mtxOld-------------------", mtxNew)
-    // if mtxNew.Delta != nil {
-    // fmt.Println("--213----handler------PostUpdate-----mtxOld-------------------", mtxNew, "delta:  ", *mtxNew.Delta)
-    // }
-    // if mtxNew.Value != nil {
-    // fmt.Println("--216----handler------PostUpdate-----mtxOld-------------------", mtxNew, "Value:  ", *mtxNew.Value)
-    // }
-    // sm, _ = M.GetAllValues()
-	// fmt.Println("--219-------handler----PostUpdate----sm-------------------", sm)
-    // fmt.Println("---220-------handler---------------------------------------------------------------------------")
-    // fmt.Println("----221--------handler-------------------------------------------------------------------------")
-	// fmt.Printf("\n----------PostUpdate------mtxOld.----:   %#v\n", mtxOld)
+
 	if err != nil {
 		w.Header().Set("content-type", "application/json")
 		w.WriteHeader(http.StatusBadRequest)
