@@ -32,7 +32,7 @@ func PutM(M repo.Repo) {
 }
 
 func GetPing(w http.ResponseWriter, r *http.Request) {
-	ok, err := store.GetPing()
+	ok, err := store.GetPing(m.GetDataBaseDSN())
  	if err != nil {
 		w.Header().Set("content-type", "application/json")
 		w.WriteHeader(http.StatusInternalServerError)

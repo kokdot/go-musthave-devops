@@ -10,9 +10,9 @@ import (
 )
 
 
-func GetPing() (bool, error) {
-	urlExample := "postgres://postgres:postgres@localhost:5432/postgres"
-    db, err := sql.Open("pgx", urlExample)
+func GetPing(dataBaseDSN string) (bool, error) {
+	// urlExample := "postgres://postgres:postgres@localhost:5432/postgres"
+    db, err := sql.Open("pgx", dataBaseDSN)
     if err != nil {
         return false, err
     }

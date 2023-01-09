@@ -33,7 +33,9 @@ import (
 //SERVER_PORT=$(random unused-port)
 //devopstest -test.v -test.run=^TestIteration9$ -source-path=. -agent-binary-path=cmd/agent/agent -binary-path=cmd/server/server -server-port=8080 -file-storage-path=/tmp/wert123 -database-dsn='postgres://postgres:postgres@postgres:5432/praktikum?sslmode=disable' -key=/tmp/wert1234
 // SERVER_PORT="33658" ADDRESS="localhost:33658" TEMP_FILE="/tmp/tgy785"  devopstest -test.v -test.run=^TestIteration6$ -source-path=. -agent-binary-path=cmd/agent/agent -binary-path=cmd/server/server -server-port=33658 -database-dsn='postgres://postgres:postgres@postgres:5432/praktikum?sslmode=disable' -file-storage-path=/tmp/tgy785
-// func init() {
+
+// SERVER_PORT=33658 ADDRESS="localhost:33658" TEMP_FILE=jkr678 devopstest -test.v -test.run=^TestIteration10[b]*$ -source-path=. -agent-binary-path=cmd/agent/agent -binary-path=cmd/server/server -server-port=33658 -database-dsn='postgres://postgres:postgres@postgres:5432/praktikum?sslmode=disable' -key="jkr678"
+//func init() {
 //     onboarding_server.OnboardingServer()
 
 // }

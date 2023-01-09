@@ -54,7 +54,9 @@ func OnboardingServer() (string, string, string, bool, time.Duration, string) {
     storeFileReal = *storeFilePtr
     restoreReal = *restorePtr
     keyReal = *keyPtr
-    dataBaseDSNReal = *DataBaseDSNPtr
+    if *DataBaseDSNPtr != "" {
+        dataBaseDSNReal = *DataBaseDSNPtr
+    }
 
     if cfg.Address != "" {
         urlReal	= cfg.Address
