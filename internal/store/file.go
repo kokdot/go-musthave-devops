@@ -5,14 +5,23 @@ import (
 	"fmt"
 	"os"
 	"log"
+	"time"
 
+	"github.com/kokdot/go-musthave-devops/internal/metrics_server"
+	// _ "github.com/kokdot/go-musthave-devops/internal/repo"
 )
+
 type FileStorage struct {
 	StoreMap   *StoreMap
-	file string
-	fileRestore string
+	storeFile string
+	restoreFile string
+	storeInterval time.Duration
+	restore bool
+	url string
+	key string
 }
-func NewFileStorage() (*FileStorage, error) {
+
+func NewFileStorage(storeInterval time.Duration, storeFile string, restore bool, url string, key string) (*FileStorage, error) {
 	tmpfile, err := os.CreateTemp("/tmp/", "devops-metrics-db")
 	if err != nil {
         log.Fatal(err)
@@ -22,23 +31,30 @@ func NewFileStorage() (*FileStorage, error) {
 	sm := make(StoreMap)
 	return &FileStorage{
 		StoreMap : &sm, 
-		file: file,
+		storeFile: storeFile,
+		restoreFile: file,
+		storeInterval: storeInterval, 
+		restore: restore,
+		url: url,
+		key: key,
 	}, nil
 }
+func (f FileStorage) GetURL() string {
+	return f.url
+}
 
-func NewFileStorageWithFile(fileRestore string) (*FileStorage, error) {
-	tmpfile, err := os.CreateTemp("/tmp/", "devops-metrics-db")
-	if err != nil {
-        log.Fatal(err)
-    }
-	file := tmpfile.Name()
-	tmpfile.Close()
-	sm := make(StoreMap)
-	return &FileStorage{
-		StoreMap : &sm,
-		file: file,
-		fileRestore: fileRestore, 
-	}, nil
+func (f FileStorage) GetStoreFile() string {
+	return f.storeFile
+}
+
+func (f FileStorage) GetRestore() bool {
+	return f.restore
+}
+func (f FileStorage) GetKey() string {
+	return f.key
+}
+func (f FileStorage) GetStoreInterval() time.Duration {
+	return f.storeInterval
 }
 
 func (f FileStorage) Save(mtxNew *Metrics) (*Metrics, error) {
@@ -81,7 +97,7 @@ func (f FileStorage) Save(mtxNew *Metrics) (*Metrics, error) {
 		mtxOld, ok := (*f.StoreMap)[mtxNew.ID]
 		if !ok {
 			(*f.StoreMap)[mtxNew.ID] = *mtxNew
-			err := f.WriteStorage()
+			err := f.WriteStorage()              
 			if err != nil {
 				return nil, err
 			} 
@@ -119,7 +135,7 @@ func (f FileStorage) GetAll() (StoreMap, error) {
 }
 //------------------------WriteStorage-------------------------------
 func (f FileStorage) WriteStorage() error {
-	p, err := NewProducer(f.fileRestore)
+	p, err := NewProducer(f.storeFile)
 	if err != nil  {
 		err1 := fmt.Errorf("can't to create producer: %s", err)
 		return err1
@@ -133,7 +149,7 @@ func (f FileStorage) WriteStorage() error {
 }
 //------------------------ReadStorage-------------------------------
 func (f FileStorage) ReadStorage() (*StoreMap, error) {
-	c, err := NewConsumer(f.fileRestore)
+	c, err := NewConsumer(f.storeFile)
 	if err != nil  {
 		err1 := fmt.Errorf("can't to create consumer: %s", err)
 		return nil, err1
@@ -151,7 +167,7 @@ func (f FileStorage) ReadStorage() (*StoreMap, error) {
 }
 //------------------------WriteStorageSelf-------------------------------
 func (f FileStorage) WriteStorageSelf() error {
-	p, err := NewProducer(f.file)
+	p, err := NewProducer(f.restoreFile)
 	if err != nil  {
 		err1 := fmt.Errorf("can't to create producer: %s", err)
 		return err1
@@ -165,7 +181,7 @@ func (f FileStorage) WriteStorageSelf() error {
 }
 //------------------------ReadStorageSelf-------------------------------
 func (f FileStorage) ReadStorageSelf() (*StoreMap, error) {
-	c, err := NewConsumer(f.file)
+	c, err := NewConsumer(f.restoreFile)
 	if err != nil  {
 		err1 := fmt.Errorf("can't to create consumer: %s", err)
 		return nil, err1
@@ -187,7 +203,7 @@ func (f FileStorage) SaveCounterValue(id string, counter Counter) (Counter, erro
 	}
 	mtxOld, ok := (*f.StoreMap)[id]
 	if !ok {
-		mtxNew := NewMetrics(id, "counter")
+		mtxNew := metrics_server.NewMetrics(id, "counter")
 		mtxNew.Delta = &counter
 		(*f.StoreMap)[id] = mtxNew
 		err := f.WriteStorage()
@@ -211,7 +227,7 @@ func (f FileStorage) SaveGaugeValue(id string, gauge Gauge) error {
 	}
 	mtxOld, ok := (*f.StoreMap)[id]
 	if !ok {
-		mtxNew := NewMetrics(id, "gauge")
+		mtxNew := metrics_server.NewMetrics(id, "gauge")
 		mtxNew.Value = &gauge
 		(*f.StoreMap)[id] = mtxNew
 		err := f.WriteStorage()

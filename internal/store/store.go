@@ -1,32 +1,60 @@
 package store
 
 import (
-	"fmt"
+	
 	"errors"
+	"fmt"
 	"sort"
+	"time"
+	"github.com/kokdot/go-musthave-devops/internal/repo"
+	"github.com/kokdot/go-musthave-devops/internal/metrics_server"
+
 )
 
-type Counter int64
-type Gauge float64
-type StoreMap map[string]Metrics
+type Gauge = repo.Gauge
+type Counter = repo.Counter
+type StoreMap = repo.StoreMap
+type Metrics = repo.Metrics
 
 type MemStorage struct {
 	StoreMap   *StoreMap
-	file string
+	storeFile string
+	restore bool
+	storeInterval time.Duration
+	key string
+	url string
+}
+
+// var key string
+
+func (m MemStorage) GetURL() string {
+	return m.url
+}
+func (m MemStorage) GetRestore() bool {
+	return m.restore
+}
+func (m MemStorage) GetStoreFile() string {
+	return m.storeFile
+}
+func (m MemStorage) GetKey() string {
+	return m.key
+}
+func (m MemStorage) GetStoreInterval() time.Duration {
+	return m.storeInterval
 }
 func NewMemStorageWithFile(filename string) (*MemStorage, error) {
 	sm := make(StoreMap)
-	sm["1"] = Metrics{
+	sm["1"] = repo.Metrics{
 		ID: "1",
 		MType: "1",
 		
 	}
 	return &MemStorage{
 		StoreMap : &sm, 
-		file: filename,
+		storeFile: filename,
 	}, nil
 }
-func NewMemStorage() (*MemStorage, error) {
+func NewMemStorage(storeInterval time.Duration, storeFile string, restore bool, url string, key string) (*MemStorage, error) {
 	sm := make(StoreMap)
 	sm["1"] = Metrics{
 		ID: "1",
@@ -34,80 +62,74 @@ func NewMemStorage() (*MemStorage, error) {
 	}
 	return &MemStorage{
 		StoreMap : &sm,
+		storeFile: storeFile,
+		restore: restore,
+		storeInterval: storeInterval,
+		key: key,
+		url: url,
 	}, nil
-}
-//------------------------------------interface--------------------------------------
-type Consumer interface {
-    ReadStorage() (*StoreMap, error) // для чтения события
-    Close() error               // для закрытия ресурса (файла)
-}
-type Producer interface {
-    WriteStorage() error // для записи события
-    Close() error            // для закрытия ресурса (файла)
-}
-type Repo interface {
-	Save(mtx *Metrics) (*Metrics, error)
-	Get(id string) (*Metrics, error)
-	GetAll() (StoreMap, error)
-	SaveCounterValue(name string, counter Counter) (Counter, error)
-	SaveGaugeValue(name string, gauge Gauge) error
-	GetCounterValue(name string) (Counter, error)
-	GetGaugeValue(name string) (Gauge, error)
-	GetAllValues() (string, error)
-	ReadStorage() (*StoreMap, error)
-	WriteStorage() error 
-}
-type Metrics struct {
-	ID    string   `json:"id"`              // имя метрики
-	MType string   `json:"type"`            // параметр, принимающий значение gauge или counter
-	Delta *Counter   `json:"delta,omitempty"` // значение метрики в случае передачи counter
-	Value *Gauge `json:"value,omitempty"` // значение метрики в случае передачи gauge
-}
-var zeroG Gauge = 0
-var zeroC Counter = 0
-
-func NewMetrics(id string, mType string) Metrics {
-	if mType == "gauge" {
-		return Metrics{
-		ID: id,
-		MType: "gauge",
-		Value: &zeroG,
-		}
-	} else {
-		return Metrics{
-			ID: id,
-			MType: "counter",
-			Delta: &zeroC,
-		}
-	}
 }
 
 func (m MemStorage) Save(mtxNew *Metrics) (*Metrics, error) {
-	switch mtxNew.MType {
-	case "Gauge":
-		(*m.StoreMap)[mtxNew.ID] = *mtxNew
-		return mtxNew, nil
-	case "gauge":
-		(*m.StoreMap)[mtxNew.ID] = *mtxNew
-		return mtxNew, nil
-	case "counter":
-		mtxOld, ok := (*m.StoreMap)[mtxNew.ID]
-		if !ok {
+	if key := m.GetKey(); key != "" {
+
+		switch mtxNew.MType {
+		case "Gauge":
 			(*m.StoreMap)[mtxNew.ID] = *mtxNew
 			return mtxNew, nil
-		}
-		*mtxOld.Delta += *mtxNew.Delta
-		return &mtxOld, nil
-	case "Counter":
-		mtxOld, ok := (*m.StoreMap)[mtxNew.ID]
-		if !ok {
+		case "gauge":
 			(*m.StoreMap)[mtxNew.ID] = *mtxNew
 			return mtxNew, nil
+		case "counter":
+			mtxOld, ok := (*m.StoreMap)[mtxNew.ID]
+			if !ok {
+				(*m.StoreMap)[mtxNew.ID] = *mtxNew
+				return mtxNew, nil
+			}
+			delta := *mtxNew.Delta + *mtxOld.Delta
+			mtxOld = *metrics_server.NewCounterMetrics(mtxNew.ID, delta, key)
+			(*m.StoreMap)[mtxOld.ID] = mtxOld
+			return &mtxOld, nil
+		case "Counter":
+			mtxOld, ok := (*m.StoreMap)[mtxNew.ID]
+			if !ok {
+				(*m.StoreMap)[mtxNew.ID] = *mtxNew
+				return mtxNew, nil
+			}
+			delta := *mtxNew.Delta + *mtxOld.Delta
+			mtxOld = *metrics_server.NewCounterMetrics(mtxNew.ID, delta, key)
+			(*m.StoreMap)[mtxOld.ID] = mtxOld
+			return &mtxOld, nil
 		}
-		*mtxOld.Delta += *mtxNew.Delta
-		return &mtxOld, nil
+		return mtxNew, nil
+	} else {
+		switch mtxNew.MType {
+		case "Gauge":
+			(*m.StoreMap)[mtxNew.ID] = *mtxNew
+			return mtxNew, nil
+		case "gauge":
+			(*m.StoreMap)[mtxNew.ID] = *mtxNew
+			return mtxNew, nil
+		case "counter":
+			mtxOld, ok := (*m.StoreMap)[mtxNew.ID]
+			if !ok {
+				(*m.StoreMap)[mtxNew.ID] = *mtxNew
+				return mtxNew, nil
+			}
+			*mtxOld.Delta += *mtxNew.Delta
+			return &mtxOld, nil
+		case "Counter":
+			mtxOld, ok := (*m.StoreMap)[mtxNew.ID]
+			if !ok {
+				(*m.StoreMap)[mtxNew.ID] = *mtxNew
+				return mtxNew, nil
+			}
+			*mtxOld.Delta += *mtxNew.Delta
+			return &mtxOld, nil
+		}
+		return mtxNew, nil
+
 	}
-	return mtxNew, nil
 }
 
 func (m MemStorage) Get(id string) (*Metrics, error) {
@@ -118,7 +140,21 @@ func (m MemStorage) Get(id string) (*Metrics, error) {
 	if !ok {
 		return nil, errors.New("metrics not found")
 	}
-	return &mtxOld, nil
+	// if mtxOld.Hash != nil {
+	// 	return &mtxOld, nil
+	// }
+	fmt.Printf("mtxOld:   %#v", mtxOld)
+	if key := m.GetKey(); key != "" {
+
+		if mtxOld.MType == "Gauge" || mtxOld.MType == "gauge" {
+			mtxOld = *metrics_server.NewGaugeMetrics(mtxOld.ID, *mtxOld.Value, key)
+		} else {
+				mtxOld = *metrics_server.NewCounterMetrics(mtxOld.ID, *mtxOld.Delta, key) //-------------------------------------line : 216
+		}
+			return &mtxOld, nil
+	} else {
+		return &mtxOld, nil
+	}
 }
 
 func (m MemStorage) GetAll() (StoreMap, error) {
@@ -134,7 +170,7 @@ func (m *MemStorage) SaveCounterValue(id string, counter Counter) (Counter, erro
 	}
 	mtxOld, ok := (*m.StoreMap)[id]
 	if !ok {
-		mtxNew := NewMetrics(id, "counter")
+		mtxNew := metrics_server.NewMetrics(id, "counter")
 		mtxNew.Delta = &counter
 		(*m.StoreMap)[id] = mtxNew
 		return counter, nil
@@ -149,7 +185,7 @@ func (m *MemStorage) SaveGaugeValue(id string, gauge Gauge) error {
 	}
 	mtxOld, ok := (*m.StoreMap)[id]
 	if !ok {
-		mtxNew := NewMetrics(id, "gauge")
+		mtxNew := metrics_server.NewMetrics(id, "gauge")
 		mtxNew.Value = &gauge
 		(*m.StoreMap)[id] = mtxNew
 	}else {
@@ -211,7 +247,7 @@ func (m *MemStorage) GetAllValues() (string, error) {
 }
 
 func (m MemStorage) ReadStorage() (*StoreMap, error) {
-	c, err := NewConsumer(m.file)
+	c, err := NewConsumer(m.storeFile)
 	if err != nil  {
 		err1 := fmt.Errorf("can't to create consumer: %s", err)
 		return nil, err1
@@ -228,7 +264,7 @@ func (m MemStorage) ReadStorage() (*StoreMap, error) {
 }
 
 func (m MemStorage) WriteStorage() error{
-	p, err := NewProducer(m.file)
+	p, err := NewProducer(m.storeFile)
 	if err != nil  {
 		err1 := fmt.Errorf("can't to create producer: %s", err)
 		return err1

@@ -7,7 +7,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
-	"time"
+	// "time"
 
 	// "bytes"
 
@@ -16,13 +16,34 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/kokdot/go-musthave-devops/internal/handler"
-	"github.com/kokdot/go-musthave-devops/internal/store"
+	"github.com/kokdot/go-musthave-devops/internal/interface_init"
+	"github.com/kokdot/go-musthave-devops/internal/onboarding_server"
+	"github.com/kokdot/go-musthave-devops/internal/repo"
+	// "github.com/kokdot/go-musthave-devops/internal/store"
+	"github.com/kokdot/go-musthave-devops/internal/downloading_to_file"
 )
 
 //test git git test what
 func TestHandler(t *testing.T) {
-	interval := time.Duration(23)
-	handler.InterfaceInit(interval, "/mnt/c/Users/user/temp/jxcwr1234", false)
+	url, storeFile, key, restore, storeInterval  := onboarding_server.OnboardingServer()
+    fmt.Println("--------------------main-------------------------------------------")
+    fmt.Println("url:  ", url)
+    fmt.Println("storeInterval:  ", storeInterval)
+    fmt.Println("storeFile:  ", storeFile)
+    fmt.Println("restore:  ", restore)
+    fmt.Println("key:  ", key)
+
+    m := interface_init.InterfaceInit(storeInterval, storeFile, restore, url, key)
+    handler.PutM(m)
+    fmt.Printf("m:   %#v", m)
+    fmt.Println("--------------------main--started-----------------------------------------")
+    if m.GetRestore() {
+        m.ReadStorage()
+    }
+    if m.GetStoreFile() != "" {
+        downloading_to_file.DownloadingToFile(m)
+    }
+
 	r := chi.NewRouter()
 	r.Use(middleware.RequestID)
 	r.Use(middleware.RealIP)
@@ -81,7 +102,7 @@ func TestHandler(t *testing.T) {
 		want   want
 		url    string
 		method string
-		mtxOld store.Metrics
+		mtxOld repo.Metrics
 	}{
 		{
 			name: "counter norm",
