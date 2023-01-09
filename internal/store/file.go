@@ -19,9 +19,10 @@ type FileStorage struct {
 	restore bool
 	url string
 	key string
+	dataBaseDSN string
 }
 
-func NewFileStorage(storeInterval time.Duration, storeFile string, restore bool, url string, key string) (*FileStorage, error) {
+func NewFileStorage(storeInterval time.Duration, storeFile string, restore bool, url string, key string, dataBaseDSN string) (*FileStorage, error) {
 	tmpfile, err := os.CreateTemp("/tmp/", "devops-metrics-db")
 	if err != nil {
         log.Fatal(err)
@@ -37,7 +38,11 @@ func NewFileStorage(storeInterval time.Duration, storeFile string, restore bool,
 		restore: restore,
 		url: url,
 		key: key,
+		dataBaseDSN: dataBaseDSN,
 	}, nil
+}
+func (f FileStorage) GetDataBaseDSN() string {
+	return f.dataBaseDSN
 }
 func (f FileStorage) GetURL() string {
 	return f.url

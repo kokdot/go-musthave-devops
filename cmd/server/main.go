@@ -47,15 +47,16 @@ var (
 	// key = onboarding_server.GetKey()
 )
 func main() {
-    url, storeFile, key, restore, storeInterval  := onboarding_server.OnboardingServer()
+    url, storeFile, key, restore, storeInterval, dataBaseDSNReal  := onboarding_server.OnboardingServer()
     fmt.Println("--------------------main-------------------------------------------")
     fmt.Println("url:  ", url)
     fmt.Println("storeInterval:  ", storeInterval)
     fmt.Println("storeFile:  ", storeFile)
     fmt.Println("restore:  ", restore)
     fmt.Println("key:  ", key)
+    fmt.Println("dataBaseDSNReal:  ", dataBaseDSNReal)
 
-    m := interface_init.InterfaceInit(storeInterval, storeFile, restore, url, key)
+    m := interface_init.InterfaceInit(storeInterval, storeFile, restore, url, key, dataBaseDSNReal)
     handler.PutM(m)
     fmt.Printf("m:   %#v", m)
     fmt.Println("--------------------main--started-----------------------------------------")
@@ -65,6 +66,9 @@ func main() {
     if m.GetStoreFile() != "" {
         downloading_to_file.DownloadingToFile(m)
     }
+    // if m.GetDataBaseDSN() != "" {
+    //     downloading_to_file.DownloadingToFile(m)
+    // }
 
     // определяем роутер chi
     r := chi.NewRouter()
@@ -76,6 +80,7 @@ func main() {
     // r.Use(middleware.Compress(5, "gzip"))
     r.Use(middleware.Compress(5))
     r.Get("/", handler.GetAll)
+    r.Get("/ping", handler.GetPing)
     r.Route("/update", func(r chi.Router) {
         r.Post("/", handler.PostUpdate)
         r.Route("/counter", func(r chi.Router) {

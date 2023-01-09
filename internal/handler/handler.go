@@ -31,6 +31,19 @@ func PutM(M repo.Repo) {
 	m = M
 }
 
+func GetPing(w http.ResponseWriter, r *http.Request) {
+	ok, err := store.GetPing()
+ 	if err != nil {
+		w.Header().Set("content-type", "application/json")
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	if ok {
+		w.Header().Set("content-type", "application/json")
+		w.WriteHeader(http.StatusOK)
+		return
+	}
+}
 func PostUpdate(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("--------------------PostUpdate-------------------------start-------------------------------")
 

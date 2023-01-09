@@ -25,15 +25,16 @@ import (
 
 //test git git test what
 func TestHandler(t *testing.T) {
-	url, storeFile, key, restore, storeInterval  := onboarding_server.OnboardingServer()
+	url, storeFile, key, restore, storeInterval, dataBaseDSN  := onboarding_server.OnboardingServer()
     fmt.Println("--------------------main-------------------------------------------")
     fmt.Println("url:  ", url)
     fmt.Println("storeInterval:  ", storeInterval)
     fmt.Println("storeFile:  ", storeFile)
     fmt.Println("restore:  ", restore)
     fmt.Println("key:  ", key)
+    fmt.Println("dataBaseDSN:  ", dataBaseDSN)
 
-    m := interface_init.InterfaceInit(storeInterval, storeFile, restore, url, key)
+    m := interface_init.InterfaceInit(storeInterval, storeFile, restore, url, key, dataBaseDSN)
     handler.PutM(m)
     fmt.Printf("m:   %#v", m)
     fmt.Println("--------------------main--started-----------------------------------------")

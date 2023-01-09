@@ -18,6 +18,7 @@ type Repo interface {
 	GetStoreFile() string
 	GetRestore() bool
 	GetStoreInterval() time.Duration
+	GetDataBaseDSN() string
 }
 
 type Consumer interface {

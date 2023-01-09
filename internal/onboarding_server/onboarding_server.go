@@ -13,6 +13,8 @@ const (
     StoreFile = "/tmp/devops-metrics-db.json"
     Key = ""
     Restore = false
+    DataBaseDSN = ""
+    // DataBaseDSN = "postgres://postgres:postgres@localhost:5432/postgres"
 )
 
 type Config struct {
@@ -21,6 +23,7 @@ type Config struct {
     StoreFile  string 		`env:"STORE_FILE"`// envDefault:"/tmp/devops-metrics-db.json"`
     Restore  bool 		`env:"RESTORE"`// envDefault:"true"`
     Key string 			`env:"KEY"`
+    DataBaseDSN string    `env:"DATABASE_DSN"`
 }
 var (
     urlReal = URL
@@ -29,8 +32,9 @@ var (
 	restoreReal = Restore
     keyReal = Key
     cfg Config
+    dataBaseDSNReal = DataBaseDSN
 )
-func OnboardingServer() (string, string, string, bool, time.Duration) {
+func OnboardingServer() (string, string, string, bool, time.Duration, string) {
 	fmt.Println("---------onboarding-------------------")
     err := env.Parse(&cfg)
     if err != nil {
@@ -42,6 +46,7 @@ func OnboardingServer() (string, string, string, bool, time.Duration) {
     storeFilePtr := flag.String("f", "/tmp/devops-metrics-db.json", "file name")
     storeIntervalPtr := flag.Duration("i", 300000000000, "interval of download")
     keyPtr := flag.String("k", "", "secret key")
+    DataBaseDSNPtr := flag.String("d", "", "Data Base DSN")
 
     flag.Parse()
     urlReal = *urlRealPtr
@@ -49,6 +54,7 @@ func OnboardingServer() (string, string, string, bool, time.Duration) {
     storeFileReal = *storeFilePtr
     restoreReal = *restorePtr
     keyReal = *keyPtr
+    dataBaseDSNReal = *DataBaseDSNPtr
 
     if cfg.Address != "" {
         urlReal	= cfg.Address
@@ -65,32 +71,39 @@ func OnboardingServer() (string, string, string, bool, time.Duration) {
     if cfg.Key != "" {
         keyReal	= cfg.Key
     }
+    if cfg.DataBaseDSN != "" {
+        dataBaseDSNReal	= cfg.DataBaseDSN
+    }
     fmt.Println("--------------------------const-------------server------------------")
     fmt.Println("URL:  ", URL)
     fmt.Println("StoreInterval:  ", StoreInterval)
     fmt.Println("StoreFile:  ", StoreFile)
     fmt.Println("Restore:  ", Restore)
     fmt.Println("Key:  ", Key)
+    fmt.Println("DataBaseDSN:  ", DataBaseDSN)
     fmt.Println("---------------------------flag------------------------------")
     fmt.Println("URLRealPtr:", *urlRealPtr)
     fmt.Println("restorePtr:", *restorePtr)
     fmt.Println("storeFilePtr:", *storeFilePtr)
     fmt.Println("storeIntervalPtr:", *storeIntervalPtr)
     fmt.Println("keyPtr:", *keyPtr)
+    fmt.Println("DataBaseDSNPtr:", *DataBaseDSNPtr)
     fmt.Println("---------------------------cfg------------------------------")
     fmt.Println("cfg.Address:", cfg.Address)
     fmt.Println("cfg.Restore:", cfg.Restore)
     fmt.Println("cfg.StoreFile:", cfg.StoreFile)
     fmt.Println("cfg.StoreInterval:", cfg.StoreInterval)
     fmt.Println("cfg.Key:", cfg.Key)
+    fmt.Println("cfg.DataBaseDSN:", cfg.DataBaseDSN)
     fmt.Println("------------------------real---------------------------------")
     fmt.Println("urlReal:", urlReal)
     fmt.Println("restoreReal:", restoreReal)
     fmt.Println("storeFileReal:", storeFileReal)
     fmt.Println("storeIntervalReal:", storeIntervalReal)
     fmt.Println("keyReal:", keyReal)
+    fmt.Println("dataBaseDSNReal:", dataBaseDSNReal)
     fmt.Println("------------------------Ok---------------------------------")
-    return urlReal, storeFileReal, keyReal, restoreReal, storeIntervalReal
+    return urlReal, storeFileReal, keyReal, restoreReal, storeIntervalReal, dataBaseDSNReal
 }
 
 

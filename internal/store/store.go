@@ -23,10 +23,14 @@ type MemStorage struct {
 	storeInterval time.Duration
 	key string
 	url string
+	dataBaseDSN string
 }
 
 // var key string
 
+func (m MemStorage) GetDataBaseDSN() string {
+	return m.dataBaseDSN
+}
 func (m MemStorage) GetURL() string {
 	return m.url
 }
@@ -54,7 +58,7 @@ func NewMemStorageWithFile(filename string) (*MemStorage, error) {
 		storeFile: filename,
 	}, nil
 }
-func NewMemStorage(storeInterval time.Duration, storeFile string, restore bool, url string, key string) (*MemStorage, error) {
+func NewMemStorage(storeInterval time.Duration, storeFile string, restore bool, url string, key string, dataBaseDSN string) (*MemStorage, error) {
 	sm := make(StoreMap)
 	sm["1"] = Metrics{
 		ID: "1",
@@ -67,6 +71,7 @@ func NewMemStorage(storeInterval time.Duration, storeFile string, restore bool, 
 		storeInterval: storeInterval,
 		key: key,
 		url: url,
+		dataBaseDSN: dataBaseDSN,
 	}, nil
 }
 
