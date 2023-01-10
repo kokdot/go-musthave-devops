@@ -6,10 +6,10 @@ import (
 	"sync"
 	"time"
 
-	"github.com/kokdot/go-musthave-devops/internal/metrics_agent"
+	"github.com/kokdot/go-musthave-devops/internal/metricsagent"
 	"github.com/kokdot/go-musthave-devops/internal/def"
 	"github.com/kokdot/go-musthave-devops/internal/monitor"
-	"github.com/kokdot/go-musthave-devops/internal/onboarding_agent"
+	"github.com/kokdot/go-musthave-devops/internal/onboardingagent"
 )
 
 type Gauge = def.Gauge

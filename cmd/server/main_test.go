@@ -16,11 +16,11 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/kokdot/go-musthave-devops/internal/handler"
-	"github.com/kokdot/go-musthave-devops/internal/interface_init"
-	"github.com/kokdot/go-musthave-devops/internal/onboarding_server"
+	"github.com/kokdot/go-musthave-devops/internal/interfaceinit"
+	"github.com/kokdot/go-musthave-devops/internal/onboardingserver"
 	"github.com/kokdot/go-musthave-devops/internal/repo"
 	// "github.com/kokdot/go-musthave-devops/internal/store"
-	"github.com/kokdot/go-musthave-devops/internal/downloading_to_file"
+	"github.com/kokdot/go-musthave-devops/internal/downloadingtofile"
 )
 
 //test git git test what
@@ -34,7 +34,7 @@ func TestHandler(t *testing.T) {
     fmt.Println("key:  ", key)
     fmt.Println("dataBaseDSN:  ", dataBaseDSN)
 
-    m := interface_init.InterfaceInit(storeInterval, storeFile, restore, url, key, dataBaseDSN)
+    m := interfaceinit.InterfaceInit(storeInterval, storeFile, restore, url, key, dataBaseDSN)
     handler.PutM(m)
     fmt.Printf("m:   %#v", m)
     fmt.Println("--------------------main--started-----------------------------------------")

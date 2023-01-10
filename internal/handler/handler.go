@@ -12,8 +12,8 @@ import (
 	// "time"
 
 	"github.com/go-chi/chi/v5"
-	// "github.com/kokdot/go-musthave-devops/internal/interface_init"
-	"github.com/kokdot/go-musthave-devops/internal/metrics_server"
+	// "github.com/kokdot/go-musthave-devops/internal/interfaceinit"
+	"github.com/kokdot/go-musthave-devops/internal/metricsserver"
 	"github.com/kokdot/go-musthave-devops/internal/store"
 	"github.com/kokdot/go-musthave-devops/internal/repo"
 )

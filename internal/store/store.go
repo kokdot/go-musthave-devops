@@ -7,7 +7,7 @@ import (
 	"sort"
 	"time"
 	"github.com/kokdot/go-musthave-devops/internal/repo"
-	"github.com/kokdot/go-musthave-devops/internal/metrics_server"
+	"github.com/kokdot/go-musthave-devops/internal/metricsserver"
 
 )
 

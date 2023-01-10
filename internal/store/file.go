@@ -7,7 +7,7 @@ import (
 	"log"
 	"time"
 
-	"github.com/kokdot/go-musthave-devops/internal/metrics_server"
+	"github.com/kokdot/go-musthave-devops/internal/metricsserver"
 	// _ "github.com/kokdot/go-musthave-devops/internal/repo"
 )
 

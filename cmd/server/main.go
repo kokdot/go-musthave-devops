@@ -17,11 +17,11 @@ import (
 	// "time"
 
 	"github.com/kokdot/go-musthave-devops/internal/handler"
-	"github.com/kokdot/go-musthave-devops/internal/interface_init"
-	"github.com/kokdot/go-musthave-devops/internal/onboarding_server"
+	"github.com/kokdot/go-musthave-devops/internal/interfaceinit"
+	"github.com/kokdot/go-musthave-devops/internal/onboardingserver"
 	// "github.com/kokdot/go-musthave-devops/internal/repo"
 	// "github.com/kokdot/go-musthave-devops/internal/store"
-	"github.com/kokdot/go-musthave-devops/internal/downloading_to_file"
+	"github.com/kokdot/go-musthave-devops/internal/downloadingtofile"
 )
 
 //:PATH="$PATH:/mnt/c/Users/user/devopstest
@@ -58,7 +58,7 @@ func main() {
     fmt.Println("key:  ", key)
     fmt.Println("dataBaseDSNReal:  ", dataBaseDSNReal)
 
-    m := interface_init.InterfaceInit(storeInterval, storeFile, restore, url, key, dataBaseDSNReal)
+    m := interfaceinit.InterfaceInit(storeInterval, storeFile, restore, url, key, dataBaseDSNReal)
     handler.PutM(m)
     fmt.Printf("m:   %#v", m)
     fmt.Println("--------------------main--started-----------------------------------------")
