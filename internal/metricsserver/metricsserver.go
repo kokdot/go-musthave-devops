@@ -1,4 +1,4 @@
-package metrics_server
+package metricsserver
 import(
 	"fmt"
 	"github.com/kokdot/go-musthave-devops/internal/repo"
@@ -35,7 +35,7 @@ func NewCounterMetrics(id string, counter Counter, key string) *Metrics {
 	h := hmac.New(sha256.New, []byte(key))
     h.Write(src)
     dst := h.Sum(nil)
-	var varMetrics Metrics = Metrics{
+	var varMetrics = Metrics{
 			ID: id,
 			MType: "counter",
 			Delta: &counter,
@@ -49,7 +49,7 @@ func NewGaugeMetrics(id string, gauge Gauge, key string) *Metrics {
 	h := hmac.New(sha256.New, []byte(key))
     h.Write(src)
     dst := h.Sum(nil)
-	var varMetrics Metrics = Metrics{
+	var varMetrics = Metrics{
 			ID: id,
 			MType: "gauge",
 			Value: &gauge,

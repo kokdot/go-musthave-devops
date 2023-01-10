@@ -1,4 +1,4 @@
-package metrics_agent
+package metricsagent
 
 import (
  	"github.com/go-resty/resty/v2"

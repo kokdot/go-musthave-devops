@@ -1,4 +1,4 @@
-package onboarding_server
+package onboardingserver
 
 import (
 	"fmt"

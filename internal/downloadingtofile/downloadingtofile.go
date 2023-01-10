@@ -1,4 +1,4 @@
-package downloading_to_file
+package downloadingtofile
 
 import(
 	"fmt"

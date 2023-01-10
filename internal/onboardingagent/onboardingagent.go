@@ -1,4 +1,4 @@
-package onboarding_agent
+package onboardingagent
 import (
 	"github.com/caarlos0/env/v6"
 	"time"
