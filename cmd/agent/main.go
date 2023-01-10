@@ -25,12 +25,12 @@ var (
 
 func main() {
 	wg.Add(2)
-	onboarding_agent.OnboardingAgent()
+	onboardingagent.OnboardingAgent()
 	m = make(def.MonitorMap)
 	go func(m *MonitorMap) {
 		defer wg.Done()
 		for {
-			<-time.After(onboarding_agent.PollIntervalReal)
+			<-time.After(onboardingagent.PollIntervalReal)
 			m = monitor.GetData(m)
 			pollCount++
 			randomValue = Gauge(rand.Float64())
@@ -40,21 +40,21 @@ func main() {
 	go func() {
 		defer wg.Done()
 		for {
-			<-time.After(onboarding_agent.ReportInterval)
-			mtxCounter, err := metrics_agent.NewMetricsCounter("PollCount", &pollCount, onboarding_agent.URLReal)
+			<-time.After(onboardingagent.ReportInterval)
+			mtxCounter, err := metricsagent.NewMetricsCounter("PollCount", &pollCount, onboardingagent.URLReal)
 			// fmt.Printf("mtxRandomValue:    %#v\n", mtxCounter)
 			if err != nil {
 				fmt.Println(err)
 			}
 			mtxCounter.Update()
-			mtxRandomValue, err := metrics_agent.NewMetricsGauge("RandomValue", &randomValue, onboarding_agent.URLReal)
+			mtxRandomValue, err := metricsagent.NewMetricsGauge("RandomValue", &randomValue, onboardingagent.URLReal)
 			// fmt.Printf("mtxRandomValue:    %#v\n", mtxRandomValue)
 			if err != nil {
 				fmt.Println(err)
 			}
 			mtxRandomValue.Update()
 			for key, val := range m {
-				mtx, err := metrics_agent.NewMetricsGauge(key, &val, onboarding_agent.URLReal) 
+				mtx, err := metricsagent.NewMetricsGauge(key, &val, onboardingagent.URLReal) 
 				// fmt.Printf("mtxRandomValue:    %#v\n", mtx)
 				if err != nil {
 					fmt.Println(err)

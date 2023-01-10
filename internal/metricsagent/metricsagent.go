@@ -25,7 +25,7 @@ type Gauge = def.Gauge
 type Counter = def.Counter
 
 func NewMetricsCounter(id string,  counterPtr *Counter, urlReal string) (*Metrics, error) {
-	keyReal := onboarding_agent.KeyReal
+	keyReal := onboardingagent.KeyReal
 	key := []byte(keyReal)
 	urlReal1 := "http://" + urlReal
 	if keyReal == "" {
@@ -67,7 +67,7 @@ func NewMetricsCounter(id string,  counterPtr *Counter, urlReal string) (*Metric
 }
 
 func NewMetricsGauge(id string, gaugePtr *Gauge,  urlReal string) (*Metrics, error) {
-	keyReal := onboarding_agent.KeyReal
+	keyReal := onboardingagent.KeyReal
 	key := []byte(keyReal)
 	urlReal1 := "http://" + urlReal
 	if keyReal == "" {

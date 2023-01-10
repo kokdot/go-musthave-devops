@@ -92,7 +92,7 @@ func (m MemStorage) Save(mtxNew *Metrics) (*Metrics, error) {
 				return mtxNew, nil
 			}
 			delta := *mtxNew.Delta + *mtxOld.Delta
-			mtxOld = *metrics_server.NewCounterMetrics(mtxNew.ID, delta, key)
+			mtxOld = *metricsserver.NewCounterMetrics(mtxNew.ID, delta, key)
 			(*m.StoreMap)[mtxOld.ID] = mtxOld
 			return &mtxOld, nil
 		case "Counter":
@@ -102,7 +102,7 @@ func (m MemStorage) Save(mtxNew *Metrics) (*Metrics, error) {
 				return mtxNew, nil
 			}
 			delta := *mtxNew.Delta + *mtxOld.Delta
-			mtxOld = *metrics_server.NewCounterMetrics(mtxNew.ID, delta, key)
+			mtxOld = *metricsserver.NewCounterMetrics(mtxNew.ID, delta, key)
 			(*m.StoreMap)[mtxOld.ID] = mtxOld
 			return &mtxOld, nil
 		}
@@ -152,9 +152,9 @@ func (m MemStorage) Get(id string) (*Metrics, error) {
 	if key := m.GetKey(); key != "" {
 
 		if mtxOld.MType == "Gauge" || mtxOld.MType == "gauge" {
-			mtxOld = *metrics_server.NewGaugeMetrics(mtxOld.ID, *mtxOld.Value, key)
+			mtxOld = *metricsserver.NewGaugeMetrics(mtxOld.ID, *mtxOld.Value, key)
 		} else {
-				mtxOld = *metrics_server.NewCounterMetrics(mtxOld.ID, *mtxOld.Delta, key) //-------------------------------------line : 216
+				mtxOld = *metricsserver.NewCounterMetrics(mtxOld.ID, *mtxOld.Delta, key) //-------------------------------------line : 216
 		}
 			return &mtxOld, nil
 	} else {
@@ -175,7 +175,7 @@ func (m *MemStorage) SaveCounterValue(id string, counter Counter) (Counter, erro
 	}
 	mtxOld, ok := (*m.StoreMap)[id]
 	if !ok {
-		mtxNew := metrics_server.NewMetrics(id, "counter")
+		mtxNew := metricsserver.NewMetrics(id, "counter")
 		mtxNew.Delta = &counter
 		(*m.StoreMap)[id] = mtxNew
 		return counter, nil
@@ -190,7 +190,7 @@ func (m *MemStorage) SaveGaugeValue(id string, gauge Gauge) error {
 	}
 	mtxOld, ok := (*m.StoreMap)[id]
 	if !ok {
-		mtxNew := metrics_server.NewMetrics(id, "gauge")
+		mtxNew := metricsserver.NewMetrics(id, "gauge")
 		mtxNew.Value = &gauge
 		(*m.StoreMap)[id] = mtxNew
 	}else {

@@ -53,7 +53,7 @@ func PostUpdate(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusNotFound)
 		return
 	}
-	var mtxNew metrics_server.Metrics
+	var mtxNew metricsserver.Metrics
 	err = json.Unmarshal(bodyBytes, &mtxNew)
 	if err != nil {
 		w.Header().Set("content-type", "application/json")
@@ -63,7 +63,7 @@ func PostUpdate(w http.ResponseWriter, r *http.Request) {
 	fmt.Printf("\n----------PostUpdate------mtxNew.----:   %#v\n", mtxNew)
 	if m.GetKey() != "" {
 		fmt.Println("----------------------------if store.Key != ampty string-------------------------------------")
-		if !metrics_server.MtxValid(&mtxNew, m.GetKey()) {
+		if !metricsserver.MtxValid(&mtxNew, m.GetKey()) {
 			fmt.Printf("\n-------if !store.MtxValid(&mtxNew).----:   %#v\n", mtxNew)
 			
 			w.Header().Set("content-type", "application/json")

@@ -25,7 +25,7 @@ import (
 
 //test git git test what
 func TestHandler(t *testing.T) {
-	url, storeFile, key, restore, storeInterval, dataBaseDSN  := onboarding_server.OnboardingServer()
+	url, storeFile, key, restore, storeInterval, dataBaseDSN  := onboardingserver.OnboardingServer()
     fmt.Println("--------------------main-------------------------------------------")
     fmt.Println("url:  ", url)
     fmt.Println("storeInterval:  ", storeInterval)
@@ -42,7 +42,7 @@ func TestHandler(t *testing.T) {
         m.ReadStorage()
     }
     if m.GetStoreFile() != "" {
-        downloading_to_file.DownloadingToFile(m)
+        downloadingtofile.DownloadingToFile(m)
     }
 
 	r := chi.NewRouter()

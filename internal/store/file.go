@@ -208,7 +208,7 @@ func (f FileStorage) SaveCounterValue(id string, counter Counter) (Counter, erro
 	}
 	mtxOld, ok := (*f.StoreMap)[id]
 	if !ok {
-		mtxNew := metrics_server.NewMetrics(id, "counter")
+		mtxNew := metricsserver.NewMetrics(id, "counter")
 		mtxNew.Delta = &counter
 		(*f.StoreMap)[id] = mtxNew
 		err := f.WriteStorage()
@@ -232,7 +232,7 @@ func (f FileStorage) SaveGaugeValue(id string, gauge Gauge) error {
 	}
 	mtxOld, ok := (*f.StoreMap)[id]
 	if !ok {
-		mtxNew := metrics_server.NewMetrics(id, "gauge")
+		mtxNew := metricsserver.NewMetrics(id, "gauge")
 		mtxNew.Value = &gauge
 		(*f.StoreMap)[id] = mtxNew
 		err := f.WriteStorage()

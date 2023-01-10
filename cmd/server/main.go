@@ -49,7 +49,7 @@ var (
 	// key = onboarding_server.GetKey()
 )
 func main() {
-    url, storeFile, key, restore, storeInterval, dataBaseDSNReal  := onboarding_server.OnboardingServer()
+    url, storeFile, key, restore, storeInterval, dataBaseDSNReal  := onboardingserver.OnboardingServer()
     fmt.Println("--------------------main-------------------------------------------")
     fmt.Println("url:  ", url)
     fmt.Println("storeInterval:  ", storeInterval)
@@ -66,7 +66,7 @@ func main() {
         m.ReadStorage()
     }
     if m.GetStoreFile() != "" {
-        downloading_to_file.DownloadingToFile(m)
+        downloadingtofile.DownloadingToFile(m)
     }
     // if m.GetDataBaseDSN() != "" {
     //     downloading_to_file.DownloadingToFile(m)
