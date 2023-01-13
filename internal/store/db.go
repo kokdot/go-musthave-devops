@@ -64,7 +64,7 @@ func (d DbStorage) Save(mtxNew *Metrics) (*Metrics, error) {
         Delta, 
         Value, 
         Hash
-    ) values($1, $2, $3, $4, $5) ON CONFLICT (ID) DO UPDATE SET Delta = EXCLUDED.Delta, Value = EXCLUDED.Value;
+    ) values($1, $2, $3, $4, $5) ON CONFLICT (ID) DO UPDATE SET Delta = EXCLUDED.Delta + Metrics.Delta, Value = EXCLUDED.Value;
     `
     // ON CONFLICT (ID) DO UPDATE SET ID = Metrics.ID;
 
