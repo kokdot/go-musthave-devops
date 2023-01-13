@@ -120,7 +120,7 @@ func (d DbStorage) ReadStorage() error {
     var hash sql.NullString
     var value sql.NullFloat64
     for rows.Next() {
-        err = rows.Scan(&mtx.ID, &mtx.MType, delta, value, hash)
+        err = rows.Scan(&mtx.ID, &mtx.MType, &delta, &value, &hash)
         if err != nil {
 		    return fmt.Errorf("не удалось отсканировать строку запроса GetTable: %v", err)
 	    }
