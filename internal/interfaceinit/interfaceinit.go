@@ -13,10 +13,14 @@ var m  repo.Repo
 
 func InterfaceInit(storeInterval time.Duration, storeFile string, restore bool, url string, key string, dataBaseDSN string) (repo.Repo, error) {
 	if dataBaseDSN != "" {
+		fmt.Println("-------------------------------------------------------------------------------------------------if dataBaseDSN != \"\" {-------")
 		d, err := store.NewDbStorage(storeInterval, storeFile , restore , url , key, dataBaseDSN)
+		fmt.Println("-------------------------------------------------------------------------------------------------d, err := -------", d, "------", err)
 		if err != nil {
+			fmt.Println("-------------------------------------------------------------------------------------------------if err != nil {------")
 			// return nil, fmt.Errorf("failed to create DbStorage, err: %s", err)
 			if storeInterval > 0 {
+			fmt.Println("-------------------------------------------------------------------------------------------------if storeInterval > 0 {------")	
 			m, err := store.NewMemStorage(storeInterval, storeFile , restore , url , key, dataBaseDSN)
 			if err != nil {
 				return nil, fmt.Errorf("failed to create MemStorage, err: %s", err)
