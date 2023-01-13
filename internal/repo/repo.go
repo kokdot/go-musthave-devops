@@ -1,6 +1,10 @@
 package repo
 
-import "time"
+import (
+	"time"
+	"fmt"
+	"sort"
+) 
 
 type Repo interface {
 	Save(mtx *Metrics) (*Metrics, error)
@@ -10,8 +14,8 @@ type Repo interface {
 	SaveGaugeValue(name string, gauge Gauge) error
 	GetCounterValue(name string) (Counter, error)
 	GetGaugeValue(name string) (Gauge, error)
-	GetAllValues() (string, error)
-	ReadStorage() (*StoreMap, error)
+	GetAllValues() string
+	ReadStorage() error
 	WriteStorage() error
 	GetURL() string
 	GetKey() string
@@ -19,6 +23,7 @@ type Repo interface {
 	GetRestore() bool
 	GetStoreInterval() time.Duration
 	GetDataBaseDSN() string
+	GetPing() (bool, error)
 }
 
 type Consumer interface {
@@ -42,3 +47,31 @@ type Metrics struct {
 type Counter int64
 type Gauge float64
 type StoreMap map[string]Metrics
+func StoreMapToString(smPtr *StoreMap) string {
+	if smPtr == nil {
+		return ""
+	}
+	var str string
+	var v Gauge
+	var d Counter
+	var i int
+
+	
+	keys := make([]string, 0, len(*smPtr))
+	for k := range *smPtr {
+		keys = append(keys, k)
+	}
+	sort.Strings(keys)
+
+	for _, key := range keys {
+		i++
+		if (*smPtr)[key].Delta != nil {
+			d = *(*smPtr)[key].Delta
+		}
+		if (*smPtr)[key].Value != nil {
+			v = *(*smPtr)[key].Value
+		}
+		str += fmt.Sprintf("%d; %s: %v %v\n",i , key, v, d)
+	}
+	return str
+}

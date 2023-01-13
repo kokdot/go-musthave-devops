@@ -1,28 +1,61 @@
 package interfaceinit
 
 import (
-	"log"
+	"fmt"
 	"time"
 
 	"github.com/kokdot/go-musthave-devops/internal/repo"
 	"github.com/kokdot/go-musthave-devops/internal/store"
+	"github.com/kokdot/go-musthave-devops/internal/downloadingtofile"
 )
 
 var m  repo.Repo
 
-func InterfaceInit(storeInterval time.Duration, storeFile string, restore bool, url string, key string, dataBaseDSN string) repo.Repo {
-	if storeInterval > 0 {
-		m, err := store.NewMemStorage(storeInterval, storeFile , restore , url , key, dataBaseDSN)
+func InterfaceInit(storeInterval time.Duration, storeFile string, restore bool, url string, key string, dataBaseDSN string) (repo.Repo, error) {
+	if dataBaseDSN != "" {
+		d, err := store.NewDbStorage(storeInterval, storeFile , restore , url , key, dataBaseDSN)
 		if err != nil {
-			log.Fatalf("failed to create MemStorage, err: %s", err)
+			return nil, fmt.Errorf("failed to create DbStorage, err: %s", err)
 		}
-		return m
-	} else {
-			m, err := store.NewFileStorage(storeInterval, storeFile , restore , url , key, dataBaseDSN)
+		if restore {
+			err := d.ReadStorage()
 			if err != nil {
-				log.Fatalf("failed to create FileStorage, err: %s", err)
+				return nil, fmt.Errorf("failed to restore DbStorage, err: %s", err)
 			}
-		return m
+		}
+		return d, nil
+	} else {
+		if storeInterval > 0 {
+			m, err := store.NewMemStorage(storeInterval, storeFile , restore , url , key, dataBaseDSN)
+			if err != nil {
+				return nil, fmt.Errorf("failed to create MemStorage, err: %s", err)
+			}
+			if storeFile != "" {
+				downloadingtofile.DownloadingToFile(m)
+			}
+			if restore {
+				err := m.ReadStorage()
+				if err != nil {
+					return nil, fmt.Errorf("failed to restore MemStorage, err: %s", err)
+				}
+			}
+			return m, nil
+		} else {
+			f, err := store.NewFileStorage(storeInterval, storeFile , restore , url , key, dataBaseDSN)
+			if err != nil {
+				return nil, fmt.Errorf("failed to create FileStorage, err: %s", err)
+			}
+			if storeFile != "" {
+				downloadingtofile.DownloadingToFile(f)
+			}
+			if restore {
+				m.ReadStorage()
+				if err != nil {
+					return nil, fmt.Errorf("failed to restore FileStorage, err: %s", err)
+				}
+			}
+			return f, nil
+		}
 	}
 }
 

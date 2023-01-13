@@ -41,6 +41,9 @@ func NewFileStorage(storeInterval time.Duration, storeFile string, restore bool,
 		dataBaseDSN: dataBaseDSN,
 	}, nil
 }
+func (f FileStorage) GetPing() (bool, error) {
+	return false, errors.New("MemStorage not defines")
+}
 func (f FileStorage) GetDataBaseDSN() string {
 	return f.dataBaseDSN
 }
@@ -63,7 +66,7 @@ func (f FileStorage) GetStoreInterval() time.Duration {
 }
 
 func (f FileStorage) Save(mtxNew *Metrics) (*Metrics, error) {
-	_, err := f.ReadStorageSelf()
+	err := f.ReadStorageSelf()
 	if err != nil {
 		return nil, err
 	}
@@ -120,11 +123,11 @@ func (f FileStorage) Save(mtxNew *Metrics) (*Metrics, error) {
 
 func (f FileStorage) Get(id string) (*Metrics, error){
 	
-	sm, err := f.ReadStorageSelf()
+	err := f.ReadStorageSelf()
 	if err != nil {
 		return nil, err
 	}
-	mtxOld, ok := (*sm)[id]
+	mtxOld, ok := (*f.StoreMap)[id]
 	if !ok {
 		return nil, errors.New("metrics not found")
 	}
@@ -132,11 +135,11 @@ func (f FileStorage) Get(id string) (*Metrics, error){
 }
 
 func (f FileStorage) GetAll() (StoreMap, error) {
-	sm, err := f.ReadStorageSelf()
+	err := f.ReadStorageSelf()
 	if err != nil {
 		return nil, err
 	}
-	return *sm, nil
+	return *f.StoreMap, nil
 }
 //------------------------WriteStorage-------------------------------
 func (f FileStorage) WriteStorage() error {
@@ -153,22 +156,20 @@ func (f FileStorage) WriteStorage() error {
 	return nil
 }
 //------------------------ReadStorage-------------------------------
-func (f FileStorage) ReadStorage() (*StoreMap, error) {
+func (f FileStorage) ReadStorage() error {
 	c, err := NewConsumer(f.storeFile)
 	if err != nil  {
-		err1 := fmt.Errorf("can't to create consumer: %s", err)
-		return nil, err1
+		return  fmt.Errorf("can't to create consumer: %s", err)
     }
 	sm, err := c.ReadStorage()
 	err = fmt.Errorf("file for StoreMap is ampty: %s", err)
 	if sm == nil && err !=  nil {
-		err1 := fmt.Errorf("file for StoreMap is ampty: %s", err)
-		return nil, err1
+		return fmt.Errorf("file for StoreMap is ampty: %s", err)
 	} else if sm == nil {
-		return nil, errors.New("file for StoreMap is ampty")
+		return errors.New("file for StoreMap is ampty")
 	}
 	(*f.StoreMap) = *sm
-	return sm, nil
+	return nil
 }
 //------------------------WriteStorageSelf-------------------------------
 func (f FileStorage) WriteStorageSelf() error {
@@ -185,24 +186,24 @@ func (f FileStorage) WriteStorageSelf() error {
 	return nil
 }
 //------------------------ReadStorageSelf-------------------------------
-func (f FileStorage) ReadStorageSelf() (*StoreMap, error) {
+func (f FileStorage) ReadStorageSelf() error {
 	c, err := NewConsumer(f.restoreFile)
 	if err != nil  {
 		err1 := fmt.Errorf("can't to create consumer: %s", err)
-		return nil, err1
+		return err1
     }
 	sm, err := c.ReadStorage()
 	if sm == nil && err !=  nil {
 		err1 := fmt.Errorf("file for StoreMap is ampty: %s", err)
-		return nil, err1
+		return err1
 	} else if sm == nil {
-		return nil, errors.New("file for StoreMap is ampty")
+		return errors.New("file for StoreMap is ampty")
 	}
 	(*f.StoreMap) = *sm
-	return sm, nil
+	return nil
 }
 func (f FileStorage) SaveCounterValue(id string, counter Counter) (Counter, error) {
-	_, err := f.ReadStorageSelf()
+	err := f.ReadStorageSelf()
 	if err != nil {
 		return counter, err
 	}
@@ -226,7 +227,7 @@ func (f FileStorage) SaveCounterValue(id string, counter Counter) (Counter, erro
 }
 
 func (f FileStorage) SaveGaugeValue(id string, gauge Gauge) error {
-	_, err := f.ReadStorageSelf()
+	err := f.ReadStorageSelf()
 	if err != nil {
 		return err
 	}
@@ -251,7 +252,7 @@ func (f FileStorage) SaveGaugeValue(id string, gauge Gauge) error {
 
 func (f FileStorage) GetCounterValue(id string) (Counter, error) {
 	var counter Counter
-	_, err := f.ReadStorageSelf()
+	err := f.ReadStorageSelf()
 	if err != nil {
 		return counter, err
 	}
@@ -264,7 +265,7 @@ func (f FileStorage) GetCounterValue(id string) (Counter, error) {
 
 func (f FileStorage) GetGaugeValue(id string) (Gauge, error) {
 	var gauge Gauge
-	_, err := f.ReadStorageSelf()
+	err := f.ReadStorageSelf()
 	if err != nil {
 		return gauge, err
 	}
@@ -275,13 +276,13 @@ func (f FileStorage) GetGaugeValue(id string) (Gauge, error) {
 	return *mtxOld.Value, nil
 }
 
-func (f FileStorage) GetAllValues() (string, error) {
+func (f FileStorage) GetAllValues() string {
 	var str string
 	var v Gauge
 	var d Counter
-	_, err := f.ReadStorageSelf()
+	err := f.ReadStorageSelf()
 	if err != nil {
-		return "", err
+		return ""
 	}
 	for key, val := range *f.StoreMap {
 		if val.Delta != nil {
@@ -294,5 +295,5 @@ func (f FileStorage) GetAllValues() (string, error) {
 
 	}
 
-	return str, nil
+	return str
 }

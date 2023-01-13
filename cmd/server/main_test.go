@@ -34,8 +34,11 @@ func TestHandler(t *testing.T) {
     fmt.Println("key:  ", key)
     fmt.Println("dataBaseDSN:  ", dataBaseDSN)
 
-    m := interfaceinit.InterfaceInit(storeInterval, storeFile, restore, url, key, dataBaseDSN)
-    handler.PutM(m)
+    m, err := interfaceinit.InterfaceInit(storeInterval, storeFile, restore, url, key, dataBaseDSN)
+    if err != nil {
+        fmt.Printf("there in error in starting interface and restore data: %s", err)
+    }
+	handler.PutM(m)
     fmt.Printf("m:   %#v", m)
     fmt.Println("--------------------main--started-----------------------------------------")
     if m.GetRestore() {

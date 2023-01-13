@@ -21,7 +21,7 @@ import (
 	"github.com/kokdot/go-musthave-devops/internal/onboardingserver"
 	// "github.com/kokdot/go-musthave-devops/internal/repo"
 	// "github.com/kokdot/go-musthave-devops/internal/store"
-	"github.com/kokdot/go-musthave-devops/internal/downloadingtofile"
+	// "github.com/kokdot/go-musthave-devops/internal/downloadingtofile"
 )
 
 //:PATH="$PATH:/mnt/c/Users/user/devopstest
@@ -48,7 +48,7 @@ var (
 	// restore = onboarding_server.GetRestore()
 	// key = onboarding_server.GetKey()
 )
-func main() {
+func main() { 
     url, storeFile, key, restore, storeInterval, dataBaseDSNReal  := onboardingserver.OnboardingServer()
     fmt.Println("--------------------main-------------------------------------------")
     fmt.Println("url:  ", url)
@@ -58,16 +58,14 @@ func main() {
     fmt.Println("key:  ", key)
     fmt.Println("dataBaseDSNReal:  ", dataBaseDSNReal)
 
-    m := interfaceinit.InterfaceInit(storeInterval, storeFile, restore, url, key, dataBaseDSNReal)
+    m, err := interfaceinit.InterfaceInit(storeInterval, storeFile, restore, url, key, dataBaseDSNReal)
+    if err != nil {
+        fmt.Printf("there in error in starting interface and restore data: %s", err)
+    }
     handler.PutM(m)
     fmt.Printf("m:   %#v", m)
     fmt.Println("--------------------main--started-----------------------------------------")
-    if m.GetRestore() {
-        m.ReadStorage()
-    }
-    if m.GetStoreFile() != "" {
-        downloadingtofile.DownloadingToFile(m)
-    }
+    
     // if m.GetDataBaseDSN() != "" {
     //     downloading_to_file.DownloadingToFile(m)
     // }

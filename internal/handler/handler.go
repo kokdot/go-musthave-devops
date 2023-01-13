@@ -32,13 +32,13 @@ func PutM(M repo.Repo) {
 }
 
 func GetPing(w http.ResponseWriter, r *http.Request) {
-	ok, err := store.GetPing(m.GetDataBaseDSN())
- 	if err != nil {
+	ok, err := m.GetPing()
+ 	if !ok {
 		w.Header().Set("content-type", "application/json")
 		w.WriteHeader(http.StatusInternalServerError)
+		fmt.Printf("%s", err)
 		return
-	}
-	if ok {
+	} else {
 		w.Header().Set("content-type", "application/json")
 		w.WriteHeader(http.StatusOK)
 		return
@@ -71,13 +71,25 @@ func PostUpdate(w http.ResponseWriter, r *http.Request) {
 			return
 		}
     }
-
+	if mtxNew.Delta != nil {
+		fmt.Println(" Delta = ", *mtxNew.Delta)
+	}
+	if mtxNew.Value != nil {
+		fmt.Println(" Value = ", *mtxNew.Value)
+	}
 	mtxOld, err := m.Save(&mtxNew)//----------------------------------------------------------------------------Save---
 
 	if err != nil {
+		fmt.Println("-------after--Save-------err:   ", err)
 		w.Header().Set("content-type", "application/json")
 		w.WriteHeader(http.StatusBadRequest)
 		return
+	}
+	if mtxOld.Delta != nil {
+		fmt.Println(" Delta = ", *mtxOld.Delta)
+	}
+	if mtxNew.Value != nil {
+		fmt.Println(" Value = ", *mtxNew.Value)
 	}
 	bodyBytes, err = json.Marshal(mtxOld)
 	if err != nil {
@@ -147,12 +159,12 @@ func GetAllJSON(w http.ResponseWriter, r *http.Request) {
 	w.Write(bodyBytes)
 }
 func GetAll(w http.ResponseWriter, r *http.Request) {
-	str, err := m.GetAllValues()
-	if err != nil {
-		w.Header().Set("content-type", "test/html")
-		w.WriteHeader(http.StatusNotFound)
-		return
-	}
+	str := m.GetAllValues()
+	// if err != nil {
+	// 	w.Header().Set("content-type", "test/html")
+	// 	w.WriteHeader(http.StatusNotFound)
+	// 	return
+	// }
 	w.Header().Set("content-type", "text/html")
 	w.WriteHeader(http.StatusOK)
 	w.Write([]byte(str))

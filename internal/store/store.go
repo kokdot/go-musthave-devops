@@ -28,6 +28,10 @@ type MemStorage struct {
 
 // var key string
 
+func (m MemStorage) GetPing() (bool, error) {
+	return false, errors.New("MemStorage not defines")
+}
+
 func (m MemStorage) GetDataBaseDSN() string {
 	return m.dataBaseDSN
 }
@@ -52,7 +56,7 @@ func NewMemStorageWithFile(filename string) (*MemStorage, error) {
 		ID: "1",
 		MType: "1",
 		
-	}
+	} 
 	return &MemStorage{
 		StoreMap : &sm, 
 		storeFile: filename,
@@ -223,13 +227,13 @@ func (m *MemStorage) GetGaugeValue(id string) (Gauge, error) {
 	return *mtxOld.Value, nil
 }
 
-func (m *MemStorage) GetAllValues() (string, error) {
+func (m *MemStorage) GetAllValues() string {
 	var str string
 	var v Gauge
 	var d Counter
 	var i int
 	if m.StoreMap == nil {
-		return "", errors.New("storeMap is nil")
+		return ""
 	}
 	sm := *m.StoreMap
 	keys := make([]string, 0, len(sm))
@@ -248,24 +252,24 @@ func (m *MemStorage) GetAllValues() (string, error) {
 		}
 		str += fmt.Sprintf("%d; %s: %v %v\n",i , key, v, d)
 	}
-	return str, nil
+	return str
 }
 
-func (m MemStorage) ReadStorage() (*StoreMap, error) {
+func (m MemStorage) ReadStorage() error {
 	c, err := NewConsumer(m.storeFile)
 	if err != nil  {
 		err1 := fmt.Errorf("can't to create consumer: %s", err)
-		return nil, err1
+		return err1
     }
 	sm, err := c.ReadStorage()
 	if sm == nil && err !=  nil {
 		err1 := fmt.Errorf("file for StoreMap is ampty: %s", err)
-		return nil, err1
+		return err1
 	} else if sm == nil {
-		return nil, errors.New("file for StoreMap is ampty")
+		return errors.New("file for StoreMap is ampty")
 	}
 	(*m.StoreMap) = *sm
-	return sm, nil
+	return nil
 }
 
 func (m MemStorage) WriteStorage() error{
