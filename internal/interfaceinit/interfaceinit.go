@@ -15,7 +15,38 @@ func InterfaceInit(storeInterval time.Duration, storeFile string, restore bool, 
 	if dataBaseDSN != "" {
 		d, err := store.NewDbStorage(storeInterval, storeFile , restore , url , key, dataBaseDSN)
 		if err != nil {
-			return nil, fmt.Errorf("failed to create DbStorage, err: %s", err)
+			// return nil, fmt.Errorf("failed to create DbStorage, err: %s", err)
+			if storeInterval > 0 {
+			m, err := store.NewMemStorage(storeInterval, storeFile , restore , url , key, dataBaseDSN)
+			if err != nil {
+				return nil, fmt.Errorf("failed to create MemStorage, err: %s", err)
+			}
+			if storeFile != "" {
+				downloadingtofile.DownloadingToFile(m)
+			}
+			if restore {
+				err := m.ReadStorage()
+				if err != nil {
+					return nil, fmt.Errorf("failed to restore MemStorage, err: %s", err)
+				}
+			}
+			return m, nil
+		} else {
+			f, err := store.NewFileStorage(storeInterval, storeFile , restore , url , key, dataBaseDSN)
+			if err != nil {
+				return nil, fmt.Errorf("failed to create FileStorage, err: %s", err)
+			}
+			if storeFile != "" {
+				downloadingtofile.DownloadingToFile(f)
+			}
+			if restore {
+				m.ReadStorage()
+				if err != nil {
+					return nil, fmt.Errorf("failed to restore FileStorage, err: %s", err)
+				}
+			}
+			return f, nil
+		}
 		}
 		if restore {
 			err := d.ReadStorage()
