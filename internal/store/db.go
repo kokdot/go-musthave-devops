@@ -88,11 +88,12 @@ func (d DbStorage) createStorage() error {
 	// rnd := rand.New(rand.NewSource(int64(time.Now().Nanosecond())))
 	// tableName := "Metrics"// + strconv.Itoa(rnd.Intn(256*256*256))
 	query := `
+        DROP TABLE IF EXISTS Metrics 
 		CREATE TABLE  IF NOT EXISTS  Metrics
         (
             ID VARCHAR(255) NOT NULL UNIQUE,
             MType VARCHAR(10) NOT NULL,
-            Delta integer,
+            Delta BIGINT,
             Value double precision,
             Hash VARCHAR(255)
         );
