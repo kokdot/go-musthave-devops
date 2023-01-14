@@ -85,10 +85,14 @@ func (d DbStorage) Save(mtxNew *Metrics) (*Metrics, error) {
 func (d DbStorage) createStorage() error {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 	defer cancel()
-	// rnd := rand.New(rand.NewSource(int64(time.Now().Nanosecond())))
-	// tableName := "Metrics"// + strconv.Itoa(rnd.Intn(256*256*256))
-	query := `
-        DROP TABLE IF EXISTS Metrics 
+	if !d.restore {
+        query := `DROP TABLE IF EXISTS Metrics;`
+        _, err := d.dbconn.ExecContext(ctx, query)
+        if err != nil {
+            return fmt.Errorf("не удалось выполнить запрос удаления таблицы Metrics: %v", err)
+        }
+    }
+    query := `
 		CREATE TABLE  IF NOT EXISTS  Metrics
         (
             ID VARCHAR(255) NOT NULL UNIQUE,
@@ -182,6 +186,10 @@ func (d DbStorage) Get(id string) (*Metrics, error) {
         mtx.Hash = hash1  
     } else {
         mtx.Hash = ""
+    }
+    err = row.Err()
+    if err != nil {
+        return nil, err
     }
     return &mtx, nil
 }

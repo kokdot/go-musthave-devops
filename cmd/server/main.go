@@ -61,10 +61,10 @@ func main() {
 
     m, err := interfaceinit.InterfaceInit(storeInterval, storeFile, restore, url, key, dataBaseDSNReal)
     if err != nil {
-        fmt.Printf("there in error in starting interface and restore data: %s", err)
+        fmt.Printf("\nthere in error in starting interface and restore data: %s", err)
     }
     handler.PutM(m)
-    fmt.Printf("m:   %#v", m)
+    fmt.Printf("\nm:   %#v\n", m)
     fmt.Println("--------------------main--started-----------------------------------------")
     
     // if m.GetDataBaseDSN() != "" {
