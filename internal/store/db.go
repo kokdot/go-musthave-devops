@@ -174,7 +174,7 @@ func (d DbStorage) Get(id string) (*Metrics, error) {
      ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 	defer cancel()
     query := `
-        SELECT ID, MType, Delta, Value, Hash FROM Metrics
+        SELECT ID, MType, Delta, Value FROM Metrics
         WHERE ID=$1
        `
     row := d.dbconn.QueryRowContext(ctx, query, id)
@@ -183,7 +183,7 @@ func (d DbStorage) Get(id string) (*Metrics, error) {
     var delta sql.NullInt64
     // var hash sql.NullString
     var value sql.NullFloat64
-    err := row.Scan(&mtx.ID, &mtx.MType, &delta, &value, &hash)
+    err := row.Scan(&mtx.ID, &mtx.MType, &delta, &value)
     if err != nil {
         return nil, fmt.Errorf("не удалось отсканировать строку запроса GetMtx: %v", err)
     }
@@ -200,7 +200,7 @@ func (d DbStorage) Get(id string) (*Metrics, error) {
         mtx.Delta = &zeroC
     }
     if d.key != "" {
-        mtx.Hash = metricsserver.Hash(&mtx)
+        mtx.Hash = metricsserver.Hash(&mtx, d.key)
     } else {
         mtx.Hash = ""
     }
