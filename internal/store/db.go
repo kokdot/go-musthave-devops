@@ -68,11 +68,6 @@ func (d DbStorage) SaveByBatch(sm []repo.Metrics) (*repo.StoreMap, error) {
 }
 
 func (d DbStorage) Save(mtxNew *Metrics) (*Metrics, error) {
-    // var mtxOld *Metrics
-    mtxOld, err := d.Get(mtxNew.ID)
-    if err == nil && mtxNew.MType == "counter" {
-            *mtxNew.Delta += *mtxOld.Delta
-	}
     ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 	defer cancel()
     query := `INSERT INTO Metrics
@@ -93,11 +88,11 @@ func (d DbStorage) Save(mtxNew *Metrics) (*Metrics, error) {
 
     // ON CONFLICT (a) DO UPDATE SET c = tablename.c + 1;
     // INSERT INTO tablename (a, b, c) values (1, 2, 10)
-    _, err = d.dbconn.ExecContext(ctx, query, mtxNew.ID, mtxNew.MType, mtxNew.Delta, mtxNew.Value, mtxNew.Hash)
+    _, err := d.dbconn.ExecContext(ctx, query, mtxNew.ID, mtxNew.MType, mtxNew.Delta, mtxNew.Value, mtxNew.Hash)
     if err != nil {
 		return mtxNew, fmt.Errorf("не удалось выполнить запрос создания записи в таблице Metrics: %v", err)
 	}
-    // var mtxOld *Metrics
+    var mtxOld *Metrics
     mtxOld, err = d.Get(mtxNew.ID)
     if err != nil {
 		return mtxNew, fmt.Errorf("не удалось выполнить запрос получения записи в таблице Metrics: %v", err)
@@ -179,7 +174,7 @@ func (d DbStorage) Get(id string) (*Metrics, error) {
      ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 	defer cancel()
     query := `
-        SELECT ID, MType, Delta, Value FROM Metrics
+        SELECT ID, MType, Delta, Value, Hash FROM Metrics
         WHERE ID=$1
        `
     row := d.dbconn.QueryRowContext(ctx, query, id)
@@ -188,7 +183,7 @@ func (d DbStorage) Get(id string) (*Metrics, error) {
     var delta sql.NullInt64
     // var hash sql.NullString
     var value sql.NullFloat64
-    err := row.Scan(&mtx.ID, &mtx.MType, &delta, &value)
+    err := row.Scan(&mtx.ID, &mtx.MType, &delta, &value, &hash)
     if err != nil {
         return nil, fmt.Errorf("не удалось отсканировать строку запроса GetMtx: %v", err)
     }
@@ -205,7 +200,7 @@ func (d DbStorage) Get(id string) (*Metrics, error) {
         mtx.Delta = &zeroC
     }
     if d.key != "" {
-        mtx.Hash = metricsserver.Hash(&mtx, d.key)
+        mtx.Hash = metricsserver.Hash(&mtx)
     } else {
         mtx.Hash = ""
     }
