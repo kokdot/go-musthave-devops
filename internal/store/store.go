@@ -27,7 +27,7 @@ type MemStorage struct {
 }
 
 // var key string
-func (m MemStorage) SaveByBatch(*StoreMap) (*StoreMap, error) {
+func (m MemStorage) SaveByBatch(sm []repo.Metrics) (*StoreMap, error) {
 return nil, nil
 }
 func (m MemStorage) GetPing() (bool, error) {

@@ -40,8 +40,9 @@ func PostUpdateByBatch(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
-	smNew := make(repo.StoreMap)
-	err = json.Unmarshal(bodyBytes, &smNew)
+	slm := make([]repo.Metrics, 0)
+	// smNew := make(repo.StoreMap)
+	err = json.Unmarshal(bodyBytes, &slm)
 	if err != nil {
 	fmt.Println("--------------------PostUpdateByBatch--------------3-----------start-------------------------------")
 	fmt.Println(err)	
@@ -49,9 +50,9 @@ func PostUpdateByBatch(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
-	fmt.Printf("Getting of requets is: %#v\n", smNew)
+	fmt.Printf("Getting of requets is: %#v\n", slm)
 
-	smOld, err := m.SaveByBatch(&smNew)
+	smOld, err := m.SaveByBatch(slm)
 	
 	fmt.Printf("Answer to requets is: %#v\n", smOld)
 	if err != nil {

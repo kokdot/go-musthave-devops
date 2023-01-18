@@ -24,7 +24,7 @@ type Repo interface {
 	GetStoreInterval() time.Duration 
 	GetDataBaseDSN() string
 	GetPing() (bool, error)
-	SaveByBatch(*StoreMap) (*StoreMap, error)
+	SaveByBatch([]Metrics) (*StoreMap, error)
 }
 
 type Consumer interface {

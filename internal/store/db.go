@@ -54,18 +54,25 @@ func NewDbStorage(storeInterval time.Duration, storeFile string, restore bool, u
     return &dbStorage , nil
 }
 
-func (d DbStorage) SaveByBatch(sm *repo.StoreMap) (*repo.StoreMap, error) {
-    for key, val := range *sm {
+func (d DbStorage) SaveByBatch(sm []repo.Metrics) (*repo.StoreMap, error) {
+// func (d DbStorage) SaveByBatch(sm *repo.StoreMap) (*repo.StoreMap, error) {
+    smtx := make(repo.StoreMap)
+    for _, val := range sm {
         mtx, err := d.Save(&val)
         if err != nil {
             return nil, err
         }
-        (*sm)[key] = *mtx
+        smtx[val.ID] = *mtx
     }
-    return sm, nil
+    return &smtx, nil
 }
 
 func (d DbStorage) Save(mtxNew *Metrics) (*Metrics, error) {
+    // var mtxOld *Metrics
+    mtxOld, err := d.Get(mtxNew.ID)
+    if err == nil && mtxNew.MType == "counter" {
+            *mtxNew.Delta += *mtxOld.Delta
+	}
     ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 	defer cancel()
     query := `INSERT INTO Metrics
@@ -86,11 +93,11 @@ func (d DbStorage) Save(mtxNew *Metrics) (*Metrics, error) {
 
     // ON CONFLICT (a) DO UPDATE SET c = tablename.c + 1;
     // INSERT INTO tablename (a, b, c) values (1, 2, 10)
-    _, err := d.dbconn.ExecContext(ctx, query, mtxNew.ID, mtxNew.MType, mtxNew.Delta, mtxNew.Value, mtxNew.Hash)
+    _, err = d.dbconn.ExecContext(ctx, query, mtxNew.ID, mtxNew.MType, mtxNew.Delta, mtxNew.Value, mtxNew.Hash)
     if err != nil {
 		return mtxNew, fmt.Errorf("не удалось выполнить запрос создания записи в таблице Metrics: %v", err)
 	}
-    var mtxOld *Metrics
+    // var mtxOld *Metrics
     mtxOld, err = d.Get(mtxNew.ID)
     if err != nil {
 		return mtxNew, fmt.Errorf("не удалось выполнить запрос получения записи в таблице Metrics: %v", err)
@@ -172,16 +179,16 @@ func (d DbStorage) Get(id string) (*Metrics, error) {
      ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 	defer cancel()
     query := `
-        SELECT ID, MType, Delta, Value, Hash FROM Metrics
+        SELECT ID, MType, Delta, Value FROM Metrics
         WHERE ID=$1
        `
     row := d.dbconn.QueryRowContext(ctx, query, id)
 
     var mtx Metrics
     var delta sql.NullInt64
-    var hash sql.NullString
+    // var hash sql.NullString
     var value sql.NullFloat64
-    err := row.Scan(&mtx.ID, &mtx.MType, &delta, &value, &hash)
+    err := row.Scan(&mtx.ID, &mtx.MType, &delta, &value)
     if err != nil {
         return nil, fmt.Errorf("не удалось отсканировать строку запроса GetMtx: %v", err)
     }
@@ -197,9 +204,8 @@ func (d DbStorage) Get(id string) (*Metrics, error) {
     } else {
         mtx.Delta = &zeroC
     }
-    if hash.Valid {
-        hash1 := hash.String
-        mtx.Hash = hash1  
+    if d.key != "" {
+        mtx.Hash = metricsserver.Hash(&mtx, d.key)
     } else {
         mtx.Hash = ""
     }

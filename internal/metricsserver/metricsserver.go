@@ -28,33 +28,36 @@ func NewMetrics(id string, mType string) Metrics {
 	}
 }
 func NewCounterMetrics(id string, counter Counter, key string) *Metrics {
-	src := []byte(fmt.Sprintf("%s:counter:%d", id, counter))
-	// if key == "" {
-	// 	panic("bad")
-	// }
-	h := hmac.New(sha256.New, []byte(key))
-    h.Write(src)
-    dst := h.Sum(nil)
 	var varMetrics = Metrics{
 			ID: id,
 			MType: "counter",
  			Delta: &counter,
-			Hash: fmt.Sprintf("%x", dst),
-		}
+	}
+	if key == "" {
+		return &varMetrics
+	} 
+	src := []byte(fmt.Sprintf("%s:counter:%d", id, counter))
+	h := hmac.New(sha256.New, []byte(key))
+    h.Write(src)
+    dst := h.Sum(nil)
+	varMetrics.Hash = fmt.Sprintf("%x", dst)
 	return &varMetrics
 }
 
 func NewGaugeMetrics(id string, gauge Gauge, key string) *Metrics {
-	src := []byte(fmt.Sprintf("%s:gauge:%f", id, float64(gauge)))
-	h := hmac.New(sha256.New, []byte(key))
-    h.Write(src)
-    dst := h.Sum(nil)
 	var varMetrics = Metrics{
 			ID: id,
 			MType: "gauge",
 			Value: &gauge,
-			Hash: fmt.Sprintf("%x", dst),
 		}
+	if key == "" {
+		return &varMetrics
+	} 
+	src := []byte(fmt.Sprintf("%s:gauge:%f", id, float64(gauge)))
+	h := hmac.New(sha256.New, []byte(key))
+	h.Write(src)
+	dst := h.Sum(nil)
+	varMetrics.Hash = fmt.Sprintf("%x", dst)
 	return &varMetrics
 }
 func MtxValid(mtx *Metrics, key string) bool {
@@ -83,4 +86,16 @@ func MtxValid(mtx *Metrics, key string) bool {
 	// fmt.Println("hmac.Equal(dst, mtx.Hash): ", hmac.Equal(dst, mtx.Hash))
 	return (fmt.Sprintf("%x", dst) == mtx.Hash)
 	// return hmac.Equal(dst, mtx.Hash)
+}
+func Hash(m *Metrics, key string) string {
+	var data string
+	switch m.MType {
+	case "counter":
+		data = fmt.Sprintf("%s:%s:%d", m.ID, m.MType, *m.Delta)
+	case "gauge":
+		data = fmt.Sprintf("%s:%s:%f", m.ID, m.MType, *m.Value)
+	}
+	h := hmac.New(sha256.New, []byte(key))
+	h.Write([]byte(data))
+	return fmt.Sprintf("%x", h.Sum(nil))
 }
