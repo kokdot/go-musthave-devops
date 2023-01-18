@@ -17,6 +17,11 @@ type Counter = def.Counter
 type MonitorMap = def.MonitorMap
 
 var (
+	pollInterval time.Duration
+	reportInterval time.Duration
+	url string
+	key string
+	batch bool
 	pollCount Counter
 	randomValue Gauge 
 	m MonitorMap
@@ -25,41 +30,38 @@ var (
 
 func main() {
 	wg.Add(2)
-	onboardingagent.OnboardingAgent()
+	pollInterval, reportInterval, url, key, batch = onboardingagent.OnboardingAgent()
 	m = make(def.MonitorMap)
+	sm := make(metricsagent.StoreMap)
 	go func(m *MonitorMap) {
 		defer wg.Done()
 		for {
-			<-time.After(onboardingagent.PollIntervalReal)
+			<-time.After(pollInterval)
 			m = monitor.GetData(m)
 			pollCount++
 			randomValue = Gauge(rand.Float64())
+			// sm = *metricsagent.GetStoreMap(&sm)
 		}
 	}(&m)
 	
 	go func() {
 		defer wg.Done()
 		for {
-			<-time.After(onboardingagent.ReportInterval)
-			mtxCounter, err := metricsagent.NewMetricsCounter("PollCount", &pollCount, onboardingagent.URLReal)
-			// fmt.Printf("mtxRandomValue:    %#v\n", mtxCounter)
-			if err != nil {
-				fmt.Println(err)
-			}
-			mtxCounter.Update()
-			mtxRandomValue, err := metricsagent.NewMetricsGauge("RandomValue", &randomValue, onboardingagent.URLReal)
-			// fmt.Printf("mtxRandomValue:    %#v\n", mtxRandomValue)
-			if err != nil {
-				fmt.Println(err)
-			}
-			mtxRandomValue.Update()
-			for key, val := range m {
-				mtx, err := metricsagent.NewMetricsGauge(key, &val, onboardingagent.URLReal) 
-				// fmt.Printf("mtxRandomValue:    %#v\n", mtx)
+			<-time.After(reportInterval)
+			if batch {
+				err := metricsagent.UpdateByBatch(&sm, &m, pollCount, randomValue, url, key)
 				if err != nil {
 					fmt.Println(err)
+				} else {
+					fmt.Println("Get response by batch request.")
 				}
-				mtx.Update()
+			} else {
+				err := metricsagent.UpdateAll(&m, pollCount, randomValue, url, key)
+				if err != nil {
+					fmt.Println(err)
+				} else {
+					fmt.Println("Get response by common request.")
+				}
 			}
 		}
 	}()
