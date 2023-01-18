@@ -38,7 +38,7 @@ func NewCounterMetrics(id string, counter Counter, key string) *Metrics {
 	var varMetrics = Metrics{
 			ID: id,
 			MType: "counter",
-			Delta: &counter,
+ 			Delta: &counter,
 			Hash: fmt.Sprintf("%x", dst),
 		}
 	return &varMetrics

@@ -76,12 +76,15 @@ func main() {
     // зададим встроенные middleware, чтобы улучшить стабильность приложения
     r.Use(middleware.RequestID)
     r.Use(middleware.RealIP)
-    r.Use(middleware.Logger)
+    r.Use(middleware.Logger)    
     r.Use(middleware.Recoverer)
     // r.Use(middleware.Compress(5, "gzip"))
     r.Use(middleware.Compress(5))
     r.Get("/", handler.GetAll)
     r.Get("/ping", handler.GetPing)
+
+    r.Post("/updates/", handler.PostUpdateByBatch)
+    
     r.Route("/update", func(r chi.Router) {
         r.Post("/", handler.PostUpdate)
         r.Route("/counter", func(r chi.Router) {

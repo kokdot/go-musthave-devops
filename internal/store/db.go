@@ -54,6 +54,17 @@ func NewDbStorage(storeInterval time.Duration, storeFile string, restore bool, u
     return &dbStorage , nil
 }
 
+func (d DbStorage) SaveByBatch(sm *repo.StoreMap) (*repo.StoreMap, error) {
+    for key, val := range *sm {
+        mtx, err := d.Save(&val)
+        if err != nil {
+            return nil, err
+        }
+        (*sm)[key] = *mtx
+    }
+    return sm, nil
+}
+
 func (d DbStorage) Save(mtxNew *Metrics) (*Metrics, error) {
     ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 	defer cancel()

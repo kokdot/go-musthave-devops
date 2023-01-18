@@ -21,9 +21,10 @@ type Repo interface {
 	GetKey() string
 	GetStoreFile() string
 	GetRestore() bool
-	GetStoreInterval() time.Duration
+	GetStoreInterval() time.Duration 
 	GetDataBaseDSN() string
 	GetPing() (bool, error)
+	SaveByBatch(*StoreMap) (*StoreMap, error)
 }
 
 type Consumer interface {

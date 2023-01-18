@@ -21,7 +21,9 @@ type FileStorage struct {
 	key string
 	dataBaseDSN string
 }
-
+func (f FileStorage) SaveByBatch(*StoreMap) (*StoreMap, error) {
+return nil, nil
+}
 func NewFileStorage(storeInterval time.Duration, storeFile string, restore bool, url string, key string, dataBaseDSN string) (*FileStorage, error) {
 	tmpfile, err := os.CreateTemp("/tmp/", "devops-metrics-db")
 	if err != nil {

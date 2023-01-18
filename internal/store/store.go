@@ -27,7 +27,9 @@ type MemStorage struct {
 }
 
 // var key string
-
+func (m MemStorage) SaveByBatch(*StoreMap) (*StoreMap, error) {
+return nil, nil
+}
 func (m MemStorage) GetPing() (bool, error) {
 	return false, errors.New("MemStorage not defines")
 }
