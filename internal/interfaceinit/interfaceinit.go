@@ -48,7 +48,7 @@ func InterfaceInit(storeInterval time.Duration, storeFile string, restore bool, 
 				downloadingtofile.DownloadingToFile(f)
 			}
 			if restore {
-				m.ReadStorage()
+				err = m.ReadStorage()
 				if err != nil {
 					return nil, fmt.Errorf("failed to restore FileStorage, err: %s", err)
 				}
