@@ -21,6 +21,7 @@ type Metrics struct {
 	Hash  string   `json:"hash,omitempty"`  // значение хеш-функции
 	bodyBytes []byte
 	strURL string
+	key string
 }
 type StoreMap map[string] Metrics
 
@@ -93,22 +94,26 @@ func UpdateAll (m *def.MonitorMap, c Counter, g Gauge, url string, key string) e
 	if err != nil {
 		fmt.Println(err)
 	}
-	mtxCounter.Update()
+	mtxCounter.Update(url)
 
 	mtxRandomValue, err := NewMetricsGauge("RandomValue", &g, url, key)
 	// fmt.Printf("mtxRandomValue:    %#v\n", mtxRandomValue)
 	if err != nil {
 		return err
 	}
-	mtxRandomValue.Update()
-
-	for key, val := range *m {
-		mtx, err := NewMetricsGauge(key, &val, url, key) 
-		// fmt.Printf("mtxRandomValue:    %#v\n", mtx)
+	mtxRandomValue.Update(url)
+	// n := 0
+	for k, v := range *m {
+		// n++
+		// if n > 4 {
+		// 	break
+		// }
+		mtx, err := NewMetricsGauge(k, &v, url, key) 
+		// fmt.Printf("mtx.Hash:    %#v\n", mtx.Hash)
 		if err != nil {
 			return err
 		}
-		mtx.Update()
+		mtx.Update(url)
 	}
 	return nil
 }
@@ -122,6 +127,7 @@ func NewMetricsCounter(id string,  counterPtr *Counter, urlReal string, keyReal 
 				ID: id,
 				MType: "counter",
 				Delta: counterPtr,
+				key: keyReal,
 			}
 		bodyBytes, err := json.Marshal(varMetrics)
 		if err != nil {
@@ -142,6 +148,7 @@ func NewMetricsCounter(id string,  counterPtr *Counter, urlReal string, keyReal 
 			MType: "counter",
 			Delta: counterPtr,
 			Hash: fmt.Sprintf("%x", dst),
+			key: keyReal,
 		}
 	bodyBytes, err := json.Marshal(varMetrics)
 	if err != nil {
@@ -155,14 +162,15 @@ func NewMetricsCounter(id string,  counterPtr *Counter, urlReal string, keyReal 
 }
 
 func NewMetricsGauge(id string, gaugePtr *Gauge,  urlReal string, keyReal string) (*Metrics, error) {
-	key := []byte(keyReal)
-	urlReal = "http://" + urlReal
+	// key := []byte(keyReal)
+	// urlReal = "http://" + urlReal
 	if keyReal == "" {
 
 		var varMetrics = Metrics{
 			ID: id,
 			MType: "gauge",
 			Value: gaugePtr,
+			key: keyReal,
 		}
 		bodyBytes, err := json.Marshal(varMetrics)
 		if err != nil {
@@ -170,32 +178,36 @@ func NewMetricsGauge(id string, gaugePtr *Gauge,  urlReal string, keyReal string
 			return nil, err
 		}
 		varMetrics.bodyBytes = bodyBytes
-		strURL := fmt.Sprintf("%s/update/", urlReal)
-		varMetrics.strURL = strURL
+		// strURL := fmt.Sprintf("%s/update/", urlReal)
+		// varMetrics.strURL = strURL
 		return &varMetrics, nil
 	}
-	src := []byte((fmt.Sprintf("%s:gauge:%f", id, float64(*gaugePtr))))
-	h := hmac.New(sha256.New, key)
-	h.Write(src)
-	dst := h.Sum(nil)
+	// src := []byte((fmt.Sprintf("%s:gauge:%f", id, float64(*gaugePtr))))
+	// h := hmac.New(sha256.New, key)
+	// h.Write(src)
+	// dst := h.Sum(nil)
 	var varMetrics = Metrics{
-			ID: id,
-			MType: "gauge",
-			Value: gaugePtr,
-			Hash: fmt.Sprintf("%x", dst),
-		}
+		ID: id,
+		MType: "gauge",
+		Value: gaugePtr,
+		key: keyReal,
+		// Hash: fmt.Sprintf("%x", dst),
+	}
+	// hash := Hash(&varMetrics, keyReal)
+	varMetrics.Hash = Hash(&varMetrics, keyReal)
 	bodyBytes, err := json.Marshal(varMetrics)
 	if err != nil {
 		fmt.Printf("Failed marshal json: %s", err)
 		return nil, err
 	}
 	varMetrics.bodyBytes = bodyBytes
-	strURL := fmt.Sprintf("%s/update/", urlReal)
-	varMetrics.strURL = strURL
+	// strURL := fmt.Sprintf("%s/update/", urlReal)
+	// varMetrics.strURL = strURL
 	return &varMetrics, nil
 }
 
-func NewMetricsGet(id, mType, urlReal string) (*Metrics, error) {
+
+func NewMetricsGet(id, mType, urlReal string, key string) (*Metrics, error) {
 	urlReal = "http://" + urlReal
 	var varMetrics = Metrics{
 			ID: id,
@@ -211,18 +223,30 @@ func NewMetricsGet(id, mType, urlReal string) (*Metrics, error) {
 	varMetrics.strURL = strURL
 	return &varMetrics, nil
 }
-func (mtx *Metrics) Update() error{
+
+func (mtx *Metrics) Update(url string) error{
+	fmt.Println("--------------------------------------Update------------------------start-------------------------------------")
+	fmt.Println("mtx.ID =   ", mtx.ID)
+	fmt.Println("mtx.MType =   ", mtx.MType)
+	fmt.Println("mtx.key =   ", mtx.key)
+	if mtx.Value != nil {
+		fmt.Println("mtx.Value =  ", *mtx.Value)
+	}
+	fmt.Println("mtx.Hash =   ", mtx.Hash)
+	strURL := fmt.Sprintf("%s/update/", "http://" + url)
 	var err error
+	mtxOld := Metrics{}
 	client := resty.New()
 	_, err = client.R().
-	SetResult(mtx).
 	SetBody(mtx.bodyBytes).
-	Post(mtx.strURL)
+	SetResult(&mtxOld).
+	Post(strURL)
 	if err != nil {
-		fmt.Printf("Failed unmarshall response %s: %s\n", mtx.MType, err)
+		fmt.Printf("Failed unmarshall response %s: %s\n", mtxOld.MType, err)
 		return err
 	}
-	fmt.Printf("Result of requets is: %#v\n", mtx)
+	fmt.Printf("Result of requets is: %#v\n", mtxOld)
+	
 	return nil
 }
 
@@ -236,4 +260,17 @@ func (mtx *Metrics) GetValue() {
 	if err != nil {
 		fmt.Printf("Failed unmarshall response %s: %s\n", mtx.MType, err)
 	}
+}
+
+func Hash(m *Metrics, key string) string {
+	var data string
+	switch m.MType {
+	case "counter":
+		data = fmt.Sprintf("%s:%s:%d", m.ID, m.MType, *m.Delta)
+	case "gauge":
+		data = fmt.Sprintf("%s:%s:%f", m.ID, m.MType, *m.Value)
+	}
+	h := hmac.New(sha256.New, []byte(key))
+	h.Write([]byte(data))
+	return fmt.Sprintf("%x", h.Sum(nil))
 }
