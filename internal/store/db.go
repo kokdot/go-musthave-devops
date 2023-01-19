@@ -204,6 +204,11 @@ func (d DbStorage) Get(id string) (*Metrics, error) {
     } else {
         mtx.Hash = ""
     }
+    if mtx.MType == "counter" {
+        mtx.Value = nil
+    } else {
+        mtx.Delta = nil
+    }
     err = row.Err()
     if err != nil {
         return nil, err
