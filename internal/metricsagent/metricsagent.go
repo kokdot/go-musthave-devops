@@ -105,7 +105,7 @@ func UpdateAll (m *def.MonitorMap, c Counter, g Gauge, url string, key string) e
 	// n := 0
 	for k, v := range *m {
 		// n++
-		// if n > 4 {
+		// if n > 1 {
 		// 	break
 		// }
 		mtx, err := NewMetricsGauge(k, &v, url, key) 

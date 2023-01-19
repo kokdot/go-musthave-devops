@@ -53,8 +53,70 @@ func NewDBStorage(storeInterval time.Duration, storeFile string, restore bool, u
 
     return &dbStorage , nil
 }
+func (d DBStorage) SaveByBatch(sm *repo.StoreMap) (*repo.StoreMap, error) {
+// func (d DBStorage) SaveByBatchSM(sm *repo.StoreMap) (*repo.StoreMap, error) {
+// func (d DbStorage) SaveByBatch(sm *repo.StoreMap) (*repo.StoreMap, error) {
+    fmt.Println("--------------------------------------------SaveByBatch----------------------------start-----------------------------------")
+        // шаг 1 — объявляем транзакцию
+    tx, err := d.dbconn.Begin()
+    if err != nil {
+        fmt.Println("--------------------------------------------SaveByBatch----------------------------1-----------------------------------")
+        return nil, err
+    }
+    // шаг 1.1 — если возникает ошибка, откатываем изменения
+    defer tx.Rollback()
 
-func (d DBStorage) SaveByBatch(sm []repo.Metrics) (*repo.StoreMap, error) {
+    // шаг 2 — готовим инструкцию
+    ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+    defer cancel()
+     query := `INSERT INTO Metrics
+    (
+        ID, 
+        MType, 
+        Delta, 
+        Value
+    ) values($1, $2, $3, $4) ON CONFLICT (ID) DO UPDATE SET 
+    ID = Metrics.ID,
+    MType = Metrics.MType,
+    Delta = EXCLUDED.Delta + Metrics.Delta, 
+    Value = EXCLUDED.Value
+    `
+    stmt, err := tx.PrepareContext(ctx, query)
+    if err != nil {
+        fmt.Println("--------------------------------------------SaveByBatch----------------------------2-----------------------------------")
+        return nil, err
+    }
+    // шаг 2.1 — не забываем закрыть инструкцию, когда она больше не нужна
+    defer stmt.Close()
+
+    for _, v := range *sm {
+        // шаг 3 — указываем, что каждое видео будет добавлено в транзакцию
+        if _, err = stmt.ExecContext(ctx, v.ID, v.MType, v.Delta, v.Value); err != nil {
+            fmt.Println("--------------------------------------------SaveByBatch----------------------------3-----------------------------------")
+            return nil, err
+        }
+    }
+    // шаг 4 — сохраняем изменения
+    err = tx.Commit()
+    if err != nil {
+        fmt.Println("--------------------------------------------SaveByBatch----------------------------4-----------------------------------")
+        return nil, err
+    }
+    smtx := make(repo.StoreMap)
+    for _, val := range *sm {
+        mtx, err := d.Get(val.ID)
+        if err != nil {
+            fmt.Println("--------------------------------------------SaveByBatch----------------------------5-----------------------------------")
+           return nil, err
+        }
+        smtx[val.ID] = *mtx
+    }
+    fmt.Println("--------------------------------------------SaveByBatch----------------------------finish-----------------------------------")
+    return &smtx, nil
+}
+
+func (d DBStorage) SaveByBatchSlice(sm []repo.Metrics) (*repo.StoreMap, error) {
+// func (d DBStorage) SaveByBatch(sm []repo.Metrics) (*repo.StoreMap, error) {
 // func (d DbStorage) SaveByBatch(sm *repo.StoreMap) (*repo.StoreMap, error) {
         // шаг 1 — объявляем транзакцию
     tx, err := d.dbconn.Begin()
