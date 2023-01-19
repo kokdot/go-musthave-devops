@@ -56,6 +56,60 @@ func NewDBStorage(storeInterval time.Duration, storeFile string, restore bool, u
 
 func (d DBStorage) SaveByBatch(sm []repo.Metrics) (*repo.StoreMap, error) {
 // func (d DbStorage) SaveByBatch(sm *repo.StoreMap) (*repo.StoreMap, error) {
+        // шаг 1 — объявляем транзакцию
+    tx, err := d.dbconn.Begin()
+    if err != nil {
+        return nil, err
+    }
+    // шаг 1.1 — если возникает ошибка, откатываем изменения
+    defer tx.Rollback()
+
+    // шаг 2 — готовим инструкцию
+    ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+    defer cancel()
+     query := `INSERT INTO Metrics
+    (
+        ID, 
+        MType, 
+        Delta, 
+        Value
+    ) values($1, $2, $3, $4) ON CONFLICT (ID) DO UPDATE SET 
+    ID = Metrics.ID,
+    MType = Metrics.MType,
+    Delta = EXCLUDED.Delta + Metrics.Delta, 
+    Value = EXCLUDED.Value,
+    `
+    stmt, err := tx.PrepareContext(ctx, query)
+    if err != nil {
+        return nil, err
+    }
+    // шаг 2.1 — не забываем закрыть инструкцию, когда она больше не нужна
+    defer stmt.Close()
+
+    for _, v := range sm {
+        // шаг 3 — указываем, что каждое видео будет добавлено в транзакцию
+        if _, err = stmt.ExecContext(ctx, v.ID, v.MType, v.Delta, v.Value); err != nil {
+            return nil, err
+        }
+    }
+    // шаг 4 — сохраняем изменения
+    err = tx.Commit()
+    if err != nil {
+        return nil, err
+    }
+    smtx := make(repo.StoreMap)
+    for _, val := range sm {
+        mtx, err := d.Get(val.ID)
+        if err != nil {
+           return nil, err
+        }
+        smtx[val.ID] = *mtx
+    }
+    return &smtx, nil
+}
+func (d DBStorage) SaveByBatch1(sm []repo.Metrics) (*repo.StoreMap, error) {
+// func (d DbStorage) SaveByBatch(sm *repo.StoreMap) (*repo.StoreMap, error) {
+
     smtx := make(repo.StoreMap)
     for _, val := range sm {
         mtx, err := d.Save(&val)
