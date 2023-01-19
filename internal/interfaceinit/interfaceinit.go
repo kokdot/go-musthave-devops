@@ -14,48 +14,12 @@ var m  repo.Repo
 func InterfaceInit(storeInterval time.Duration, storeFile string, restore bool, url string, key string, dataBaseDSN string) (repo.Repo, error) {
 	if dataBaseDSN != "" {
 		fmt.Println("----------if dataBaseDSN != \"\" {-------")
-		d, err := store.NewDbStorage(storeInterval, storeFile , restore , url , key, dataBaseDSN)
+		d, err := store.NewDBStorage(storeInterval, storeFile , restore , url , key, dataBaseDSN)
 		fmt.Println("----------d, err := -------", d, "------", err)
-		// if err != nil {
-		// 	fmt.Println("-------------------------------------------------------------------------------------------------if err != nil {------")
-		// 	// return nil, fmt.Errorf("failed to create DbStorage, err: %s", err)
-		// 	if storeInterval > 0 {
-		// 	fmt.Println("-------------------------------------------------------------------------------------------------if storeInterval > 0 {------")	
-		// 	m, err := store.NewMemStorage(storeInterval, storeFile , restore , url , key, dataBaseDSN)
-		// 	if err != nil {
-		// 		return nil, fmt.Errorf("failed to create MemStorage, err: %s", err)
-		// 	}
-		// 	if storeFile != "" {
-		// 		downloadingtofile.DownloadingToFile(m)
-		// 	}
-		// 	if restore {
-		// 		err := m.ReadStorage()
-		// 		if err != nil {
-		// 			return nil, fmt.Errorf("failed to restore MemStorage, err: %s", err)
-		// 		}
-		// 	}
-		// 	return m, nil
-		// } else {
-		// 	f, err := store.NewFileStorage(storeInterval, storeFile , restore , url , key, dataBaseDSN)
-		// 	if err != nil {
-		// 		return nil, fmt.Errorf("failed to create FileStorage, err: %s", err)
-		// 	}
-		// 	if storeFile != "" {
-		// 		downloadingtofile.DownloadingToFile(f)
-		// 	}
-		// 	if restore {
-		// 		m.ReadStorage()
-		// 		if err != nil {
-		// 			return nil, fmt.Errorf("failed to restore FileStorage, err: %s", err)
-		// 		}
-		// 	}
-		// 	return f, nil
-		// }
-		// }
 		if restore {
 			err := d.ReadStorage()
 			if err != nil {
-				return nil, fmt.Errorf("failed to restore DbStorage, err: %s", err)
+				return nil, fmt.Errorf("failed to restore DBStorage, err: %s", err)
 			}
 		}
 		return d, nil

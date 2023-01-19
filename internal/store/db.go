@@ -16,7 +16,7 @@ import (
 var zeroG Gauge = 0
 var zeroC Counter = 0
 // type Metrics = repo.Metrics
-type DbStorage struct {
+type DBStorage struct {
 	StoreMap      *StoreMap
 	restore       bool
     storeFile   string
@@ -26,7 +26,7 @@ type DbStorage struct {
 	dataBaseDSN   string
 	dbconn        *sql.DB
 }
-func NewDbStorage(storeInterval time.Duration, storeFile string, restore bool, url string, key string, dataBaseDSN string) (*DbStorage, error){
+func NewDBStorage(storeInterval time.Duration, storeFile string, restore bool, url string, key string, dataBaseDSN string) (*DBStorage, error){
     dbconn, err := sql.Open("pgx", dataBaseDSN)
 	if err != nil {
 		return nil, err
@@ -37,7 +37,7 @@ func NewDbStorage(storeInterval time.Duration, storeFile string, restore bool, u
 		return nil, err
 	}
     var sm = make(StoreMap, 0)
-    var dbStorage =   DbStorage{
+    var dbStorage =   DBStorage{
         StoreMap: &sm,
         storeInterval: storeInterval, 
 		restore: restore,
@@ -54,7 +54,7 @@ func NewDbStorage(storeInterval time.Duration, storeFile string, restore bool, u
     return &dbStorage , nil
 }
 
-func (d DbStorage) SaveByBatch(sm []repo.Metrics) (*repo.StoreMap, error) {
+func (d DBStorage) SaveByBatch(sm []repo.Metrics) (*repo.StoreMap, error) {
 // func (d DbStorage) SaveByBatch(sm *repo.StoreMap) (*repo.StoreMap, error) {
     smtx := make(repo.StoreMap)
     for _, val := range sm {
@@ -67,7 +67,7 @@ func (d DbStorage) SaveByBatch(sm []repo.Metrics) (*repo.StoreMap, error) {
     return &smtx, nil
 }
 
-func (d DbStorage) Save(mtxNew *Metrics) (*Metrics, error) {
+func (d DBStorage) Save(mtxNew *Metrics) (*Metrics, error) {
     ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 	defer cancel()
     query := `INSERT INTO Metrics
@@ -100,7 +100,7 @@ func (d DbStorage) Save(mtxNew *Metrics) (*Metrics, error) {
     return mtxOld, nil
 }
 
-func (d DbStorage) createStorage() error {
+func (d DBStorage) createStorage() error {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 	defer cancel()
 	if !d.restore {
@@ -126,7 +126,7 @@ func (d DbStorage) createStorage() error {
 	}
     return nil
 }
-func (d DbStorage) ReadStorage() error {
+func (d DBStorage) ReadStorage() error {
     ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 	defer cancel()
     query := `
@@ -167,10 +167,14 @@ func (d DbStorage) ReadStorage() error {
         }
         sm[mtx.ID] = mtx
     }
+    err = rows.Err()
+        if err != nil {
+            return err
+    }
     *(d.StoreMap) = sm
     return nil   
 }
-func (d DbStorage) Get(id string) (*Metrics, error) {
+func (d DBStorage) Get(id string) (*Metrics, error) {
      ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 	defer cancel()
     query := `
@@ -216,41 +220,41 @@ func (d DbStorage) Get(id string) (*Metrics, error) {
     return &mtx, nil
 }
 
-func (d DbStorage) GetGaugeValue(id string) (Gauge, error) {
+func (d DBStorage) GetGaugeValue(id string) (Gauge, error) {
     mtxNew, err := d.Get(id)
     if err != nil {
         return zeroG, err
     }
     return *mtxNew.Value, nil
 }
-func (d DbStorage) GetCounterValue(id string) (Counter, error) {
+func (d DBStorage) GetCounterValue(id string) (Counter, error) {
     mtxNew, err := d.Get(id)
     if err != nil {
         return zeroC, err
     }
     return *mtxNew.Delta, nil
 }
-func (d DbStorage) GetDataBaseDSN() string {
+func (d DBStorage) GetDataBaseDSN() string {
 	return d.dataBaseDSN
 }
-func (d DbStorage) GetStoreFile() string {
+func (d DBStorage) GetStoreFile() string {
     return d.storeFile
 }
-func (d DbStorage) GetURL() string {
+func (d DBStorage) GetURL() string {
 	return d.url
 }
-func (d DbStorage) GetRestore() bool {
+func (d DBStorage) GetRestore() bool {
 	return d.restore
 }
 
-func (d DbStorage) GetKey() string {
+func (d DBStorage) GetKey() string {
 	return d.key
 }
-func (d DbStorage) GetStoreInterval() time.Duration {
+func (d DBStorage) GetStoreInterval() time.Duration {
 	return d.storeInterval
 }
 
-func (d DbStorage) GetPing() (bool, error) {
+func (d DBStorage) GetPing() (bool, error) {
 	// urlExample := "postgres://postgres:postgres@localhost:5432/postgres"
 	ctx, cancel := context.WithTimeout(context.Background(), 1*time.Second)
 	defer cancel()
@@ -260,7 +264,7 @@ func (d DbStorage) GetPing() (bool, error) {
 	fmt.Println("Ping Ok")
 	return true, nil
 }
-func (d DbStorage) SaveCounterValue(name string, counter Counter) (Counter, error) {
+func (d DBStorage) SaveCounterValue(name string, counter Counter) (Counter, error) {
     mtx := metricsserver.NewMetrics(name, "counter")
     mtxNew, err :=(d.Save(&mtx)) //Save(mtx)
     if err != nil {
@@ -268,7 +272,7 @@ func (d DbStorage) SaveCounterValue(name string, counter Counter) (Counter, erro
     }
     return *mtxNew.Delta, nil
 }
-func (d DbStorage) SaveGaugeValue(name string, gauge Gauge) error {
+func (d DBStorage) SaveGaugeValue(name string, gauge Gauge) error {
     mtx := metricsserver.NewMetrics(name, "gauge")
     _, err :=(d.Save(&mtx)) 
     if err != nil {
@@ -276,18 +280,18 @@ func (d DbStorage) SaveGaugeValue(name string, gauge Gauge) error {
     }
     return nil
 }
-func (d DbStorage) GetAllValues() string {
+func (d DBStorage) GetAllValues() string {
     _, _ = d.GetAll()
     return repo.StoreMapToString(d.StoreMap)
 }
-func (d DbStorage) GetAll() (StoreMap, error) {
+func (d DBStorage) GetAll() (StoreMap, error) {
     err := d.ReadStorage()
     if err != nil {
         return nil, fmt.Errorf("%s", err)
     }
     return *d.StoreMap, nil
 }
-func (d DbStorage) WriteStorage() error {
+func (d DBStorage) WriteStorage() error {
     for _, val := range *d.StoreMap  {
         _, err := d.Save(&val)
         if err != nil {
