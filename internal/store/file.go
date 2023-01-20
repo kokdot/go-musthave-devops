@@ -25,6 +25,10 @@ type FileStorage struct {
 func (f FileStorage) SaveByBatch(sm []repo.Metrics) (*StoreMap, error) {
 return nil, nil
 }
+func (f FileStorage) SaveByBatch1(sm *StoreMap) (*StoreMap, error) {
+// func (f FileStorage) SaveByBatch(sm []repo.Metrics) (*StoreMap, error) {
+return nil, nil
+}
 func NewFileStorage(storeInterval time.Duration, storeFile string, restore bool, url string, key string, dataBaseDSN string) (*FileStorage, error) {
 	tmpfile, err := os.CreateTemp("/tmp/", "devops-metrics-db")
 	if err != nil {

@@ -31,6 +31,10 @@ func (m MemStorage) SaveByBatch(sm []repo.Metrics) (*StoreMap, error) {
 // func (m MemStorage) SaveByBatch(sm *StoreMap) (*StoreMap, error) {
 return nil, nil
 }
+// func (m MemStorage) SaveByBatch(sm []repo.Metrics) (*StoreMap, error) {
+func (m MemStorage) SaveByBatch1(sm *StoreMap) (*StoreMap, error) {
+return nil, nil
+}
 func (m MemStorage) GetPing() (bool, error) {
 	return false, errors.New("MemStorage not defines")
 }

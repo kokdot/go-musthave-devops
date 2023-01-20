@@ -53,8 +53,8 @@ func NewDBStorage(storeInterval time.Duration, storeFile string, restore bool, u
 
     return &dbStorage , nil
 }
-// func (d DBStorage) SaveByBatch(sm *repo.StoreMap) (*repo.StoreMap, error) {
-func (d DBStorage) SaveByBatchSM(sm *repo.StoreMap) (*repo.StoreMap, error) {
+func (d DBStorage) SaveByBatch1(sm *repo.StoreMap) (*repo.StoreMap, error) {
+// func (d DBStorage) SaveByBatchSM(sm *repo.StoreMap) (*repo.StoreMap, error) {
 // func (d DbStorage) SaveByBatch(sm *repo.StoreMap) (*repo.StoreMap, error) {
     fmt.Println("--------------------------------------------SaveByBatch----------------------------start-----------------------------------")
         // шаг 1 — объявляем транзакцию
@@ -115,8 +115,8 @@ func (d DBStorage) SaveByBatchSM(sm *repo.StoreMap) (*repo.StoreMap, error) {
     return &smtx, nil
 }
 
-// func (d DBStorage) SaveByBatchSlice(sm []repo.Metrics) (*repo.StoreMap, error) {
 func (d DBStorage) SaveByBatch(sm []repo.Metrics) (*repo.StoreMap, error) {
+// func (d DBStorage) SaveByBatch(sm []repo.Metrics) (*repo.StoreMap, error) {
 // func (d DbStorage) SaveByBatch(sm *repo.StoreMap) (*repo.StoreMap, error) {
         // шаг 1 — объявляем транзакцию
     tx, err := d.dbconn.Begin()
@@ -169,7 +169,7 @@ func (d DBStorage) SaveByBatch(sm []repo.Metrics) (*repo.StoreMap, error) {
     }
     return &smtx, nil
 }
-func (d DBStorage) SaveByBatch1(sm []repo.Metrics) (*repo.StoreMap, error) {
+func (d DBStorage) SaveByBatchOld(sm []repo.Metrics) (*repo.StoreMap, error) {
 // func (d DbStorage) SaveByBatch(sm *repo.StoreMap) (*repo.StoreMap, error) {
 
     smtx := make(repo.StoreMap)

@@ -76,6 +76,52 @@ func PostUpdateByBatch(w http.ResponseWriter, r *http.Request) {
 	w.Write(bodyBytes)
 	// return
 }
+func PostUpdateByBatch1(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("--------------------PostUpdateByBatch------------1-------------start-------------------------------")
+
+	bodyBytes, err := io.ReadAll(r.Body)
+	if err != nil {
+	fmt.Println("--------------------PostUpdateByBatch------------2-------------start-------------------------------")
+		w.Header().Set("content-type", "application/json")
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+	// slm := make([]repo.Metrics, 0)
+	smNew := make(repo.StoreMap)
+	err = json.Unmarshal(bodyBytes, &smNew)
+	// err = json.Unmarshal(bodyBytes, &slm)
+	if err != nil {
+	fmt.Println("--------------------PostUpdateByBatch--------------3-----------start-------------------------------")
+	fmt.Println(err)	
+	w.Header().Set("content-type", "application/json")
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+	fmt.Printf("Getting of requets is: %#v\n", smNew)
+	// fmt.Printf("Getting of requets is: %#v\n", slm)
+
+	smOld, err := m.SaveByBatch1(&smNew)
+	// smOld, err := m.SaveByBatch(slm)
+	
+	fmt.Printf("Answer to requets is: %#v\n", smOld)
+	if err != nil {
+	fmt.Println("--------------------PostUpdateByBatch-------------4------------start-------------------------------")
+		w.Header().Set("content-type", "application/json")
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	fmt.Println("--------------------PostUpdateByBatch-------------5------------start-------------------------------")
+	bodyBytes, err = json.Marshal(smOld)
+	if err != nil {
+		w.Header().Set("content-type", "application/json")
+		w.WriteHeader(http.StatusNotFound)
+		return
+	}
+	w.Header().Set("content-type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	w.Write(bodyBytes)
+	// return
+}
 func GetPing(w http.ResponseWriter, r *http.Request) {
 	ok, err := m.GetPing()
  	if !ok {
