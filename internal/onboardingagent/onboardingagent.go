@@ -3,7 +3,11 @@ import (
 	"github.com/caarlos0/env/v6"
 	"time"
 	"flag"
-	"fmt"
+	"strconv"
+	"os"
+	// "fmt"
+	"github.com/rs/zerolog"
+    "github.com/rs/zerolog/log"
 )
 
 const (
@@ -12,6 +16,7 @@ const (
 	ReportInterval time.Duration 	= time.Second * 10
 	Key = ""
 	Batch 							= false
+	Debug = false
 )
 
 type Config struct {
@@ -29,6 +34,7 @@ var(
 	keyReal string
 	cfg Config
 	batchReal = false
+	logg zerolog.Logger
 )
 // func GetReportInterval () time.Duration {
 // 	return reportIntervalReal
@@ -45,24 +51,51 @@ var(
 // func GetBatch () bool{
 // 	return batchReal
 // }
+func GetLogg() zerolog.Logger {
+	return logg
+}
 
-func OnboardingAgent() (time.Duration, time.Duration, string, string, bool) {
+func OnboardingAgent() (time.Duration, time.Duration, string, string, bool, zerolog.Logger) {
     err := env.Parse(&cfg)
     if err != nil {
-        fmt.Println("fail to parse cfg:  ", err)
+        logg.Print("fail to parse cfg:  ", err)
     }
 	urlRealPtr := flag.String("a", "127.0.0.1:8080", "ip adddress of server")
     reportIntervalRealPtr := flag.Duration("r", 10000000000, "interval of perort")
     pollIntervalRealPtr := flag.Duration("p", 2000000000, "interval of poll")
     keyPtr := flag.String("k", "", "secret key")
     batchPtr := flag.Bool("b", false, "batch style")
-	
+	debug := flag.Bool("debug", false, "sets log level to debug")
 	flag.Parse()
+
+	zerolog.SetGlobalLevel(zerolog.InfoLevel)
+    if *debug {
+        zerolog.SetGlobalLevel(zerolog.DebugLevel)
+    }
+	zerolog.TimeFieldFormat = zerolog.TimeFormatUnix
+	log.Logger = log.Output(zerolog.ConsoleWriter{Out: os.Stderr})
+	// log.Logger = log.With().Caller().Logger()
+	zerolog.CallerMarshalFunc = func(pc uintptr, file string, line int) string {
+		short := file
+		for i := len(file) - 1; i > 0; i-- {
+			if file[i] == '/' {
+				short = file[i+1:]
+				break
+			}
+		}
+		file = short
+		return file + ":" + strconv.Itoa(line)
+	}
+	log.Logger = log.With().Caller().Logger()
+	logg = log.Logger
+	
+	
 	urlReal = *urlRealPtr
 	reportIntervalReal = *reportIntervalRealPtr
 	pollIntervalReal = *pollIntervalRealPtr
 	keyReal = *keyPtr
 	batchReal = *batchPtr
+	// debugReal = *debug
 
 	if cfg.Batch {
         batchReal = cfg.Batch
@@ -79,31 +112,32 @@ func OnboardingAgent() (time.Duration, time.Duration, string, string, bool) {
 	if cfg.PollInterval != 0 {
         pollIntervalReal = cfg.PollInterval
 	}
-    fmt.Println("--------------------------agent-------------------------------")
-    fmt.Println("--------------------------const-------------------------------")
-	fmt.Println("URL:     ", URL)
-	fmt.Println("ReportInterval:     ", ReportInterval)
-	fmt.Println("PollInterval:     ", PollInterval)
-	fmt.Println("Key:     ", Key)
-	fmt.Println("Batch:     ", Batch)
-	fmt.Println("--------------------------flag-------------------------------")
-	fmt.Println("urlRealPtr:     ", *urlRealPtr)
-	fmt.Println("reportIntervalRealPtr:     ", *reportIntervalRealPtr)
-	fmt.Println("pollIntervalRealPtr:     ", *pollIntervalRealPtr)
-	fmt.Println("keyPtr:     ", *keyPtr)
-	fmt.Println("batchPtr:     ", *batchPtr)
-	fmt.Println("--------------------------cfg-------------------------------")
-	fmt.Println("cfg.Address:     ", cfg.Address)
-	fmt.Println("cfg.ReportInterval:     ", cfg.ReportInterval)
-	fmt.Println("cfg.PollInterval:     ", cfg.PollInterval)
-	fmt.Println("cfg.Key:     ", cfg.Key)
-	fmt.Println("cfg.Batch:     ", cfg.Batch)
-	fmt.Println("--------------------------real-------------------------------")
-	fmt.Println("URLReal:     ", urlReal)
-	fmt.Println("ReportIntervalReal:     ", reportIntervalReal)
-	fmt.Println("PollIntervalReal:     ", pollIntervalReal)
-	fmt.Println("KeyReal:     ", keyReal)
-	fmt.Println("BatchReal:     ", batchReal)
-	fmt.Println("--------------------------Ok-------------------------------")
-	return pollIntervalReal, reportIntervalReal, urlReal, keyReal, batchReal
+    logg.Print("--------------------------agent-------------------------------")
+    logg.Print("--------------------------const-------------------------------")
+	logg.Print("URL:     ", URL)
+	logg.Print("ReportInterval:     ", ReportInterval)
+	logg.Print("PollInterval:     ", PollInterval)
+	logg.Print("Key:     ", Key)
+	logg.Print("Batch:     ", Batch)
+	logg.Print("--------------------------flag-------------------------------")
+	logg.Print("urlRealPtr:     ", *urlRealPtr)
+	logg.Print("reportIntervalRealPtr:     ", *reportIntervalRealPtr)
+	logg.Print("pollIntervalRealPtr:     ", *pollIntervalRealPtr)
+	logg.Print("keyPtr:     ", *keyPtr)
+	logg.Print("batchPtr:     ", *batchPtr)
+	logg.Print("debug:     ", *debug)
+	logg.Print("--------------------------cfg-------------------------------")
+	logg.Print("cfg.Address:     ", cfg.Address)
+	logg.Print("cfg.ReportInterval:     ", cfg.ReportInterval)
+	logg.Print("cfg.PollInterval:     ", cfg.PollInterval)
+	logg.Print("cfg.Key:     ", cfg.Key)
+	logg.Print("cfg.Batch:     ", cfg.Batch)
+	logg.Print("--------------------------real-------------------------------")
+	logg.Print("URLReal:     ", urlReal)
+	logg.Print("ReportIntervalReal:     ", reportIntervalReal)
+	logg.Print("PollIntervalReal:     ", pollIntervalReal)
+	logg.Print("KeyReal:     ", keyReal)
+	logg.Print("BatchReal:     ", batchReal)
+	logg.Print("--------------------------Ok-------------------------------")
+	return pollIntervalReal, reportIntervalReal, urlReal, keyReal, batchReal, log.Logger
 }

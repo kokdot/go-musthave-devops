@@ -2,7 +2,7 @@ package metricsagent
 
 import (
  	"github.com/go-resty/resty/v2"
-	// "github.com/kokdot/go-musthave-devops/internal/onboardingagent"
+	"github.com/kokdot/go-musthave-devops/internal/onboardingagent"
 	"github.com/kokdot/go-musthave-devops/internal/def"
 	"github.com/rs/zerolog"
 	// "github.com/kokdot/go-musthave-devops/internal/monitor"
@@ -11,6 +11,8 @@ import (
 	// "os"
 	"crypto/sha256"
 	"crypto/hmac"
+    // "github.com/rs/zerolog/log"
+
 )
 
 type Gauge = def.Gauge 
@@ -28,6 +30,7 @@ type Metrics struct {
 type SliceMetrics []Metrics
 type StoreMap map[string] Metrics
 var StoreMetrics = make(map[string]interface{})
+var logg zerolog.Logger = onboardingagent.GetLogg()
 // var metrics = Metrics{}
 // var sliceMetrics =  make(SliceMetrics, 0)
 // var logStoreMetrics = zerolog.New(os.Stdout).With().
@@ -40,135 +43,78 @@ var StoreMetrics = make(map[string]interface{})
 // 		Array("maetrics", u).
 // 		Logger()
 
-func (mtx Metrics) MarshalZerologObject(e *zerolog.Event) {
-	var value Gauge
-	var delta Counter
-	if mtx.Value != nil {
-		value := *(mtx.Value)
-		fmt.Println("value: ", value, "  int64(value): ", float64(value))
-	}
-	if mtx.Delta != nil {
-		delta = *(mtx.Delta)
-		fmt.Println("delta: ", delta, "  int64(delta): ", int64(delta))
-	}
-	// if mtx.ID == "" {
-		// 	return
-		// }
-		e.Str("ID", mtx.ID).
-		Str("MType", mtx.MType).
-		Float64("Value", float64(value)).
-		Int64("Delta", int64(delta)).
-		Str("URL", mtx.StrURL).
-		Str("Key", mtx.Key)
+// func (mtx Metrics) MarshalZerologObject(e *zerolog.Event) {
+// 	var value Gauge
+// 	var delta Counter
+// 	if mtx.Value != nil {
+// 		value = *(mtx.Value)
+// 		// fmt.Println("value: ", value, "  int64(value): ", float64(value))
+// 	}
+// 	if mtx.Delta != nil {
+// 		delta = *(mtx.Delta)
+// 		// fmt.Println("delta: ", delta, "  int64(delta): ", int64(delta))
+// 	}
+// 	// if mtx.ID == "" {
+// 		// 	return
+// 		// }
+// 		e.Str("ID", mtx.ID).
+// 		Str("MType", mtx.MType).
+// 		Float64("Value", float64(value)).
+// 		Int64("Delta", int64(delta)).
+// 		Str("URL", mtx.StrURL).
+// 		Str("Key", mtx.Key)
 		
 		
 
-	// Str("MType", mtx.Hash).
-	// Int64("MType", int64(*mtx.Delta))
-}
+// 	// Str("MType", mtx.Hash).
+// 	// Int64("MType", int64(*mtx.Delta))
+// }
 
 
-func (sliceMetrics SliceMetrics) MarshalZerologArray(a *zerolog.Array) {
-	for _, m := range sliceMetrics {
-		a.Object(m)
-	}
-}
+// func (sliceMetrics SliceMetrics) MarshalZerologArray(a *zerolog.Array) {
+// 	for _, m := range sliceMetrics {
+// 		a.Object(m)
+// 	}
+// }
 // var logStoreMetrics = zerolog.New(os.Stdout).With().
 // 		Str("agent", "metricsagent").
 // 		Array("SliceMetrics", sliceMetrics).
 // 		Logger()
+func GetLogg(loggReal zerolog.Logger)  {
+	logg = loggReal
+	// return logg
+}
+// logg.Error().Err(err).Send()
 func GetStoreMap(mPtr *def.MonitorMap, url string, key string, mtxPollCountAndRandomValue... Metrics) (*StoreMap, error) {
-	fmt.Println("mPtr:  ", *mPtr)
+	logg.Print("mPtr:  ", *mPtr)
 	sm := make(StoreMap, 0)
 	var mtx = Metrics{}
-	_ = mtx
-	// *smPtr = StoreMap{}
-
-	// fmt.Println("smPtr = ", *smPtr)
+	var err  error
 	for k, v := range *mPtr {
-		fmt.Println("---------------------------------------------*mPtr-----------------------------------------------------   ", k)
-		fmt.Println("k: ", k)
-		fmt.Println("&v: ", v)
-		fmt.Println("url: ", url)
-		fmt.Println("key: ", key)
-		mtx, err := NewMetricsGauge(k, v, url, key)
+		mtx, err = NewMetricsGauge(k, v, url, key)
 		if err != nil {
+			logg.Error().Err(err).Send()
 			return nil, fmt.Errorf("%s", err)
 		}
-		fmt.Println("mtx.ID: ", mtx.ID)
-		fmt.Println("mtx.Value: ", *mtx.Value)
-
-		// if mtx.Value != nil {
-		// 	fmt.Println("mtx.ID: ", mtx.ID)
-		// 	fmt.Println("mtx.Value: ", *mtx.Value)
-		// }
+		logg.Print("mtx.ID: ", mtx.ID)
+		logg.Print("mtx.Value: ", *mtx.Value)
 		sm[k] = mtx
-			for k1, v1 := range sm {
-			fmt.Println("-----------------------------------------   ", k1)
-			if v1.Value != nil {
-				fmt.Println("mtx.ID: ", v1.ID)
-				fmt.Println("mtx.Value: ", *v1.Value)
-			} else {
-				fmt.Println("mtx.ID: ", v1.ID)
-				fmt.Println("mtx.Delta: ", *v1.Delta)
-			}
-		}
 	}
 
 	for _, mtx1 := range mtxPollCountAndRandomValue {
-		// if mtx.Value != nil {
-		// 	fmt.Println("mtx.ID: ", mtx.ID)
-		// 	fmt.Println("mtx.Value: ", *mtx.Value)
-		// } else {
-		// 	fmt.Println("mtx.ID: ", mtx.ID)
-		// 	fmt.Println("mtx.Delta: ", *mtx.Delta)
-		// }
-
 		sm[mtx1.ID] = mtx1
+		logg.Print("mtx.ID: ", mtx1.ID)
 	}
 
 	// sliceMetrics := make(SliceMetrics, 0)
-	// for k, v := range *smPtr {
-	// 	fmt.Println("---------------------------------------------for _, v := range *smPtr---------------------------   ", k)
-	// 	if v.Value != nil {
-	// 		fmt.Println("mtx.ID: ", v.ID)
-	// 		fmt.Println("mtx.Value: ", *v.Value)
-	// 	} else {
-	// 		fmt.Println("mtx.ID: ", v.ID)
-	// 		fmt.Println("mtx.Delta: ", *v.Delta)
-	// 	}
-	// }
-	
-	// for k, v := range *smPtr {
-	// 	fmt.Println("---------------------------------------------for _, v := range *smPtr---------------------------   ", k)
-	// 	if v.Value != nil {
-	// 		fmt.Println("mtx.ID: ", v.ID)
-	// 		fmt.Println("mtx.Value: ", *v.Value)
-	// 	} else {
-	// 		fmt.Println("mtx.ID: ", v.ID)
-	// 		fmt.Println("mtx.Delta: ", *v.Delta)
-	// 	}
-	// 	// fmt.Println("ID: ", v.ID)
-	// 	// fmt.Println("MType: ", v.MType)
-	// 	// fmt.Println("Delta: ", v.Delta)
-	// 	// fmt.Println("Value: ", v.Value)
-	// 	// fmt.Println("Key: ", v.Key)
-	// 	// fmt.Println("URL: ", v.StrURL)
+	// for _, v := range sm {
 	// 	sliceMetrics = append(sliceMetrics, v)
 	// }
-		// fmt.Println("---------------------------------------------GetStoreMap--------smPtr--------------------")
-
-	// _ = sliceMetrics
-
-	// fmt.Println("smPtr = ", *smPtr)
+	
 	// logStoreMetrics := zerolog.New(os.Stdout).With().
-	// 	Str("agent", "metricsagent").
-	// 	Array("SliceMetrics", sliceMetrics).
-	// 	Logger()
-
-	// fmt.Println(sliceMetrics)
-	// fmt.Printf("StoreMetrics = %#v", StoreMetrics)
-	// StoreMetrics = smPtr
+	// Str("--------------------agent", "metricsagent").
+	// Array("SliceMetrics", sliceMetrics).
+	// Logger()
 	// logStoreMetrics.Log().Msg("GetStoreMap is finish")
 	return &sm, nil
 }
@@ -176,32 +122,32 @@ func GetStoreMap(mPtr *def.MonitorMap, url string, key string, mtxPollCountAndRa
 func UpdateByBatch(mPtr *def.MonitorMap, pollCount Counter, randomValue Gauge, url string, key string) error {
 	mtxCounter, err := NewMetricsCounter("PollCount", pollCount, url, key)
 	if err != nil {
-		fmt.Println(err)
+		logg.Error().Err(err).Send()
 		return err
 	}
 	mtxRandomValue, err := NewMetricsGauge("RandomValue", randomValue, url, key)
 	if err != nil {
-		fmt.Println(err)
+		logg.Error().Err(err).Send()
 		return err
 	}
 	smPtr, err := GetStoreMap(mPtr, url, key, mtxCounter, mtxRandomValue)
 	if err != nil {
-		fmt.Println(err)
+		logg.Error().Err(err).Send()
 		return err
 	}
-	for k, v := range *smPtr {
-		fmt.Println("-----------------------------------------   ", k)
-		if v.Value != nil {
-			fmt.Println("mtx.ID: ", v.ID)
-			fmt.Println("mtx.Value: ", *v.Value)
-		} else {
-			fmt.Println("mtx.ID: ", v.ID)
-			fmt.Println("mtx.Delta: ", *v.Delta)
-		}
-	}
+	// for k, v := range *smPtr {
+	// 	fmt.Println("-----------------------------------------   ", k)
+	// 	if v.Value != nil {
+	// 		fmt.Println("mtx.ID: ", v.ID)
+	// 		fmt.Println("mtx.Value: ", *v.Value)
+	// 	} else {
+	// 		fmt.Println("mtx.ID: ", v.ID)
+	// 		fmt.Println("mtx.Delta: ", *v.Delta)
+	// 	}
+	// }
 	err = UpdateStoreMap(smPtr, url)
 	if err != nil {
-		fmt.Println(err)
+		logg.Error().Err(err).Send()
 		return err
 	}
 	return nil
@@ -214,7 +160,7 @@ func UpdateStoreMap(smPtrnew *StoreMap, url string) error {
 	strURL := fmt.Sprintf("%s/updates1/", url)
 	bodyBytes, err := json.Marshal(smPtrnew)
 	if err != nil {
-		fmt.Printf("Failed marshal json for batch: %s", err)
+		logg.Error().Err(err).Msg("Failed marshal json for batch: ")
 		return err
 	}
 	client := resty.New()
@@ -225,7 +171,8 @@ func UpdateStoreMap(smPtrnew *StoreMap, url string) error {
 	SetResult(&smOld).
 	Post(strURL)
 	if err != nil {
-		fmt.Printf("Failed unmarshall response by batch %#v: %s\n", smOld, err)
+		logg.Error().Err(err).Msg("Failed unmarshall response by batch: ")
+		// fmt.Printf("Failed unmarshall response by batch %#v: %s\n", smOld, err)
 		return err
 	}
 	// fmt.Printf("Result of requets is: %#v\n", smOld)
@@ -236,13 +183,15 @@ func UpdateAll (m *def.MonitorMap, c Counter, g Gauge, url string, key string) e
 	mtxCounter, err := NewMetricsCounter("PollCount", c, url, key)
 	// fmt.Printf("mtxRandomValue:    %#v\n", mtxCounter)
 	if err != nil {
-		fmt.Println(err)
+		logg.Error().Err(err).Send()
+		return err
 	}
 	mtxCounter.Update(url)
 
 	mtxRandomValue, err := NewMetricsGauge("RandomValue", g, url, key)
 	// fmt.Printf("mtxRandomValue:    %#v\n", mtxRandomValue)
 	if err != nil {
+		logg.Error().Err(err).Send()
 		return err
 	}
 	mtxRandomValue.Update(url)
@@ -253,9 +202,10 @@ func UpdateAll (m *def.MonitorMap, c Counter, g Gauge, url string, key string) e
 		// 	break
 		// }
 		mtx, err := NewMetricsGauge(k, v, url, key) 
-		fmt.Println("-------------------------------------------------------------------UpdateAll-----------------")
-		fmt.Printf("mtx:    %v -!!!!$$$$$$$!!!!!!-  %v\n", mtx.ID, *mtx.Value)
+		logg.Print("------------------------------------UpdateAll---------------------------start---------------------")
+		logg.Printf("mtx: %v; Value =  %v", mtx.ID, *mtx.Value)
 		if err != nil {
+			logg.Error().Err(err).Send()
 			return err
 		}
 		mtx.Update(url)
@@ -276,7 +226,8 @@ func NewMetricsCounter(id string,  counter Counter, urlReal string, keyReal stri
 			}
 		bodyBytes, err := json.Marshal(varMetrics)
 		if err != nil {
-			fmt.Printf("Failed marshal json counter:  %s\n", err)
+			logg.Error().Err(err).Msg("Failed marshal json counter: ")
+			// fmt.Printf("Failed marshal json counter:  %s\n", err)
 			return Metrics{}, err
 		}
 		varMetrics.BodyBytes = bodyBytes
@@ -319,7 +270,8 @@ func NewMetricsGauge(id string, gauge Gauge,  urlReal string, keyReal string) (M
 		}
 		bodyBytes, err := json.Marshal(varMetrics)
 		if err != nil {
-			fmt.Printf("Failed marshal json gauge: %s\n", err)
+			logg.Error().Err(err).Msg("Failed marshal json gauge: ")
+			// fmt.Printf("Failed marshal json gauge: %s\n", err)
 			return Metrics{}, err
 		}
 		varMetrics.BodyBytes = bodyBytes
@@ -342,7 +294,8 @@ func NewMetricsGauge(id string, gauge Gauge,  urlReal string, keyReal string) (M
 	varMetrics.Hash = Hash(&varMetrics, keyReal)
 	bodyBytes, err := json.Marshal(varMetrics)
 	if err != nil {
-		fmt.Printf("Failed marshal json: %s", err)
+		logg.Error().Err(err).Msg("Failed marshal json gauge: ")
+		// fmt.Printf("Failed marshal json: %s", err)
 		return Metrics{}, err
 	}
 	varMetrics.BodyBytes = bodyBytes
@@ -360,7 +313,8 @@ func NewMetricsGet(id, mType, urlReal string, key string) (*Metrics, error) {
 		}
 	bodyBytes, err := json.Marshal(varMetrics)
 	if err != nil {
-		fmt.Printf("Failed marshal json for get: %s\n", err)
+		logg.Error().Err(err).Msg("Failed marshal json for get: ")
+		// fmt.Printf("Failed marshal json for get: %s\n", err)
 		return nil, err
 	}
 	varMetrics.BodyBytes = bodyBytes
@@ -370,14 +324,15 @@ func NewMetricsGet(id, mType, urlReal string, key string) (*Metrics, error) {
 }
 
 func (mtx *Metrics) Update(url string) error{
-	fmt.Println("--------------------------------------Update------------------------start-------------------------------------")
-	fmt.Println("mtx.ID =   ", mtx.ID)
-	fmt.Println("mtx.MType =   ", mtx.MType)
-	fmt.Println("mtx.key =   ", mtx.Key)
+	logg.Print("--------------------------------------Update------------------------start-------------------------------------")
+	// logg.Print("logg: ", logg)
+	logg.Printf("mtx.ID =   %v", mtx.ID)
+	logg.Printf("mtx.MType =   %v", mtx.MType)
+	logg.Printf("mtx.key =   %v", mtx.Key)
 	if mtx.Value != nil {
-		fmt.Println("mtx.Value =  ", *mtx.Value)
+		logg.Printf("mtx.Value =  %v", *mtx.Value)
 	}
-	fmt.Println("mtx.Hash =   ", mtx.Hash)
+	logg.Printf("mtx.Hash =   ", mtx.Hash)
 	strURL := fmt.Sprintf("%s/update/", "http://" + url)
 	var err error
 	mtxOld := Metrics{}
@@ -386,11 +341,25 @@ func (mtx *Metrics) Update(url string) error{
 	SetBody(mtx.BodyBytes).
 	SetResult(&mtxOld).
 	Post(strURL)
+	logg.Print("--------------------------------------Get perponse-------------------------------------------------------------")
 	if err != nil {
-		fmt.Printf("Failed unmarshall response %s: %s\n", mtxOld.MType, err)
+		// logg.Printf("Failed unmarshall response %s: %s\n", mtxOld.MType, err)
+		logg.Error().Err(err).Msg("Failed unmarshall response")
+		// logg.Error().Err(err.Printf("Failed unmarshall response %s: %s\n", mtxOld.MType, err).Send()
+
 		return err
 	}
-	fmt.Printf("Result of requets is: %#v\n", mtxOld)
+	// logg.Printf("Result of requets is: %#v", mtxOld)
+	logg.Printf("mtxOld.ID =   %v", mtxOld.ID)
+	logg.Printf("mtxOld.MType =   %v", mtxOld.MType)
+	logg.Printf("mtxOld.key =   %v", mtxOld.Key)
+	if mtxOld.Value != nil {
+		logg.Printf("mtxOld.Value =  %v", *mtxOld.Value)
+	}
+	if mtxOld.Delta != nil {
+		logg.Printf("mtxOld.Delta =  %v", *mtxOld.Delta)
+	}
+	logg.Printf("mtxOld.Hash =  %v\n ", mtxOld.Hash)
 	
 	return nil
 }
@@ -403,7 +372,8 @@ func (mtx *Metrics) GetValue() {
 	SetBody(mtx.BodyBytes).
 	Get(mtx.StrURL)
 	if err != nil {
-		fmt.Printf("Failed unmarshall response %s: %s\n", mtx.MType, err)
+		logg.Error().Err(err).Msg("Failed unmarshall response: ")
+		// fmt.Printf("Failed unmarshall response %s: %s\n", mtx.MType, err)
 	}
 }
 

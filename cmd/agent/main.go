@@ -1,12 +1,13 @@
 package main
 
 import (
-	"fmt"
+	// "fmt"
 	// "os"
 	"math/rand"
 	"sync"
 	"time"
 	// "github.com/rs/zerolog"
+    "github.com/rs/zerolog/log"
 
 	"github.com/kokdot/go-musthave-devops/internal/metricsagent"
 	"github.com/kokdot/go-musthave-devops/internal/def"
@@ -28,7 +29,9 @@ var (
 	randomValue Gauge 
 	m MonitorMap
 	wg sync.WaitGroup 
+	
 ) 
+var logg = log.Logger
 // func (mtx metricsagent.Metrics) MarshalZerologObject(e *zerolog.Event) {
 // 	e.Str("ID", mtx.ID).
 // 	Str("MType", mtx.MType).
@@ -41,7 +44,8 @@ var (
 
 func main() {
 	wg.Add(2)
-	pollInterval, reportInterval, url, key, batch = onboardingagent.OnboardingAgent()
+	pollInterval, reportInterval, url, key, batch, logg = onboardingagent.OnboardingAgent()
+	metricsagent.GetLogg(logg)
 	m = make(def.MonitorMap)
 	// sm := make(metricsagent.StoreMap)
 	// logMetrics := zerolog.New(os.Stdout).With().
@@ -62,22 +66,23 @@ func main() {
 	}(&m)
 	
 	go func() {
+		logg.Print("main is going to send the report.--------------------")
 		defer wg.Done()
 		for {
 			<-time.After(reportInterval)
 			if batch {
 				err := metricsagent.UpdateByBatch(&m, pollCount, randomValue, url, key)
 				if err != nil {
-					fmt.Println(err)
+					logg.Error().Err(err).Send()
 				} else {
-					fmt.Println("Get response by batch request.")
+					logg.Print("Get response by batch request.")
 				}
 			} else {
 				err := metricsagent.UpdateAll(&m, pollCount, randomValue, url, key)
 				if err != nil {
-					fmt.Println(err)
+					logg.Error().Err(err).Send()
 				} else {
-					fmt.Println("Get response by common request.")
+					logg.Print("Get response by common request.")
 				}
 			}
 		}
