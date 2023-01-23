@@ -381,15 +381,20 @@ func (d DBStorage) GetPing() (bool, error) {
 	return true, nil
 }
 func (d DBStorage) SaveCounterValue(name string, counter Counter) (Counter, error) {
+    logg.Printf("Couunter: %v", counter)
     mtx := metricsserver.NewMetrics(name, "counter")
+    mtx.Delta = &counter
+    logg.Printf("mtx: %#v, ; Delta: %d", mtx, *mtx.Delta)
     mtxNew, err :=(d.Save(&mtx)) //Save(mtx)
     if err != nil {
         return counter, fmt.Errorf("%s", err)
     }
+    logg.Printf("mtxNew: %#v, ; Delta: %d", mtxNew, *mtxNew.Delta)
     return *mtxNew.Delta, nil
 }
 func (d DBStorage) SaveGaugeValue(name string, gauge Gauge) error {
     mtx := metricsserver.NewMetrics(name, "gauge")
+    mtx.Value = &gauge
     _, err :=(d.Save(&mtx)) 
     if err != nil {
         return fmt.Errorf("%s", err)

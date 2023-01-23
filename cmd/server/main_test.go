@@ -2,7 +2,7 @@ package main
 
 import (
 	// "encoding/json"
-	"fmt"
+	// "fmt"
 	"io"
 	"net/http"
 	"net/http/httptest"
@@ -19,78 +19,89 @@ import (
 	"github.com/kokdot/go-musthave-devops/internal/interfaceinit"
 	"github.com/kokdot/go-musthave-devops/internal/onboardingserver"
 	"github.com/kokdot/go-musthave-devops/internal/repo"
-	// "github.com/kokdot/go-musthave-devops/internal/store"
-	"github.com/kokdot/go-musthave-devops/internal/downloadingtofile"
+	"github.com/kokdot/go-musthave-devops/internal/store"
+	"github.com/kokdot/go-musthave-devops/internal/metricsserver"
+	// "github.com/kokdot/go-musthave-devops/internal/downloadingtofile"
 )
 
 //test git git test what
 func TestHandler(t *testing.T) {
-	url, storeFile, key, restore, storeInterval, dataBaseDSN, logg  := onboardingserver.OnboardingServer()
+url, storeFile, key, restore, storeInterval, dataBaseDSNReal, logg  := onboardingserver.OnboardingServer()
     logg.Print("--------------------main-------------------------------------------")
     logg.Print("url:  ", url)
     logg.Print("storeInterval:  ", storeInterval)
     logg.Print("storeFile:  ", storeFile)
     logg.Print("restore:  ", restore)
     logg.Print("key:  ", key)
-    logg.Print("dataBaseDSN:  ", dataBaseDSN)
+    logg.Print("dataBaseDSNReal:  ", dataBaseDSNReal)
 
-    m, err := interfaceinit.InterfaceInit(storeInterval, storeFile, restore, url, key, dataBaseDSN, logg)
+    m, err := interfaceinit.InterfaceInit(storeInterval, storeFile, restore, url, key, dataBaseDSNReal, logg)
     if err != nil {
-        fmt.Printf("there in error in starting interface and restore data: %s", err)
+        logg.Printf("\nthere in error in starting interface and restore data: %s", err)
     }
-	handler.PutM(m)
-    fmt.Printf("m:   %#v", m)
+    handler.PutM(m)
+    handler.GetLogg(logg)
+    store.GetLogg(logg)
+    metricsserver.GetLogg(logg)
+    logg.Printf("interface m:   %#v", m)
     logg.Print("--------------------main--started-----------------------------------------")
-    if m.GetRestore() {
-        m.ReadStorage()
-    }
-    if m.GetStoreFile() != "" {
-        downloadingtofile.DownloadingToFile(m)
-    }
+    
+    // if m.GetDataBaseDSN() != "" {
+    //     downloading_to_file.DownloadingToFile(m)
+    // }
 
-	r := chi.NewRouter()
-	r.Use(middleware.RequestID)
-	r.Use(middleware.RealIP)
-	r.Use(middleware.Logger)
-	r.Use(middleware.Recoverer)
-	r.Get("/", handler.GetAll)
-	r.Route("/update", func(r chi.Router) {
+    // определяем роутер chi
+    r := chi.NewRouter()
+    // зададим встроенные middleware, чтобы улучшить стабильность приложения
+    r.Use(middleware.RequestID)
+    r.Use(middleware.RealIP)
+    r.Use(middleware.Logger)    
+    r.Use(middleware.Recoverer)
+    // r.Use(middleware.Compress(5, "gzip"))
+    r.Use(middleware.Compress(5))
+    r.Get("/", handler.GetAll)
+    r.Get("/ping", handler.GetPing)
+
+    r.Post("/updates/", handler.PostUpdateByBatch)
+    r.Post("/updates1/", handler.PostUpdateByBatch1)
+    
+    r.Route("/update", func(r chi.Router) {
         r.Post("/", handler.PostUpdate)
-		r.Route("/counter", func(r chi.Router) {
-			r.Route("/{nameData}/{valueData}", func(r chi.Router) {
-				r.Use(handler.PostCounterCtx)
-				r.Post("/", handler.PostUpdateCounter)
-			})
-		})
-		r.Route("/gauge", func(r chi.Router) {
-			r.Route("/{nameData}/{valueData}", func(r chi.Router) {
-				r.Use(handler.PostGaugeCtx)
-				r.Post("/", handler.PostUpdateGauge)
-			})
-		})
-		r.Route("/", func(r chi.Router) {
-			r.Post("/*", func(w http.ResponseWriter, r *http.Request) {
-				w.Header().Set("content-type", "text/plain; charset=utf-8")
-				w.WriteHeader(http.StatusNotImplemented)
-				// fmt.Fprint(w, "line: 52; http.StatusNotImplemented")
-			})
-		})
-	})
+        r.Route("/counter", func(r chi.Router) {
+            r.Route("/{nameData}/{valueData}", func(r chi.Router) {
+                r.Use(handler.PostCounterCtx)
+                r.Post("/", handler.PostUpdateCounter)
+            })
+        })
+        r.Route("/gauge", func(r chi.Router) {
+            r.Route("/{nameData}/{valueData}", func(r chi.Router) {
+                r.Use(handler.PostGaugeCtx)
+                r.Post("/", handler.PostUpdateGauge)
+            })
+        })
+        r.Route("/",func(r chi.Router) {
+            r.Post("/*", func(w http.ResponseWriter, r *http.Request) {
+		        w.Header().Set("content-type", "text/plain; charset=utf-8")
+                w.WriteHeader(http.StatusNotImplemented)
+                // fmt.Fprint(w, "line: 52; http.StatusNotImplemented")
+	        })
+        })
+    })
 
-	r.Route("/value", func(r chi.Router) {
+    r.Route("/value", func(r chi.Router) {
         r.Post("/", handler.GetValue)
-		r.Route("/counter", func(r chi.Router) {
-			r.Route("/{nameData}", func(r chi.Router) {
-				r.Use(handler.GetCtx)
-				r.Get("/", handler.GetCounter)
-			})
-		})
-		r.Route("/gauge", func(r chi.Router) {
-			r.Route("/{nameData}", func(r chi.Router) {
-				r.Use(handler.GetCtx)
-				r.Get("/", handler.GetGauge)
-			})
-		})
+		r.Route("/counter", func(r chi.Router){
+            r.Route("/{nameData}", func(r chi.Router) {
+                r.Use(handler.GetCtx)
+                r.Get("/", handler.GetCounter)
+            })
+        })
+       	r.Route("/gauge", func(r chi.Router){
+            r.Route("/{nameData}", func(r chi.Router) {
+                r.Use(handler.GetCtx)
+                r.Get("/", handler.GetGauge)
+            })
+        })
 	})
 
 	type want struct {

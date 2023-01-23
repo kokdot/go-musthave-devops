@@ -18,6 +18,7 @@ func GetLogg(loggReal zerolog.Logger)  {
 	logg = loggReal
 }
 func NewMetrics(id string, mType string) Metrics {
+	logg.Print("---------------------------------------------------------NewMetrics------------------")
 	if mType == "gauge" {
 		return Metrics{
 		ID: id,

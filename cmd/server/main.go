@@ -14,7 +14,7 @@ import (
 	// "github.com/rs/zerolog/log"
 	"github.com/go-chi/chi/v5/middleware"
 
-	"fmt"
+	// "fmt"
 	// "time"
 
 	"github.com/kokdot/go-musthave-devops/internal/handler"
@@ -108,7 +108,7 @@ func main() {
             r.Post("/*", func(w http.ResponseWriter, r *http.Request) {
 		        w.Header().Set("content-type", "text/plain; charset=utf-8")
                 w.WriteHeader(http.StatusNotImplemented)
-                fmt.Fprint(w, "line: 52; http.StatusNotImplemented")
+                // fmt.Fprint(w, "line: 52; http.StatusNotImplemented")
 	        })
         })
     })

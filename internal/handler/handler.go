@@ -329,14 +329,18 @@ func PostGaugeCtx(next http.Handler) http.Handler {
 	})
 }
 func PostUpdateCounter(w http.ResponseWriter, r *http.Request) {
+	logg.Print("-----------------------------------------------------------------------------PostUpdateCounter-----------------")
 	valueData := r.Context().Value(valueDataKey).(int)
 	nameData := r.Context().Value(nameDataKey).(string)
-	counter, err := m.SaveCounterValue(nameData, store.Counter(valueData))//------430
+	logg.Debug().Str("nameData", nameData).Int("ValueData", valueData).Send()
+	counter, err := m.SaveCounterValue(nameData, store.Counter(valueData))
     if err != nil {
+		logg.Error().Err(err).Send()
         w.Header().Set("content-type", "text/plain; charset=utf-8")
         w.WriteHeader(http.StatusBadRequest)
         return
     }
+	logg.Debug().Str("nameData", nameData).Int("ValueData", int(counter)).Send()
 	w.Header().Set("content-type", "text/plain; charset=utf-8")
 	w.WriteHeader(http.StatusOK)
 	fmt.Fprint(w, counter)
