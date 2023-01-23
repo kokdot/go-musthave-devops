@@ -332,7 +332,7 @@ func (mtx *Metrics) Update(url string) error{
 	if mtx.Value != nil {
 		logg.Printf("mtx.Value =  %v", *mtx.Value)
 	}
-	logg.Printf("mtx.Hash =   ", mtx.Hash)
+	logg.Printf("mtx.Hash =  %v", mtx.Hash)
 	strURL := fmt.Sprintf("%s/update/", "http://" + url)
 	var err error
 	mtxOld := Metrics{}
