@@ -1,11 +1,15 @@
 package onboardingserver
 
 import (
-	"fmt"
+	// "fmt"
     "time"
 	// "github.com/kokdot/go-musthave-devops/internal/store"
+	"strconv"
+	"os"
 	"flag"
     "github.com/caarlos0/env/v6"
+    "github.com/rs/zerolog"
+    "github.com/rs/zerolog/log"
 )
 const (
     URL = "127.0.0.1:8080"
@@ -14,7 +18,7 @@ const (
     Key = ""
     Restore = false
     DataBaseDSN = ""
-    // DataBaseDSN = "postgres://postgres:postgres@localhost:5432/postgres"
+    Debug = false
 )
 
 type Config struct {
@@ -33,12 +37,18 @@ var (
     keyReal = Key
     cfg Config
     dataBaseDSNReal = DataBaseDSN
+    logg zerolog.Logger
 )
-func OnboardingServer() (string, string, string, bool, time.Duration, string) {
-	fmt.Println("---------onboarding-------------------")
+
+func GetLogg() zerolog.Logger {
+	return logg
+}
+
+func OnboardingServer() (string, string, string, bool, time.Duration, string, zerolog.Logger) {
+	logg.Print("---------onboarding-------------------")
     err := env.Parse(&cfg)
     if err != nil {
-        fmt.Println(err)
+        logg.Print(err)
     }
 
     urlRealPtr := flag.String("a", "127.0.0.1:8080", "ip adddress of server")
@@ -47,8 +57,30 @@ func OnboardingServer() (string, string, string, bool, time.Duration, string) {
     storeIntervalPtr := flag.Duration("i", 300000000000, "interval of download")
     keyPtr := flag.String("k", "", "secret key")
     DataBaseDSNPtr := flag.String("d", "", "Data Base DSN")
+    debug := flag.Bool("debug", false, "sets log level to debug")
 
     flag.Parse()
+    zerolog.SetGlobalLevel(zerolog.InfoLevel)
+    if *debug {
+        zerolog.SetGlobalLevel(zerolog.DebugLevel)
+    }
+	zerolog.TimeFieldFormat = zerolog.TimeFormatUnix
+	log.Logger = log.Output(zerolog.ConsoleWriter{Out: os.Stderr})
+	// log.Logger = log.With().Caller().Logger()
+	zerolog.CallerMarshalFunc = func(pc uintptr, file string, line int) string {
+		short := file
+		for i := len(file) - 1; i > 0; i-- {
+			if file[i] == '/' {
+				short = file[i+1:]
+				break
+			}
+		}
+		file = short
+		return file + ":" + strconv.Itoa(line)
+	}
+	log.Logger = log.With().Caller().Logger()
+	logg = log.Logger
+
     urlReal = *urlRealPtr
     storeIntervalReal = *storeIntervalPtr
     storeFileReal = *storeFilePtr
@@ -76,36 +108,37 @@ func OnboardingServer() (string, string, string, bool, time.Duration, string) {
     if cfg.DataBaseDSN != "" {
         dataBaseDSNReal	= cfg.DataBaseDSN
     }
-    fmt.Println("--------------------------const-------------server------------------")
-    fmt.Println("URL:  ", URL)
-    fmt.Println("StoreInterval:  ", StoreInterval)
-    fmt.Println("StoreFile:  ", StoreFile)
-    fmt.Println("Restore:  ", Restore)
-    fmt.Println("Key:  ", Key)
-    fmt.Println("DataBaseDSN:  ", DataBaseDSN)
-    fmt.Println("---------------------------flag------------------------------")
-    fmt.Println("URLRealPtr:", *urlRealPtr)
-    fmt.Println("restorePtr:", *restorePtr)
-    fmt.Println("storeFilePtr:", *storeFilePtr)
-    fmt.Println("storeIntervalPtr:", *storeIntervalPtr)
-    fmt.Println("keyPtr:", *keyPtr)
-    fmt.Println("DataBaseDSNPtr:", *DataBaseDSNPtr)
-    fmt.Println("---------------------------cfg------------------------------")
-    fmt.Println("cfg.Address:", cfg.Address)
-    fmt.Println("cfg.Restore:", cfg.Restore)
-    fmt.Println("cfg.StoreFile:", cfg.StoreFile)
-    fmt.Println("cfg.StoreInterval:", cfg.StoreInterval)
-    fmt.Println("cfg.Key:", cfg.Key)
-    fmt.Println("cfg.DataBaseDSN:", cfg.DataBaseDSN)
-    fmt.Println("------------------------real---------------------------------")
-    fmt.Println("urlReal:", urlReal)
-    fmt.Println("restoreReal:", restoreReal)
-    fmt.Println("storeFileReal:", storeFileReal)
-    fmt.Println("storeIntervalReal:", storeIntervalReal)
-    fmt.Println("keyReal:", keyReal)
-    fmt.Println("dataBaseDSNReal:", dataBaseDSNReal)
-    fmt.Println("------------------------Ok---------------------------------")
-    return urlReal, storeFileReal, keyReal, restoreReal, storeIntervalReal, dataBaseDSNReal
+    logg.Print("--------------------------const-------------server------------------")
+    logg.Print("URL:  ", URL)
+    logg.Print("StoreInterval:  ", StoreInterval)
+    logg.Print("StoreFile:  ", StoreFile)
+    logg.Print("Restore:  ", Restore)
+    logg.Print("Key:  ", Key)
+    logg.Print("DataBaseDSN:  ", DataBaseDSN)
+    logg.Print("---------------------------flag------------------------------")
+    logg.Print("URLRealPtr:", *urlRealPtr)
+    logg.Print("restorePtr:", *restorePtr)
+    logg.Print("storeFilePtr:", *storeFilePtr)
+    logg.Print("storeIntervalPtr:", *storeIntervalPtr)
+    logg.Print("keyPtr:", *keyPtr)
+    logg.Print("DataBaseDSNPtr:", *DataBaseDSNPtr)
+    logg.Print("debug:     ", *debug)
+    logg.Print("---------------------------cfg------------------------------")
+    logg.Print("cfg.Address:", cfg.Address)
+    logg.Print("cfg.Restore:", cfg.Restore)
+    logg.Print("cfg.StoreFile:", cfg.StoreFile)
+    logg.Print("cfg.StoreInterval:", cfg.StoreInterval)
+    logg.Print("cfg.Key:", cfg.Key)
+    logg.Print("cfg.DataBaseDSN:", cfg.DataBaseDSN)
+    logg.Print("------------------------real---------------------------------")
+    logg.Print("urlReal:", urlReal)
+    logg.Print("restoreReal:", restoreReal)
+    logg.Print("storeFileReal:", storeFileReal)
+    logg.Print("storeIntervalReal:", storeIntervalReal)
+    logg.Print("keyReal:", keyReal)
+    logg.Print("dataBaseDSNReal:", dataBaseDSNReal)
+    logg.Print("------------------------Ok---------------------------------")
+    return urlReal, storeFileReal, keyReal, restoreReal, storeIntervalReal, dataBaseDSNReal, log.Logger
 }
 
 

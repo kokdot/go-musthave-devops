@@ -7,6 +7,7 @@ import (
 	"sort"
 	"time"
 	"github.com/kokdot/go-musthave-devops/internal/repo"
+	"github.com/rs/zerolog"
 	"github.com/kokdot/go-musthave-devops/internal/metricsserver"
 
 )
@@ -25,7 +26,11 @@ type MemStorage struct {
 	url string
 	dataBaseDSN string
 }
-
+var logg zerolog.Logger
+func GetLogg(loggReal zerolog.Logger)  {
+	logg = loggReal
+	// return logg
+}
 // var key string
 func (m MemStorage) SaveByBatch(sm []repo.Metrics) (*StoreMap, error) {
 // func (m MemStorage) SaveByBatch(sm *StoreMap) (*StoreMap, error) {
@@ -159,7 +164,7 @@ func (m MemStorage) Get(id string) (*Metrics, error) {
 	// if mtxOld.Hash != nil {
 	// 	return &mtxOld, nil
 	// }
-	fmt.Printf("mtxOld:   %#v", mtxOld)
+	logg.Printf("mtxOld:   %#v", mtxOld)
 	if key := m.GetKey(); key != "" {
 
 		if mtxOld.MType == "Gauge" || mtxOld.MType == "gauge" {

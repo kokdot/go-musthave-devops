@@ -3,6 +3,7 @@ package interfaceinit
 import (
 	"fmt"
 	"time"
+	"github.com/rs/zerolog"
 
 	"github.com/kokdot/go-musthave-devops/internal/repo"
 	"github.com/kokdot/go-musthave-devops/internal/store"
@@ -10,12 +11,16 @@ import (
 )
 
 var m  repo.Repo
+// var logg zerolog.Logger
+// func GetLogg(loggReal zerolog.Logger)  {
+// 	logg = loggReal
+// }
 
-func InterfaceInit(storeInterval time.Duration, storeFile string, restore bool, url string, key string, dataBaseDSN string) (repo.Repo, error) {
+func InterfaceInit(storeInterval time.Duration, storeFile string, restore bool, url string, key string, dataBaseDSN string, logg zerolog.Logger) (repo.Repo, error) {
 	if dataBaseDSN != "" {
-		fmt.Println("----------if dataBaseDSN != \"\" {-------")
+		logg.Print("----------if dataBaseDSN != \"\" {-------")
 		d, err := store.NewDBStorage(storeInterval, storeFile , restore , url , key, dataBaseDSN)
-		fmt.Println("----------d, err := -------", d, "------", err)
+		logg.Print("----------d, err := -------", d, "------", err)
 		if restore {
 			err := d.ReadStorage()
 			if err != nil {

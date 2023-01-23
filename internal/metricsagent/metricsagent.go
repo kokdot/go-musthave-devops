@@ -2,7 +2,7 @@ package metricsagent
 
 import (
  	"github.com/go-resty/resty/v2"
-	"github.com/kokdot/go-musthave-devops/internal/onboardingagent"
+	// "github.com/kokdot/go-musthave-devops/internal/onboardingagent"
 	"github.com/kokdot/go-musthave-devops/internal/def"
 	"github.com/rs/zerolog"
 	// "github.com/kokdot/go-musthave-devops/internal/monitor"
@@ -30,7 +30,7 @@ type Metrics struct {
 type SliceMetrics []Metrics
 type StoreMap map[string] Metrics
 var StoreMetrics = make(map[string]interface{})
-var logg zerolog.Logger = onboardingagent.GetLogg()
+var logg zerolog.Logger// = onboardingagent.GetLogg()
 // var metrics = Metrics{}
 // var sliceMetrics =  make(SliceMetrics, 0)
 // var logStoreMetrics = zerolog.New(os.Stdout).With().

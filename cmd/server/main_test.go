@@ -25,22 +25,22 @@ import (
 
 //test git git test what
 func TestHandler(t *testing.T) {
-	url, storeFile, key, restore, storeInterval, dataBaseDSN  := onboardingserver.OnboardingServer()
-    fmt.Println("--------------------main-------------------------------------------")
-    fmt.Println("url:  ", url)
-    fmt.Println("storeInterval:  ", storeInterval)
-    fmt.Println("storeFile:  ", storeFile)
-    fmt.Println("restore:  ", restore)
-    fmt.Println("key:  ", key)
-    fmt.Println("dataBaseDSN:  ", dataBaseDSN)
+	url, storeFile, key, restore, storeInterval, dataBaseDSN, logg  := onboardingserver.OnboardingServer()
+    logg.Print("--------------------main-------------------------------------------")
+    logg.Print("url:  ", url)
+    logg.Print("storeInterval:  ", storeInterval)
+    logg.Print("storeFile:  ", storeFile)
+    logg.Print("restore:  ", restore)
+    logg.Print("key:  ", key)
+    logg.Print("dataBaseDSN:  ", dataBaseDSN)
 
-    m, err := interfaceinit.InterfaceInit(storeInterval, storeFile, restore, url, key, dataBaseDSN)
+    m, err := interfaceinit.InterfaceInit(storeInterval, storeFile, restore, url, key, dataBaseDSN, logg)
     if err != nil {
         fmt.Printf("there in error in starting interface and restore data: %s", err)
     }
 	handler.PutM(m)
     fmt.Printf("m:   %#v", m)
-    fmt.Println("--------------------main--started-----------------------------------------")
+    logg.Print("--------------------main--started-----------------------------------------")
     if m.GetRestore() {
         m.ReadStorage()
     }
@@ -209,7 +209,7 @@ func TestHandler(t *testing.T) {
 
 			assert.NoError(t, err)
 			assert.Equal(t, tt.want.StatusCode, result.StatusCode)
-			fmt.Println(tt.name)
+			logg.Print(tt.name)
 			if tt.name != "default" {
 				assert.Equal(t, tt.want.contentType, result.Header.Get("Content-Type"))
 			}
@@ -220,8 +220,8 @@ func TestHandler(t *testing.T) {
 	}
 	// for _, tt := range testsJson {
 	// 	t.Run(tt.name, func(t *testing.T) {
-	// 		fmt.Println(tt.name)
-	// 		fmt.Println("tt.mtxOld:   ", int(*tt.mtxOld.Delta))
+	// 		logg.Print(tt.name)
+	// 		logg.Print("tt.mtxOld:   ", int(*tt.mtxOld.Delta))
 	// 		bodyBytes, _ := json.Marshal(tt.mtxOld)
 	// 		buf := bytes.NewReader(bodyBytes)
 	// 		request := httptest.NewRequest(tt.method, tt.url, buf)
@@ -235,7 +235,7 @@ func TestHandler(t *testing.T) {
 	// 		_ = json.Unmarshal(bodyBytes, &mtxNew)
 	// 		result.Body.Close()
 	// 		// assert.NoError(t, err)
-	// 		fmt.Println("mtxNew:   ", int(*mtxNew.Delta))
+	// 		logg.Print("mtxNew:   ", int(*mtxNew.Delta))
 	// 		assert.Equal(t, tt.want.StatusCode, result.StatusCode)
 	// 		assert.Equal(t, tt.want.mtxNew, mtxNew)
 	// 		if tt.name != "default" {

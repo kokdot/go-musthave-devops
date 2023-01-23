@@ -3,6 +3,7 @@ import(
 	"fmt"
 	"github.com/kokdot/go-musthave-devops/internal/repo"
 	"crypto/hmac"
+	"github.com/rs/zerolog"
 	"crypto/sha256"
 
 )
@@ -11,7 +12,11 @@ type Gauge = repo.Gauge
 type Metrics = repo.Metrics
 var zeroG Gauge = 0
 var zeroC Counter = 0
+var logg zerolog.Logger
 
+func GetLogg(loggReal zerolog.Logger)  {
+	logg = loggReal
+}
 func NewMetrics(id string, mType string) Metrics {
 	if mType == "gauge" {
 		return Metrics{
@@ -76,24 +81,24 @@ func MtxValid(mtx *Metrics, key string) bool {
 		
 	// 	return false
 	// }
-	fmt.Println("-------------------------------MtxValid---------------------------start-----------------key not nil--------")
-	fmt.Println("mtx.ID =  ", mtx.ID)
-	fmt.Println("mtx.MType =  ", mtx.MType)
-	fmt.Println("mtx.MType =  ", mtx.MType)
-	fmt.Println("key =  ", key)
+	logg.Print("-------------------------------MtxValid---------------------------start-----------------key not nil--------")
+	logg.Print("mtx.ID =  ", mtx.ID)
+	logg.Print("mtx.MType =  ", mtx.MType)
+	logg.Print("mtx.MType =  ", mtx.MType)
+	logg.Print("key =  ", key)
 	if mtx.Value != nil {
-		fmt.Println("mtx.Value =  ", *mtx.Value)
+		logg.Print("mtx.Value =  ", *mtx.Value)
 	}
 	// h := hmac.New(sha256.New, []byte(key))
     // h.Write(src)
     // dst := h.Sum(nil)
 	hash := Hash(mtx, key)
-	fmt.Println("hash: ", hash)
-	// fmt.Println("hash old: ", fmt.Sprintf("%x", dst))
-	fmt.Println("hash is come: ", mtx.Hash)
-	fmt.Println("hmac.Equal(dst, mtx.Hash): ", (hash == mtx.Hash))
-	// fmt.Println("hmac.Equal(dst, mtx.Hash): ", (fmt.Sprintf("%x", dst) == mtx.Hash))
-	// fmt.Println("hmac.Equal(dst, mtx.Hash): ", hmac.Equal(dst, mtx.Hash))
+	logg.Print("hash: ", hash)
+	// logg.Print("hash old: ", fmt.Sprintf("%x", dst))
+	logg.Print("hash is come: ", mtx.Hash)
+	logg.Print("hmac.Equal(dst, mtx.Hash): ", (hash == mtx.Hash))
+	// logg.Print("hmac.Equal(dst, mtx.Hash): ", (fmt.Sprintf("%x", dst) == mtx.Hash))
+	// logg.Print("hmac.Equal(dst, mtx.Hash): ", hmac.Equal(dst, mtx.Hash))
 	return (hash == mtx.Hash)
 	// return (fmt.Sprintf("%x", dst) == mtx.Hash)
 	// return hmac.Equal(dst, mtx.Hash)

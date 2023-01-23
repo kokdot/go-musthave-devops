@@ -11,6 +11,7 @@ import (
 	"strconv"
 	// "time"
 
+	"github.com/rs/zerolog"
 	"github.com/go-chi/chi/v5"
 	// "github.com/kokdot/go-musthave-devops/internal/interfaceinit"
 	"github.com/kokdot/go-musthave-devops/internal/metricsserver"
@@ -26,16 +27,21 @@ const (
 )
 
 var m  repo.Repo
+var logg zerolog.Logger
 
 func PutM(M repo.Repo) {
 	m = M
 }
+func GetLogg(loggReal zerolog.Logger)  {
+	logg = loggReal
+	// return logg
+}
 func PostUpdateByBatch(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("--------------------PostUpdateByBatch------------1-------------start-------------------------------")
+	logg.Print("--------------------PostUpdateByBatch------------1-------------start-------------------------------")
 
 	bodyBytes, err := io.ReadAll(r.Body)
 	if err != nil {
-	fmt.Println("--------------------PostUpdateByBatch------------2-------------start-------------------------------")
+	logg.Print("--------------------PostUpdateByBatch------------2-------------start-------------------------------")
 		w.Header().Set("content-type", "application/json")
 		w.WriteHeader(http.StatusBadRequest)
 		return
@@ -45,26 +51,26 @@ func PostUpdateByBatch(w http.ResponseWriter, r *http.Request) {
 	// err = json.Unmarshal(bodyBytes, &smNew)
 	err = json.Unmarshal(bodyBytes, &slm)
 	if err != nil {
-	fmt.Println("--------------------PostUpdateByBatch--------------3-----------start-------------------------------")
-	fmt.Println(err)	
+	logg.Print("--------------------PostUpdateByBatch--------------3-----------start-------------------------------")
+	logg.Print(err)	
 	w.Header().Set("content-type", "application/json")
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
-	// fmt.Printf("Getting of requets is: %#v\n", smNew)
-	fmt.Printf("Getting of requets is: %#v\n", slm)
+	// logg.Printf("Getting of requets is: %#v\n", smNew)
+	logg.Printf("Getting of requets is: %#v\n", slm)
 
 	// smOld, err := m.SaveByBatch(&smNew)
 	smOld, err := m.SaveByBatch(slm)
 	
-	fmt.Printf("Answer to requets is: %#v\n", smOld)
+	logg.Printf("Answer to requets is: %#v\n", smOld)
 	if err != nil {
-	fmt.Println("--------------------PostUpdateByBatch-------------4------------start-------------------------------")
+	logg.Print("--------------------PostUpdateByBatch-------------4------------start-------------------------------")
 		w.Header().Set("content-type", "application/json")
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-	fmt.Println("--------------------PostUpdateByBatch-------------5------------start-------------------------------")
+	logg.Print("--------------------PostUpdateByBatch-------------5------------start-------------------------------")
 	bodyBytes, err = json.Marshal(smOld)
 	if err != nil {
 		w.Header().Set("content-type", "application/json")
@@ -77,11 +83,11 @@ func PostUpdateByBatch(w http.ResponseWriter, r *http.Request) {
 	// return
 }
 func PostUpdateByBatch1(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("--------------------PostUpdateByBatch------------1-------------start-------------------------------")
+	logg.Print("--------------------PostUpdateByBatch------------1-------------start-------------------------------")
 
 	bodyBytes, err := io.ReadAll(r.Body)
 	if err != nil {
-	fmt.Println("--------------------PostUpdateByBatch------------2-------------start-------------------------------")
+	logg.Print("--------------------PostUpdateByBatch------------2-------------start-------------------------------")
 		w.Header().Set("content-type", "application/json")
 		w.WriteHeader(http.StatusBadRequest)
 		return
@@ -91,26 +97,26 @@ func PostUpdateByBatch1(w http.ResponseWriter, r *http.Request) {
 	err = json.Unmarshal(bodyBytes, &smNew)
 	// err = json.Unmarshal(bodyBytes, &slm)
 	if err != nil {
-	fmt.Println("--------------------PostUpdateByBatch--------------3-----------start-------------------------------")
-	fmt.Println(err)	
+	logg.Print("--------------------PostUpdateByBatch--------------3-----------start-------------------------------")
+	logg.Print(err)	
 	w.Header().Set("content-type", "application/json")
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
-	fmt.Printf("Getting of requets is: %#v\n", smNew)
-	// fmt.Printf("Getting of requets is: %#v\n", slm)
+	logg.Printf("Getting of requets is: %#v\n", smNew)
+	// logg.Printf("Getting of requets is: %#v\n", slm)
 
 	smOld, err := m.SaveByBatch1(&smNew)
 	// smOld, err := m.SaveByBatch(slm)
 	
-	fmt.Printf("Answer to requets is: %#v\n", smOld)
+	logg.Printf("Answer to requets is: %#v\n", smOld)
 	if err != nil {
-	fmt.Println("--------------------PostUpdateByBatch-------------4------------start-------------------------------")
+	logg.Print("--------------------PostUpdateByBatch-------------4------------start-------------------------------")
 		w.Header().Set("content-type", "application/json")
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-	fmt.Println("--------------------PostUpdateByBatch-------------5------------start-------------------------------")
+	logg.Print("--------------------PostUpdateByBatch-------------5------------start-------------------------------")
 	bodyBytes, err = json.Marshal(smOld)
 	if err != nil {
 		w.Header().Set("content-type", "application/json")
@@ -127,7 +133,7 @@ func GetPing(w http.ResponseWriter, r *http.Request) {
  	if !ok {
 		w.Header().Set("content-type", "application/json")
 		w.WriteHeader(http.StatusInternalServerError)
-		fmt.Printf("%s", err)
+		logg.Printf("%s", err)
 		return
 	} else {
 		w.Header().Set("content-type", "application/json")
@@ -136,7 +142,7 @@ func GetPing(w http.ResponseWriter, r *http.Request) {
 	}
 }
 func PostUpdate(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("--------------------PostUpdate-------------------------start-------------------------------")
+	logg.Print("--------------------PostUpdate-------------------------start-------------------------------")
 
 	bodyBytes, err := io.ReadAll(r.Body)
 	if err != nil {
@@ -151,11 +157,11 @@ func PostUpdate(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusNotFound)
 		return
 	}
-	fmt.Printf("\n----------PostUpdate------mtxNew.----:   %#v\n", mtxNew)
+	logg.Printf("----------PostUpdate------mtxNew.----:   %#v", mtxNew)
 	if m.GetKey() != "" {
-		fmt.Println("----------------------------if store.Key != ampty string-------------------------------------")
+		logg.Print("----------------------------if store.Key != ampty string-------------------------------------")
 		if !metricsserver.MtxValid(&mtxNew, m.GetKey()) {
-			fmt.Printf("\n-------if !store.MtxValid(&mtxNew).----:   %#v\n", mtxNew)
+			logg.Printf("\n-------if !store.MtxValid(&mtxNew).----:   %#v\n", mtxNew)
 			
 			w.Header().Set("content-type", "application/json")
 			w.WriteHeader(http.StatusBadRequest)
@@ -163,24 +169,24 @@ func PostUpdate(w http.ResponseWriter, r *http.Request) {
 		}
     }
 	if mtxNew.Delta != nil {
-		fmt.Println(" Delta = ", *mtxNew.Delta)
+		logg.Print(" Delta = ", *mtxNew.Delta)
 	}
 	if mtxNew.Value != nil {
-		fmt.Println(" Value = ", *mtxNew.Value)
+		logg.Print(" Value = ", *mtxNew.Value)
 	}
 	mtxOld, err := m.Save(&mtxNew)//----------------------------------------------------------------------------Save---
 
 	if err != nil {
-		fmt.Println("-------after--Save-------err:   ", err)
+		logg.Print("-------after--Save-------err:   ", err)
 		w.Header().Set("content-type", "application/json")
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
 	if mtxOld.Delta != nil {
-		fmt.Println(" Delta = ", *mtxOld.Delta)
+		logg.Print(" Delta = ", *mtxOld.Delta)
 	}
 	if mtxNew.Value != nil {
-		fmt.Println(" Value = ", *mtxNew.Value)
+		logg.Print(" Value = ", *mtxNew.Value)
 	}
 	bodyBytes, err = json.Marshal(mtxOld)
 	if err != nil {
@@ -194,7 +200,7 @@ func PostUpdate(w http.ResponseWriter, r *http.Request) {
 }
 
 func GetValue(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("--------------------GetValue-------------------------start-------------------------------")
+	logg.Print("--------------------GetValue-------------------------start-------------------------------")
 
 	bodyBytes, err := io.ReadAll(r.Body)
 	if err != nil {
@@ -209,13 +215,13 @@ func GetValue(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
-	fmt.Printf("\n----------GetValue------mtxNew.----:   %#v\n", mtxNew)
+	logg.Printf("\n----------GetValue------mtxNew.----:   %#v\n", mtxNew)
 
 	mtxOLd, err := m.Get(mtxNew.ID) 
-	// fmt.Println("----------------------------------------------------------------------------")
-	fmt.Printf("\n----------GetValue------mtxOLd.----:   %#v\n", mtxOLd)
+	// logg.Print("----------------------------------------------------------------------------")
+	logg.Printf("\n----------GetValue------mtxOLd.----:   %#v\n", mtxOLd)
 	if err != nil {
-        fmt.Println("-----------------------------------err line 274, err:  ", err)
+        logg.Print("-----------------------------------err line 274, err:  ", err)
 		w.Header().Set("content-type", "application/json")
 		w.WriteHeader(http.StatusNotFound)
 		return
@@ -244,7 +250,7 @@ func GetAllJSON(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusNotFound)
 		return
 	}
-	fmt.Println(string(bodyBytes))
+	logg.Print(string(bodyBytes))
 	w.Header().Set("content-type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	w.Write(bodyBytes)
