@@ -98,7 +98,6 @@ func OnboardingAgent() (*def.Conf) {
 	if cfg.ReportInterval != 0 {
         conf.ReportInterval = cfg.ReportInterval
 	}
-	logg.Printf("conf.ReportInterval: v%", conf.ReportInterval)
 	if cfg.PollInterval != 0 {
         conf.PollInterval = cfg.PollInterval
 	}

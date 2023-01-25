@@ -68,7 +68,8 @@ func PostUpdateByBatch(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	logg.Print("--------------------PostUpdateByBatch-------------5------------start-------------------------------")
-	bodyBytes, err = json.Marshal(smOld)
+	mtxOld := repo.Metrics{}
+	bodyBytes, err = json.Marshal(&mtxOld)
 	if err != nil {
 		w.Header().Set("content-type", "application/json")
 		w.WriteHeader(http.StatusNotFound)
