@@ -22,7 +22,7 @@ type FileStorage struct {
 	dataBaseDSN string
 }
 // func (f FileStorage) SaveByBatch(sm *StoreMap) (*StoreMap, error) {
-func (f FileStorage) SaveByBatch(sm []repo.Metrics) (*StoreMap, error) {
+func (f FileStorage) SaveByBatch(sm []repo.Metrics) (*[]repo.Metrics, error) {
 return nil, nil
 }
 func (f FileStorage) SaveByBatch1(sm *StoreMap) (*StoreMap, error) {

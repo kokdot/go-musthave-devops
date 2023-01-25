@@ -25,7 +25,7 @@ type Repo interface {
 	GetDataBaseDSN() string
 	GetPing() (bool, error)
 	SaveByBatch1(*StoreMap) (*StoreMap, error)
-	SaveByBatch([]Metrics) (*StoreMap, error)
+	SaveByBatch([]Metrics) (*[]Metrics, error)
 }
 
 type Consumer interface {

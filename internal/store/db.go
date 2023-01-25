@@ -115,9 +115,7 @@ func (d DBStorage) SaveByBatch1(sm *repo.StoreMap) (*repo.StoreMap, error) {
     return &smtx, nil
 }
 
-func (d DBStorage) SaveByBatch(sm []repo.Metrics) (*repo.StoreMap, error) {
-// func (d DBStorage) SaveByBatch(sm []repo.Metrics) (*repo.StoreMap, error) {
-// func (d DbStorage) SaveByBatch(sm *repo.StoreMap) (*repo.StoreMap, error) {
+func (d DBStorage) SaveByBatch(sm []repo.Metrics) (*[]repo.Metrics, error) {
         // шаг 1 — объявляем транзакцию
     tx, err := d.dbconn.Begin()
     if err != nil {
@@ -159,15 +157,15 @@ func (d DBStorage) SaveByBatch(sm []repo.Metrics) (*repo.StoreMap, error) {
     if err != nil {
         return nil, err
     }
-    smtx := make(repo.StoreMap)
+    smNew := make([]repo.Metrics, 0)
     for _, val := range sm {
         mtx, err := d.Get(val.ID)
         if err != nil {
            return nil, err
         }
-        smtx[val.ID] = *mtx
+        smNew = append(smNew, *mtx)
     }
-    return &smtx, nil
+    return &smNew, nil
 }
 func (d DBStorage) SaveByBatchOld(sm []repo.Metrics) (*repo.StoreMap, error) {
 // func (d DbStorage) SaveByBatch(sm *repo.StoreMap) (*repo.StoreMap, error) {

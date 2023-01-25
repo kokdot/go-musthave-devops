@@ -32,7 +32,7 @@ func GetLogg(loggReal zerolog.Logger)  {
 	// return logg
 }
 // var key string
-func (m MemStorage) SaveByBatch(sm []repo.Metrics) (*StoreMap, error) {
+func (m MemStorage) SaveByBatch(sm []repo.Metrics) (*[]repo.Metrics, error) {
 // func (m MemStorage) SaveByBatch(sm *StoreMap) (*StoreMap, error) {
 return nil, nil
 }

@@ -61,6 +61,7 @@ func PostUpdateByBatch(w http.ResponseWriter, r *http.Request) {
 	logg.Printf("Getting of requets is: %#v\n", slm)
 
 	// smOld, err := m.SaveByBatch(&smNew)
+	
 	smOld, err := m.SaveByBatch(slm)
 	
 	logg.Printf("Answer to requets is: %#v\n", smOld)
