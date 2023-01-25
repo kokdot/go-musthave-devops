@@ -89,7 +89,7 @@ func main() {
 			for k, v := range vm {
 				gm[k] = v
 			}
-			gm["randomValue"] = randomValue 
+			gm["RandomValue"] = randomValue 
 			if conf.Batch {
 				err := metricsagent.UpdateByBatch(&gm, pollCount)
 				// err := metricsagent.UpdateByBatch(&m, &vm, pollCount, randomValue, url, key)
