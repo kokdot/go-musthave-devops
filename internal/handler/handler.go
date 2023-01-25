@@ -47,20 +47,16 @@ func PostUpdateByBatch(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	slm := make([]repo.Metrics, 0)
-	// smNew := make(repo.StoreMap)
-	// err = json.Unmarshal(bodyBytes, &smNew)
 	err = json.Unmarshal(bodyBytes, &slm)
 	if err != nil {
 	logg.Print("--------------------PostUpdateByBatch--------------3-----------start-------------------------------")
-	logg.Print(err)	
+	logg.Error().Err(err).Send()	
 	w.Header().Set("content-type", "application/json")
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
-	// logg.Printf("Getting of requets is: %#v\n", smNew)
 	logg.Printf("Getting of requets is: %#v\n", slm)
 
-	// smOld, err := m.SaveByBatch(&smNew)
 	
 	smOld, err := m.SaveByBatch(slm)
 	

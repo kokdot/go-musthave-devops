@@ -60,7 +60,8 @@ func OnboardingServer() (string, string, string, bool, time.Duration, string, ze
     debug := flag.Bool("debug", false, "sets log level to debug")
 
     flag.Parse()
-    zerolog.SetGlobalLevel(zerolog.InfoLevel)
+    zerolog.SetGlobalLevel(zerolog.DebugLevel)
+    // zerolog.SetGlobalLevel(zerolog.InfoLevel)
     if *debug {
         zerolog.SetGlobalLevel(zerolog.DebugLevel)
     }

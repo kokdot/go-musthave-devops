@@ -88,7 +88,7 @@ func main() {
     r.Get("/ping", handler.GetPing)
 
     r.Post("/updates/", handler.PostUpdateByBatch)
-    r.Post("/updates1/", handler.PostUpdateByBatch1)
+    // r.Post("/updates1/", handler.PostUpdateByBatch1)
     
     r.Route("/update", func(r chi.Router) {
         r.Post("/", handler.PostUpdate)
