@@ -7,7 +7,8 @@ import (
 	"sort"
 	"time"
 	"github.com/kokdot/go-musthave-devops/internal/repo"
-	"github.com/kokdot/go-musthave-devops/internal/metrics_server"
+	"github.com/rs/zerolog"
+	"github.com/kokdot/go-musthave-devops/internal/metricsserver"
 
 )
 
@@ -23,10 +24,29 @@ type MemStorage struct {
 	storeInterval time.Duration
 	key string
 	url string
+	dataBaseDSN string
+}
+var logg zerolog.Logger
+func GetLogg(loggReal zerolog.Logger)  {
+	logg = loggReal
+	// return logg
+}
+// var key string
+func (m MemStorage) SaveByBatch(sm []repo.Metrics) (*[]repo.Metrics, error) {
+// func (m MemStorage) SaveByBatch(sm *StoreMap) (*StoreMap, error) {
+return nil, nil
+}
+// func (m MemStorage) SaveByBatch(sm []repo.Metrics) (*StoreMap, error) {
+func (m MemStorage) SaveByBatch1(sm *StoreMap) (*StoreMap, error) {
+return nil, nil
+}
+func (m MemStorage) GetPing() (bool, error) {
+	return false, errors.New("MemStorage not defines")
 }
 
-// var key string
-
+func (m MemStorage) GetDataBaseDSN() string {
+	return m.dataBaseDSN
+}
 func (m MemStorage) GetURL() string {
 	return m.url
 }
@@ -48,13 +68,13 @@ func NewMemStorageWithFile(filename string) (*MemStorage, error) {
 		ID: "1",
 		MType: "1",
 		
-	}
+	} 
 	return &MemStorage{
 		StoreMap : &sm, 
 		storeFile: filename,
 	}, nil
 }
-func NewMemStorage(storeInterval time.Duration, storeFile string, restore bool, url string, key string) (*MemStorage, error) {
+func NewMemStorage(storeInterval time.Duration, storeFile string, restore bool, url string, key string, dataBaseDSN string) (*MemStorage, error) {
 	sm := make(StoreMap)
 	sm["1"] = Metrics{
 		ID: "1",
@@ -67,6 +87,7 @@ func NewMemStorage(storeInterval time.Duration, storeFile string, restore bool, 
 		storeInterval: storeInterval,
 		key: key,
 		url: url,
+		dataBaseDSN: dataBaseDSN,
 	}, nil
 }
 
@@ -87,7 +108,7 @@ func (m MemStorage) Save(mtxNew *Metrics) (*Metrics, error) {
 				return mtxNew, nil
 			}
 			delta := *mtxNew.Delta + *mtxOld.Delta
-			mtxOld = *metrics_server.NewCounterMetrics(mtxNew.ID, delta, key)
+			mtxOld = *metricsserver.NewCounterMetrics(mtxNew.ID, delta, key)
 			(*m.StoreMap)[mtxOld.ID] = mtxOld
 			return &mtxOld, nil
 		case "Counter":
@@ -97,7 +118,7 @@ func (m MemStorage) Save(mtxNew *Metrics) (*Metrics, error) {
 				return mtxNew, nil
 			}
 			delta := *mtxNew.Delta + *mtxOld.Delta
-			mtxOld = *metrics_server.NewCounterMetrics(mtxNew.ID, delta, key)
+			mtxOld = *metricsserver.NewCounterMetrics(mtxNew.ID, delta, key)
 			(*m.StoreMap)[mtxOld.ID] = mtxOld
 			return &mtxOld, nil
 		}
@@ -143,13 +164,13 @@ func (m MemStorage) Get(id string) (*Metrics, error) {
 	// if mtxOld.Hash != nil {
 	// 	return &mtxOld, nil
 	// }
-	fmt.Printf("mtxOld:   %#v", mtxOld)
+	logg.Printf("mtxOld:   %#v", mtxOld)
 	if key := m.GetKey(); key != "" {
 
 		if mtxOld.MType == "Gauge" || mtxOld.MType == "gauge" {
-			mtxOld = *metrics_server.NewGaugeMetrics(mtxOld.ID, *mtxOld.Value, key)
+			mtxOld = *metricsserver.NewGaugeMetrics(mtxOld.ID, *mtxOld.Value, key)
 		} else {
-				mtxOld = *metrics_server.NewCounterMetrics(mtxOld.ID, *mtxOld.Delta, key) //-------------------------------------line : 216
+				mtxOld = *metricsserver.NewCounterMetrics(mtxOld.ID, *mtxOld.Delta, key) //-------------------------------------line : 216
 		}
 			return &mtxOld, nil
 	} else {
@@ -170,7 +191,7 @@ func (m *MemStorage) SaveCounterValue(id string, counter Counter) (Counter, erro
 	}
 	mtxOld, ok := (*m.StoreMap)[id]
 	if !ok {
-		mtxNew := metrics_server.NewMetrics(id, "counter")
+		mtxNew := metricsserver.NewMetrics(id, "counter")
 		mtxNew.Delta = &counter
 		(*m.StoreMap)[id] = mtxNew
 		return counter, nil
@@ -185,7 +206,7 @@ func (m *MemStorage) SaveGaugeValue(id string, gauge Gauge) error {
 	}
 	mtxOld, ok := (*m.StoreMap)[id]
 	if !ok {
-		mtxNew := metrics_server.NewMetrics(id, "gauge")
+		mtxNew := metricsserver.NewMetrics(id, "gauge")
 		mtxNew.Value = &gauge
 		(*m.StoreMap)[id] = mtxNew
 	}else {
@@ -218,13 +239,13 @@ func (m *MemStorage) GetGaugeValue(id string) (Gauge, error) {
 	return *mtxOld.Value, nil
 }
 
-func (m *MemStorage) GetAllValues() (string, error) {
+func (m *MemStorage) GetAllValues() string {
 	var str string
 	var v Gauge
 	var d Counter
 	var i int
 	if m.StoreMap == nil {
-		return "", errors.New("storeMap is nil")
+		return ""
 	}
 	sm := *m.StoreMap
 	keys := make([]string, 0, len(sm))
@@ -243,24 +264,24 @@ func (m *MemStorage) GetAllValues() (string, error) {
 		}
 		str += fmt.Sprintf("%d; %s: %v %v\n",i , key, v, d)
 	}
-	return str, nil
+	return str
 }
 
-func (m MemStorage) ReadStorage() (*StoreMap, error) {
+func (m MemStorage) ReadStorage() error {
 	c, err := NewConsumer(m.storeFile)
 	if err != nil  {
 		err1 := fmt.Errorf("can't to create consumer: %s", err)
-		return nil, err1
+		return err1
     }
 	sm, err := c.ReadStorage()
 	if sm == nil && err !=  nil {
 		err1 := fmt.Errorf("file for StoreMap is ampty: %s", err)
-		return nil, err1
+		return err1
 	} else if sm == nil {
-		return nil, errors.New("file for StoreMap is ampty")
+		return errors.New("file for StoreMap is ampty")
 	}
 	(*m.StoreMap) = *sm
-	return sm, nil
+	return nil
 }
 
 func (m MemStorage) WriteStorage() error{

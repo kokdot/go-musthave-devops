@@ -1,65 +1,111 @@
 package main
 
 import (
-	"fmt"
+	// "fmt"
+	// "os"
 	"math/rand"
 	"sync"
 	"time"
 
-	"github.com/kokdot/go-musthave-devops/internal/metrics_agent"
+	// "github.com/rs/zerolog"
+	// "github.com/rs/zerolog/log"
+
 	"github.com/kokdot/go-musthave-devops/internal/def"
+	"github.com/kokdot/go-musthave-devops/internal/metricsagent"
 	"github.com/kokdot/go-musthave-devops/internal/monitor"
-	"github.com/kokdot/go-musthave-devops/internal/onboarding_agent"
+	"github.com/kokdot/go-musthave-devops/internal/onboardingagent"
+	"github.com/kokdot/go-musthave-devops/internal/virtualmemory"
 )
 
 type Gauge = def.Gauge
 type Counter = def.Counter
-type MonitorMap = def.MonitorMap
+type GaugeMap = def.GaugeMap
 
 var (
+	// pollInterval time.Duration
+	// reportInterval time.Duration
+	// url string
+	// key string
+	// batch bool
 	pollCount Counter
 	randomValue Gauge 
-	m MonitorMap
+	// m MonitorMap
+	// vm def.VirtualMemoryMap
 	wg sync.WaitGroup 
+	
 ) 
+// var conf *def.Conf
+// var logg = log.Logger
+// func (mtx metricsagent.Metrics) MarshalZerologObject(e *zerolog.Event) {
+// 	e.Str("ID", mtx.ID).
+// 	Str("MType", mtx.MType).
+// 	Str("MType", mtx.Hash).
+// 	Str("MType", mtx.Key).
+// 	Str("MType", mtx.StrURL).
+// 	Float64("MType", mtx.Value).
+// 	int64("MType", mtx.Delta)
+// }
+
 
 func main() {
-	wg.Add(2)
-	onboarding_agent.OnboardingAgent()
-	m = make(def.MonitorMap)
-	go func(m *MonitorMap) {
+	wg.Add(3)
+	conf := onboardingagent.OnboardingAgent()
+	logg := conf.Logg
+	// pollInterval, reportInterval, url, key, batch, logg = onboardingagent.OnboardingAgent()
+	metricsagent.GetConf(conf)
+	gm := make(def.GaugeMap)
+	vm := make(def.GaugeMap)
+	// sm := make(metricsagent.StoreMap)
+	// logMetrics := zerolog.New(os.Stdout).With().
+	// 	Str("foo", "bar").
+	// 	Object("user", u).
+	// 	Logger()
+
+	// log.Log().Msg("hello world")
+	go func (vm *def.GaugeMap) {
 		defer wg.Done()
 		for {
-			<-time.After(onboarding_agent.PollIntervalReal)
-			m = monitor.GetData(m)
+			<-time.After(conf.PollInterval)
+			vm = virtualmemory.GetData(vm)
+		}
+	}(&vm)
+
+	go func(gm *GaugeMap) {
+		defer wg.Done()
+		for {
+			<-time.After(conf.PollInterval)
+			gm = monitor.GetData(gm)
 			pollCount++
 			randomValue = Gauge(rand.Float64())
+			// sm = *metricsagent.GetStoreMap(&sm)
 		}
-	}(&m)
+	}(&gm)
 	
 	go func() {
+		logg.Print("main is going to send the report.--------------------")
 		defer wg.Done()
 		for {
-			<-time.After(onboarding_agent.ReportInterval)
-			mtxCounter, err := metrics_agent.NewMetricsCounter("PollCount", &pollCount, onboarding_agent.URLReal)
-			// fmt.Printf("mtxRandomValue:    %#v\n", mtxCounter)
-			if err != nil {
-				fmt.Println(err)
+			<-time.After(conf.ReportInterval)
+			for k, v := range vm {
+				gm[k] = v
 			}
-			mtxCounter.Update()
-			mtxRandomValue, err := metrics_agent.NewMetricsGauge("RandomValue", &randomValue, onboarding_agent.URLReal)
-			// fmt.Printf("mtxRandomValue:    %#v\n", mtxRandomValue)
-			if err != nil {
-				fmt.Println(err)
-			}
-			mtxRandomValue.Update()
-			for key, val := range m {
-				mtx, err := metrics_agent.NewMetricsGauge(key, &val, onboarding_agent.URLReal) 
-				// fmt.Printf("mtxRandomValue:    %#v\n", mtx)
+			gm["RandomValue"] = randomValue 
+			if conf.Batch {
+				err := metricsagent.UpdateByBatch(&gm, pollCount)
+				// err := metricsagent.UpdateByBatch(&m, &vm, pollCount, randomValue, url, key)
 				if err != nil {
-					fmt.Println(err)
+					logg.Error().Err(err).Send()
+				} else {
+					logg.Print("Get response by batch request.")
 				}
-				mtx.Update()
+			} else {
+				err := metricsagent.UpdateAll(&gm, pollCount)
+				// err := metricsagent.UpdateAll(&m, &vm, pollCount, randomValue, url, key)
+				if err != nil {
+					logg.Error().Err(err).Send()
+				} else {
+					logg.Print("Get response by common request.")
+				}
 			}
 		}
 	}()

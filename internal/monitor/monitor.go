@@ -8,7 +8,7 @@ import (
 type Gauge = def.Gauge
 var rtm runtime.MemStats
 
-func NewMonitor(m *def.MonitorMap, rtm runtime.MemStats) {
+func NewGaugeMap(m *def.GaugeMap, rtm runtime.MemStats) {
 	(*m)["Alloc"] = Gauge(rtm.Alloc)
 	(*m)["BuckHashSys"] = Gauge(rtm.BuckHashSys)
 	(*m)["TotalAlloc"] = Gauge(rtm.TotalAlloc)
@@ -39,8 +39,8 @@ func NewMonitor(m *def.MonitorMap, rtm runtime.MemStats) {
 	(*m)["TotalAlloc"] = Gauge(rtm.TotalAlloc)
 }
 
-func GetData(m *def.MonitorMap) *def.MonitorMap {
+func GetData(gm *def.GaugeMap) *def.GaugeMap {
 	runtime.ReadMemStats(&rtm)
-	NewMonitor(m, rtm)
-	return m
+	NewGaugeMap(gm, rtm)
+	return gm
 }
