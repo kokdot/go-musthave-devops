@@ -10,12 +10,10 @@ import (
 	_ "github.com/jackc/pgx/v5/stdlib"
 	"github.com/kokdot/go-musthave-devops/internal/metricsserver"
 	"github.com/kokdot/go-musthave-devops/internal/repo"
-	// "github.com/kokdot/go-musthave-devops/internal/repo"
 )
 
 var zeroG Gauge = 0
 var zeroC Counter = 0
-// type Metrics = repo.Metrics
 type DBStorage struct {
 	StoreMap      *StoreMap
 	restore       bool
@@ -54,8 +52,6 @@ func NewDBStorage(storeInterval time.Duration, storeFile string, restore bool, u
     return &dbStorage , nil
 }
 func (d DBStorage) SaveByBatch1(sm *repo.StoreMap) (*repo.StoreMap, error) {
-// func (d DBStorage) SaveByBatchSM(sm *repo.StoreMap) (*repo.StoreMap, error) {
-// func (d DbStorage) SaveByBatch(sm *repo.StoreMap) (*repo.StoreMap, error) {
     logg.Print("--------------------------------------------SaveByBatch----------------------------start-----------------------------------")
         // шаг 1 — объявляем транзакцию
     tx, err := d.dbconn.Begin()
@@ -168,8 +164,6 @@ func (d DBStorage) SaveByBatch(sm []repo.Metrics) (*[]repo.Metrics, error) {
     return &smNew, nil
 }
 func (d DBStorage) SaveByBatchOld(sm []repo.Metrics) (*repo.StoreMap, error) {
-// func (d DbStorage) SaveByBatch(sm *repo.StoreMap) (*repo.StoreMap, error) {
-
     smtx := make(repo.StoreMap)
     for _, val := range sm {
         mtx, err := d.Save(&val)
@@ -198,10 +192,6 @@ func (d DBStorage) Save(mtxNew *Metrics) (*Metrics, error) {
     Value = EXCLUDED.Value,
     Hash = EXCLUDED.Hash;
     `
-    // ON CONFLICT (ID) DO UPDATE SET ID = Metrics.ID;
-
-    // ON CONFLICT (a) DO UPDATE SET c = tablename.c + 1;
-    // INSERT INTO tablename (a, b, c) values (1, 2, 10)
     _, err := d.dbconn.ExecContext(ctx, query, mtxNew.ID, mtxNew.MType, mtxNew.Delta, mtxNew.Value, mtxNew.Hash)
     if err != nil {
 		return mtxNew, fmt.Errorf("не удалось выполнить запрос создания записи в таблице Metrics: %v", err)
@@ -299,7 +289,6 @@ func (d DBStorage) Get(id string) (*Metrics, error) {
 
     var mtx Metrics
     var delta sql.NullInt64
-    // var hash sql.NullString
     var value sql.NullFloat64
     err := row.Scan(&mtx.ID, &mtx.MType, &delta, &value)
     if err != nil {
@@ -369,7 +358,6 @@ func (d DBStorage) GetStoreInterval() time.Duration {
 }
 
 func (d DBStorage) GetPing() (bool, error) {
-	// urlExample := "postgres://postgres:postgres@localhost:5432/postgres"
 	ctx, cancel := context.WithTimeout(context.Background(), 1*time.Second)
 	defer cancel()
 	if err := d.dbconn.PingContext(ctx); err != nil {

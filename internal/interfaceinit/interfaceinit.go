@@ -11,10 +11,6 @@ import (
 )
 
 var m  repo.Repo
-// var logg zerolog.Logger
-// func GetLogg(loggReal zerolog.Logger)  {
-// 	logg = loggReal
-// }
 
 func InterfaceInit(storeInterval time.Duration, storeFile string, restore bool, url string, key string, dataBaseDSN string, logg zerolog.Logger) (repo.Repo, error) {
 	if dataBaseDSN != "" {

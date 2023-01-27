@@ -21,12 +21,10 @@ type FileStorage struct {
 	key string
 	dataBaseDSN string
 }
-// func (f FileStorage) SaveByBatch(sm *StoreMap) (*StoreMap, error) {
 func (f FileStorage) SaveByBatch(sm []repo.Metrics) (*[]repo.Metrics, error) {
 return nil, nil
 }
 func (f FileStorage) SaveByBatch1(sm *StoreMap) (*StoreMap, error) {
-// func (f FileStorage) SaveByBatch(sm []repo.Metrics) (*StoreMap, error) {
 return nil, nil
 }
 func NewFileStorage(storeInterval time.Duration, storeFile string, restore bool, url string, key string, dataBaseDSN string) (*FileStorage, error) {

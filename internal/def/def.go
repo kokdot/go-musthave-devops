@@ -2,7 +2,6 @@ package def
 import(
 	"time"
 	"github.com/rs/zerolog"
-    // "github.com/rs/zerolog/log"
 )
 
 type Gauge float64
