@@ -1,9 +1,7 @@
 package onboardingserver
 
 import (
-	// "fmt"
     "time"
-	// "github.com/kokdot/go-musthave-devops/internal/store"
 	"strconv"
 	"os"
 	"flag"
@@ -61,7 +59,6 @@ func OnboardingServer() (string, string, string, bool, time.Duration, string, ze
 
     flag.Parse()
     zerolog.SetGlobalLevel(zerolog.DebugLevel)
-    // zerolog.SetGlobalLevel(zerolog.InfoLevel)
     if *debug {
         zerolog.SetGlobalLevel(zerolog.DebugLevel)
     }

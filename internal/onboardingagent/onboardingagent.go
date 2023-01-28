@@ -9,7 +9,6 @@ import (
 	"github.com/caarlos0/env/v6"
 	"github.com/kokdot/go-musthave-devops/internal/def"
 
-	// "fmt"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 )
@@ -46,7 +45,6 @@ func zerroInit() {
     
 	zerolog.TimeFieldFormat = zerolog.TimeFormatUnix
 	log.Logger = log.Output(zerolog.ConsoleWriter{Out: os.Stderr})
-	// log.Logger = log.With().Caller().Logger()
 	zerolog.CallerMarshalFunc = func(pc uintptr, file string, line int) string {
 		short := file
 		for i := len(file) - 1; i > 0; i-- {
@@ -129,5 +127,4 @@ func OnboardingAgent() (*def.Conf) {
 	logg.Print("BatchReal:     ", conf.Batch)
 	logg.Print("--------------------------Ok-------------------------------")
 	return &conf
-	// return pollIntervalReal, reportIntervalReal, urlReal, keyReal, batchReal, log.Logger
 }

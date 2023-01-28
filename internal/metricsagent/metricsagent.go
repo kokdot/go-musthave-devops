@@ -2,16 +2,12 @@ package metricsagent
 
 import (
  	"github.com/go-resty/resty/v2"
-	// "github.com/kokdot/go-musthave-devops/internal/onboardingagent"
 	"github.com/kokdot/go-musthave-devops/internal/def"
 	"github.com/rs/zerolog"
-	// "github.com/kokdot/go-musthave-devops/internal/monitor"
 	"encoding/json"
 	"fmt"
-	// "os"
 	"crypto/sha256"
 	"crypto/hmac"
-    // "github.com/rs/zerolog/log"
 
 )
 
@@ -27,7 +23,6 @@ type Metrics struct {
 	StrURL string `json:"-"`
 	Key string `json:"-"`
 }
-// type SliceMetrics []Metrics
 type MetricsSlice [] Metrics
 var logg zerolog.Logger// = onboardingagent.GetLogg()
 var conf *def.Conf
@@ -84,11 +79,11 @@ func UpdateStoreMap(m *MetricsSlice) error {
 	}
 	client := resty.New()
 	_, err = client.R().
-	SetHeader("Accept-Encoding", "gzip").
-	SetHeader("Content-Type", "application/json").
-	SetBody(bodyBytes).
-	SetResult(&m).
-	Post(strURL)
+		SetHeader("Accept-Encoding", "gzip").
+		SetHeader("Content-Type", "application/json").
+		SetBody(bodyBytes).
+		SetResult(&m).
+		Post(strURL)
 	if err != nil {
 		logg.Error().Err(err).Msg("Failed unmarshall response by batch: ")
 		return err
@@ -185,21 +180,6 @@ func NewMetricsGauge(id string, gauge Gauge) (Metrics, error) {
 	return varMetrics, nil
 }
 
-
-// func NewMetricsGet(id, mType string) (*Metrics, error) {
-// 	var varMetrics = Metrics{
-// 			ID: id,
-// 			MType: mType,
-// 		}
-// 	bodyBytes, err := json.Marshal(varMetrics)
-// 	if err != nil {
-// 		logg.Error().Err(err).Msg("Failed marshal json for get: ")
-// 		return nil, err
-// 	}
-// 	varMetrics.BodyBytes = bodyBytes
-// 	return &varMetrics, nil
-// }
-
 func Update(mtx Metrics) error{
 	logg.Print("--------------------------------------Update------------------------start-------------------------------------")
 	logg.Printf("mtx.ID =   %v", mtx.ID)
@@ -215,9 +195,9 @@ func Update(mtx Metrics) error{
 	mtxOld := Metrics{}
 	client := resty.New()
 	_, err = client.R().
-	SetBody(mtx.BodyBytes).
-	SetResult(&mtxOld).
-	Post(strURL)
+		SetBody(mtx.BodyBytes).
+		SetResult(&mtxOld).
+		Post(strURL)
 	logg.Print("--------------------------------------Get perponse-------------------------------------------------------------")
 	if err != nil {
 		logg.Error().Err(err).Msg("Failed unmarshall response")

@@ -1,7 +1,6 @@
 package store
 
 import (
-	
 	"errors"
 	"fmt"
 	"sort"
@@ -29,14 +28,10 @@ type MemStorage struct {
 var logg zerolog.Logger
 func GetLogg(loggReal zerolog.Logger)  {
 	logg = loggReal
-	// return logg
 }
-// var key string
 func (m MemStorage) SaveByBatch(sm []repo.Metrics) (*[]repo.Metrics, error) {
-// func (m MemStorage) SaveByBatch(sm *StoreMap) (*StoreMap, error) {
 return nil, nil
 }
-// func (m MemStorage) SaveByBatch(sm []repo.Metrics) (*StoreMap, error) {
 func (m MemStorage) SaveByBatch1(sm *StoreMap) (*StoreMap, error) {
 return nil, nil
 }
@@ -161,9 +156,6 @@ func (m MemStorage) Get(id string) (*Metrics, error) {
 	if !ok {
 		return nil, errors.New("metrics not found")
 	}
-	// if mtxOld.Hash != nil {
-	// 	return &mtxOld, nil
-	// }
 	logg.Printf("mtxOld:   %#v", mtxOld)
 	if key := m.GetKey(); key != "" {
 

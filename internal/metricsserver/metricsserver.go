@@ -73,15 +73,7 @@ func MtxValid(mtx *Metrics, key string) bool {
 	if mtx.Hash == "" {
 		return false
 	}
-	// var src []byte
-	// if mtx.MType == "gauge"{
-	// 	src = []byte((fmt.Sprintf("%s:gauge:%f", mtx.ID, *mtx.Value)))
-	// } else if mtx.MType == "counter" {
-	// 	src = []byte((fmt.Sprintf("%s:counter:%v", mtx.ID, *mtx.Delta)))
-	// } else {
-		
-	// 	return false
-	// }
+
 	logg.Print("-------------------------------MtxValid---------------------------start-----------------key not nil--------")
 	logg.Print("mtx.ID =  ", mtx.ID)
 	logg.Print("mtx.MType =  ", mtx.MType)
@@ -90,19 +82,12 @@ func MtxValid(mtx *Metrics, key string) bool {
 	if mtx.Value != nil {
 		logg.Print("mtx.Value =  ", *mtx.Value)
 	}
-	// h := hmac.New(sha256.New, []byte(key))
-    // h.Write(src)
-    // dst := h.Sum(nil)
+
 	hash := Hash(mtx, key)
 	logg.Print("hash: ", hash)
-	// logg.Print("hash old: ", fmt.Sprintf("%x", dst))
 	logg.Print("hash is come: ", mtx.Hash)
 	logg.Print("hmac.Equal(dst, mtx.Hash): ", (hash == mtx.Hash))
-	// logg.Print("hmac.Equal(dst, mtx.Hash): ", (fmt.Sprintf("%x", dst) == mtx.Hash))
-	// logg.Print("hmac.Equal(dst, mtx.Hash): ", hmac.Equal(dst, mtx.Hash))
 	return (hash == mtx.Hash)
-	// return (fmt.Sprintf("%x", dst) == mtx.Hash)
-	// return hmac.Equal(dst, mtx.Hash)
 }
 func Hash(m *Metrics, key string) string {
 	var data string
